@@ -1,0 +1,317 @@
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+const { width } = Dimensions.get('window');
+
+export default function ServicesScreen() {
+  const services = [
+    {
+      id: '1',
+      title: 'Business Printing',
+      icon: 'briefcase',
+      description: 'Professional business cards, letterheads, and more',
+      color: '#3B82F6',
+      items: ['Business Cards', 'Letterheads', 'Envelopes', 'Folders'],
+    },
+    {
+      id: '2',
+      title: 'Marketing Materials',
+      icon: 'megaphone',
+      description: 'Eye-catching promotional materials for your brand',
+      color: '#8B5CF6',
+      items: ['Flyers', 'Brochures', 'Catalogs', 'Postcards'],
+    },
+    {
+      id: '3',
+      title: 'Large Format',
+      icon: 'resize',
+      description: 'Banners, posters, and signage in any size',
+      color: '#EC4899',
+      items: ['Banners', 'Posters', 'Wall Graphics', 'Vehicle Wraps'],
+    },
+    {
+      id: '4',
+      title: 'Custom Apparel',
+      icon: 'shirt',
+      description: 'T-shirts, hoodies, and more with your design',
+      color: '#10B981',
+      items: ['T-Shirts', 'Hoodies', 'Caps', 'Tote Bags'],
+    },
+    {
+      id: '5',
+      title: 'Photo Services',
+      icon: 'camera',
+      description: 'Professional photo printing and framing',
+      color: '#F59E0B',
+      items: ['Photo Prints', 'Canvas Prints', 'Photo Books', 'Framing'],
+    },
+    {
+      id: '6',
+      title: 'Packaging',
+      icon: 'cube',
+      description: 'Custom boxes, labels, and packaging solutions',
+      color: '#06B6D4',
+      items: ['Boxes', 'Labels', 'Stickers', 'Bags'],
+    },
+  ];
+
+  const features = [
+    {
+      icon: 'checkmark-circle',
+      title: 'High Quality',
+      description: 'Premium materials and printing technology',
+    },
+    {
+      icon: 'time',
+      title: 'Fast Turnaround',
+      description: 'Quick delivery without compromising quality',
+    },
+    {
+      icon: 'shield-checkmark',
+      title: 'Satisfaction Guaranteed',
+      description: '100% satisfaction or your money back',
+    },
+    {
+      icon: 'people',
+      title: 'Expert Support',
+      description: 'Dedicated team to help with your project',
+    },
+  ];
+
+  return (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Our Services</Text>
+        <Text style={styles.headerSubtitle}>
+          Professional printing solutions for every need
+        </Text>
+      </View>
+
+      {/* Services Grid */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>What We Offer</Text>
+        {services.map((service) => (
+          <TouchableOpacity
+            key={service.id}
+            style={styles.serviceCard}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.serviceIconContainer, { backgroundColor: service.color + '20' }]}>
+              <Ionicons name={service.icon as any} size={32} color={service.color} />
+            </View>
+            <View style={styles.serviceContent}>
+              <Text style={styles.serviceTitle}>{service.title}</Text>
+              <Text style={styles.serviceDescription}>{service.description}</Text>
+              <View style={styles.serviceItems}>
+                {service.items.map((item, index) => (
+                  <View key={index} style={styles.serviceItemTag}>
+                    <Text style={styles.serviceItemText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#9CA3AF" />
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Features Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Why Choose Us</Text>
+        <View style={styles.featuresGrid}>
+          {features.map((feature, index) => (
+            <View key={index} style={styles.featureCard}>
+              <View style={styles.featureIconContainer}>
+                <Ionicons name={feature.icon as any} size={28} color="#3B82F6" />
+              </View>
+              <Text style={styles.featureTitle}>{feature.title}</Text>
+              <Text style={styles.featureDescription}>{feature.description}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* CTA Section */}
+      <View style={styles.ctaSection}>
+        <View style={styles.ctaCard}>
+          <Ionicons name="help-circle" size={48} color="#3B82F6" />
+          <Text style={styles.ctaTitle}>Need Help Choosing?</Text>
+          <Text style={styles.ctaDescription}>
+            Our print experts are here to help you find the perfect solution
+          </Text>
+          <TouchableOpacity style={styles.ctaButton}>
+            <Text style={styles.ctaButtonText}>Contact Us</Text>
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={{ height: 40 }} />
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  header: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+  },
+  section: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 16,
+  },
+  serviceCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  serviceIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  serviceContent: {
+    flex: 1,
+  },
+  serviceTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  serviceDescription: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  serviceItems: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  serviceItemTag: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  serviceItemText: {
+    fontSize: 11,
+    color: '#4B5563',
+    fontWeight: '600',
+  },
+  featuresGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  featureCard: {
+    width: (width - 52) / 2,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  featureIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  featureTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  featureDescription: {
+    fontSize: 13,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  ctaSection: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  ctaCard: {
+    backgroundColor: '#EFF6FF',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+  },
+  ctaTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  ctaDescription: {
+    fontSize: 15,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3B82F6',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    gap: 8,
+  },
+  ctaButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+  },
+});

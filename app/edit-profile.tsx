@@ -1,0 +1,765 @@
+import { useAuth } from "@/contexts/AuthContext";
+import { Profile, profileService } from "@/lib/database-service";
+import { storageService } from "@/lib/storage-service";
+import { supabase } from "@/lib/supabase";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Image,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+
+export default function EditProfileScreen() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
+  const [addressStreet, setAddressStreet] = useState("");
+  const [addressCity, setAddressCity] = useState("");
+  const [addressState, setAddressState] = useState("");
+  const [addressZip, setAddressZip] = useState("");
+  const [addressCountry, setAddressCountry] = useState("");
+  const [company, setCompany] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [gender, setGender] = useState("");
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const profileData = await profileService.get(user.id);
+      if (profileData) {
+        setProfile(profileData);
+        setAvatarUri(profileData.avatar_url);
+        setFullName(profileData.full_name || "");
+        setPhone(profileData.phone || "");
+        setBio(profileData.bio || "");
+        setAddressStreet(profileData.address_street || "");
+        setAddressCity(profileData.address_city || "");
+        setAddressState(profileData.address_state || "");
+        setAddressZip(profileData.address_zip || "");
+        setAddressCountry(profileData.address_country || "");
+        setCompany(profileData.company || "");
+        setJobTitle(profileData.job_title || "");
+        setDateOfBirth(profileData.date_of_birth || "");
+        setGender(profileData.gender || "");
+      } else {
+        // Fallback to user metadata
+        setFullName(user.user_metadata?.full_name || "");
+        setPhone(user.user_metadata?.phone || "");
+      }
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pickImage = async () => {
+    try {
+      // Request permission
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Required',
+          'Please allow access to your photos to change your profile picture.'
+        );
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setAvatarUri(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    if (!fullName.trim()) {
+      Alert.alert("Validation Error", "Full name is required");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      let avatarUrl = profile?.avatar_url || null;
+
+      // Upload new avatar if changed
+      if (avatarUri && avatarUri !== profile?.avatar_url) {
+        setUploading(true);
+        try {
+          const uploadedUrl = await storageService.uploadAvatar(
+            avatarUri,
+            user.id,
+            profile?.avatar_url
+          );
+          
+          if (uploadedUrl) {
+            avatarUrl = uploadedUrl;
+            console.log('Avatar uploaded successfully:', avatarUrl);
+          } else {
+            throw new Error('Failed to get avatar URL');
+          }
+        } catch (uploadError: any) {
+          console.error('Avatar upload error:', uploadError);
+          setUploading(false);
+          setSaving(false);
+          
+          // Show specific error message from storage service
+          const errorMessage = uploadError.message || 'Failed to upload profile picture. Please try again.';
+          Alert.alert('Upload Error', errorMessage);
+          return; // Stop the save process
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      // Update both auth user metadata and profile table
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          full_name: fullName,
+          phone: phone,
+        },
+      });
+
+      if (authError) throw authError;
+
+      // Update profile in profiles table
+      const profileSuccess = await profileService.update(user.id, {
+        full_name: fullName,
+        avatar_url: avatarUrl,
+        phone: phone,
+        bio: bio,
+        address_street: addressStreet,
+        address_city: addressCity,
+        address_state: addressState,
+        address_zip: addressZip,
+        address_country: addressCountry,
+        company: company,
+        job_title: jobTitle,
+        date_of_birth: dateOfBirth,
+        gender: gender,
+      });
+
+      if (!profileSuccess) {
+        // If profile doesn't exist, create it
+        await profileService.create(user.id, fullName);
+        // Then update with avatar URL
+        if (avatarUrl) {
+          await profileService.update(user.id, {
+            avatar_url: avatarUrl,
+          });
+        }
+      }
+
+      console.log('Profile updated with avatar URL:', avatarUrl);
+
+      // Show success message and navigate back
+      Alert.alert("Success", "Profile updated successfully!");
+      
+      // Navigate back with fallback to profile tab
+      setTimeout(() => {
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/(tabs)/profile');
+        }
+      }, 100);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)/profile');
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#3B82F6" />
+            <Text style={styles.loadingText}>Loading profile...</Text>
+          </View>
+        ) : (
+          <>
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+            {/* Header */}
+            <View style={styles.header}>
+              <TouchableOpacity
+                onPress={handleBack}
+                style={styles.backButton}
+              >
+                <Ionicons name="arrow-back" size={24} color="#1F2937" />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Edit Profile</Text>
+              <View style={{ width: 40 }} />
+            </View>
+
+            {/* Avatar */}
+            <View style={styles.avatarSection}>
+              <TouchableOpacity
+                style={styles.avatar}
+                onPress={() => avatarUri && setShowAvatarModal(true)}
+                activeOpacity={avatarUri ? 0.7 : 1}
+              >
+                {avatarUri ? (
+                  <Image
+                    key={avatarUri}
+                    source={{ uri: avatarUri }}
+                    style={styles.avatarImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Ionicons name="person" size={48} color="#fff" />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.changePhotoButton}
+                onPress={pickImage}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <ActivityIndicator size="small" color="#3B82F6" />
+                ) : (
+                  <>
+                    <Ionicons name="camera" size={18} color="#3B82F6" />
+                    <Text style={styles.changePhotoText}>Change Photo</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* Form */}
+            <View style={styles.form}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Full Name *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={fullName}
+                  onChangeText={setFullName}
+                  placeholder="Enter your full name"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Email</Text>
+                <TextInput
+                  style={[styles.input, styles.inputDisabled]}
+                  value={user?.email || ""}
+                  editable={false}
+                  placeholderTextColor="#9CA3AF"
+                />
+                <Text style={styles.helperText}>Email cannot be changed</Text>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Phone Number</Text>
+                <TextInput
+                  style={styles.input}
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="Enter your phone number"
+                  keyboardType="phone-pad"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.sectionDivider}>
+                <Text style={styles.sectionTitle}>About</Text>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Bio</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={bio}
+                  onChangeText={setBio}
+                  placeholder="Tell us about yourself"
+                  placeholderTextColor="#9CA3AF"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Company</Text>
+                <TextInput
+                  style={styles.input}
+                  value={company}
+                  onChangeText={setCompany}
+                  placeholder="Your company name"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Job Title</Text>
+                <TextInput
+                  style={styles.input}
+                  value={jobTitle}
+                  onChangeText={setJobTitle}
+                  placeholder="Your job title"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.sectionDivider}>
+                <Text style={styles.sectionTitle}>Personal Information</Text>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Date of Birth</Text>
+                <TextInput
+                  style={styles.input}
+                  value={dateOfBirth}
+                  onChangeText={setDateOfBirth}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor="#9CA3AF"
+                />
+                <Text style={styles.helperText}>
+                  Format: YYYY-MM-DD (e.g., 1990-01-15)
+                </Text>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Gender</Text>
+                <View style={styles.genderContainer}>
+                  {["Male", "Female", "Other", "Prefer not to say"].map(
+                    (option) => (
+                      <TouchableOpacity
+                        key={option}
+                        style={[
+                          styles.genderOption,
+                          gender === option && styles.genderOptionSelected,
+                        ]}
+                        onPress={() => setGender(option)}
+                      >
+                        <Text
+                          style={[
+                            styles.genderOptionText,
+                            gender === option &&
+                              styles.genderOptionTextSelected,
+                          ]}
+                        >
+                          {option}
+                        </Text>
+                      </TouchableOpacity>
+                    ),
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.sectionDivider}>
+                <Text style={styles.sectionTitle}>Address</Text>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Street Address</Text>
+                <TextInput
+                  style={styles.input}
+                  value={addressStreet}
+                  onChangeText={setAddressStreet}
+                  placeholder="123 Main Street"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.row}>
+                <View style={[styles.inputGroup, styles.halfWidth]}>
+                  <Text style={styles.label}>City</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={addressCity}
+                    onChangeText={setAddressCity}
+                    placeholder="City"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+                <View style={[styles.inputGroup, styles.halfWidth]}>
+                  <Text style={styles.label}>State/Province</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={addressState}
+                    onChangeText={setAddressState}
+                    placeholder="State"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.row}>
+                <View style={[styles.inputGroup, styles.halfWidth]}>
+                  <Text style={styles.label}>ZIP/Postal Code</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={addressZip}
+                    onChangeText={setAddressZip}
+                    placeholder="12345"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="number-pad"
+                  />
+                </View>
+                <View style={[styles.inputGroup, styles.halfWidth]}>
+                  <Text style={styles.label}>Country</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={addressCountry}
+                    onChangeText={setAddressCountry}
+                    placeholder="Country"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.infoBox}>
+                <Ionicons
+                  name="information-circle-outline"
+                  size={20}
+                  color="#3B82F6"
+                />
+                <Text style={styles.infoText}>
+                  Your personal information is stored securely and will only be
+                  used to improve your experience.
+                </Text>
+              </View>
+            </View>
+          </ScrollView>
+
+          {/* Save Button */}
+          <View style={styles.bottomBar}>
+            <TouchableOpacity
+              style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+              onPress={handleSave}
+              disabled={saving}
+            >
+              {saving ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Ionicons name="checkmark" size={20} color="#fff" />
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+
+      {/* Avatar Preview Modal */}
+      <Modal
+        visible={showAvatarModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowAvatarModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalContainer}
+          activeOpacity={1}
+          onPress={() => setShowAvatarModal(false)}
+        >
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setShowAvatarModal(false)}
+            >
+              <Ionicons name="close" size={28} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          {avatarUri && (
+            <Image
+              source={{ uri: avatarUri }}
+              style={styles.modalImage}
+              resizeMode="contain"
+            />
+          )}
+        </TouchableOpacity>
+      </Modal>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#6B7280",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#1F2937",
+  },
+  avatarSection: {
+    alignItems: "center",
+    paddingVertical: 32,
+    backgroundColor: "#fff",
+    marginBottom: 20,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#3B82F6",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  changePhotoButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  changePhotoText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#3B82F6",
+  },
+  form: {
+    paddingHorizontal: 20,
+    paddingBottom: 100,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: "#1F2937",
+  },
+  inputDisabled: {
+    backgroundColor: "#F3F4F6",
+    color: "#6B7280",
+  },
+  textArea: {
+    minHeight: 100,
+    paddingTop: 14,
+  },
+  helperText: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 6,
+  },
+  sectionDivider: {
+    marginTop: 20,
+    marginBottom: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: "#E5E7EB",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1F2937",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  halfWidth: {
+    flex: 1,
+  },
+  genderContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  genderOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    backgroundColor: "#fff",
+  },
+  genderOptionSelected: {
+    backgroundColor: "#3B82F6",
+    borderColor: "#3B82F6",
+  },
+  genderOptionText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  genderOptionTextSelected: {
+    color: "#fff",
+  },
+  infoBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#EFF6FF",
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 10,
+    gap: 12,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#1E40AF",
+    lineHeight: 20,
+  },
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+  },
+  saveButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#3B82F6",
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  saveButtonDisabled: {
+    backgroundColor: "#9CA3AF",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.95)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalHeader: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    zIndex: 10,
+  },
+  modalCloseButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-end",
+  },
+  modalImage: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height * 0.7,
+  },
+});

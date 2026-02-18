@@ -1,0 +1,154 @@
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { Stack, useRouter, useSegments } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
+import "react-native-reanimated";
+
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+
+function RootLayoutNav() {
+  const colorScheme = useColorScheme();
+  const { user, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === "auth";
+    const inTabsGroup = segments[0] === "(tabs)";
+    const inProtectedRoute = [
+      "edit-profile",
+      "view-profile",
+      "addresses",
+      "saved-designs",
+      "change-password",
+      "cart",
+    ].includes(segments[0]);
+    const onLandingPage = !segments[0];
+
+    if (user) {
+      // User is signed in
+      if (onLandingPage || inAuthGroup) {
+        // User is signed in but on landing/auth page, redirect to tabs
+        router.replace("/(tabs)");
+      }
+      // Allow navigation within protected routes and tabs
+    } else {
+      // User is not signed in
+      if (inTabsGroup || inProtectedRoute) {
+        // User is not signed in but trying to access protected routes, redirect to landing
+        router.replace("/");
+      }
+    }
+  }, [user, loading]);
+
+  return (
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <Stack>
+        <Stack.Screen
+          name="index"
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen
+          name="auth"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen
+          name="product/[id]"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="cart"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="edit-profile"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="view-profile"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="addresses"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="saved-designs"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="change-password"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="modal"
+          options={{
+            presentation: "modal",
+            title: "Modal",
+          }}
+        />
+      </Stack>
+      <StatusBar style="auto" />
+    </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <CartProvider>
+        <RootLayoutNav />
+      </CartProvider>
+    </AuthProvider>
+  );
+}
