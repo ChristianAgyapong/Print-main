@@ -217,7 +217,7 @@ export default function ProductDetailsScreen() {
                 </View>
               </View>
             </View>
-            
+
             <View style={styles.paymentMethods}>
               <Text style={styles.paymentMethodsTitle}>We Accept:</Text>
               <View style={styles.paymentIcons}>

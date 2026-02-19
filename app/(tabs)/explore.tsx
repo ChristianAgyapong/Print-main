@@ -92,90 +92,90 @@ export default function ServicesScreen() {
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-        <Text style={styles.headerTitle}>Our Services</Text>
-        <Text style={styles.headerSubtitle}>
-          Professional printing solutions for every need
-        </Text>
-      </View>
+          <Text style={styles.headerTitle}>Our Services</Text>
+          <Text style={styles.headerSubtitle}>
+            Professional printing solutions for every need
+          </Text>
+        </View>
 
-      {/* Services Grid */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>What We Offer</Text>
-        {services.map((service) => (
-          <TouchableOpacity
-            key={service.id}
-            style={styles.serviceCard}
-            activeOpacity={0.7}
-          >
-            <View
-              style={[
-                styles.serviceIconContainer,
-                { backgroundColor: service.color + "20" },
-              ]}
+        {/* Services Grid */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>What We Offer</Text>
+          {services.map((service) => (
+            <TouchableOpacity
+              key={service.id}
+              style={styles.serviceCard}
+              activeOpacity={0.7}
             >
-              <Ionicons
-                name={service.icon as any}
-                size={32}
-                color={service.color}
-              />
-            </View>
-            <View style={styles.serviceContent}>
-              <Text style={styles.serviceTitle}>{service.title}</Text>
-              <Text style={styles.serviceDescription}>
-                {service.description}
-              </Text>
-              <View style={styles.serviceItems}>
-                {service.items.map((item, index) => (
-                  <View key={index} style={styles.serviceItemTag}>
-                    <Text style={styles.serviceItemText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#B8B8D1" />
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Features Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Why Choose Us</Text>
-        <View style={styles.featuresGrid}>
-          {features.map((feature, index) => (
-            <View key={index} style={styles.featureCard}>
-              <View style={styles.featureIconContainer}>
+              <View
+                style={[
+                  styles.serviceIconContainer,
+                  { backgroundColor: service.color + "20" },
+                ]}
+              >
                 <Ionicons
-                  name={feature.icon as any}
-                  size={28}
-                  color="#FF006E"
+                  name={service.icon as any}
+                  size={32}
+                  color={service.color}
                 />
               </View>
-              <Text style={styles.featureTitle}>{feature.title}</Text>
-              <Text style={styles.featureDescription}>
-                {feature.description}
-              </Text>
-            </View>
+              <View style={styles.serviceContent}>
+                <Text style={styles.serviceTitle}>{service.title}</Text>
+                <Text style={styles.serviceDescription}>
+                  {service.description}
+                </Text>
+                <View style={styles.serviceItems}>
+                  {service.items.map((item, index) => (
+                    <View key={index} style={styles.serviceItemTag}>
+                      <Text style={styles.serviceItemText}>{item}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#B8B8D1" />
+            </TouchableOpacity>
           ))}
         </View>
-      </View>
 
-      {/* CTA Section */}
-      <View style={styles.ctaSection}>
-        <View style={styles.ctaCard}>
-          <Ionicons name="help-circle" size={48} color="#FF006E" />
-          <Text style={styles.ctaTitle}>Need Help Choosing?</Text>
-          <Text style={styles.ctaDescription}>
-            Our print experts are here to help you find the perfect solution
-          </Text>
-          <TouchableOpacity style={styles.ctaButton}>
-            <Text style={styles.ctaButtonText}>Contact Us</Text>
-            <Ionicons name="arrow-forward" size={20} color="#fff" />
-          </TouchableOpacity>
+        {/* Features Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Why Choose Us</Text>
+          <View style={styles.featuresGrid}>
+            {features.map((feature, index) => (
+              <View key={index} style={styles.featureCard}>
+                <View style={styles.featureIconContainer}>
+                  <Ionicons
+                    name={feature.icon as any}
+                    size={28}
+                    color="#FF006E"
+                  />
+                </View>
+                <Text style={styles.featureTitle}>{feature.title}</Text>
+                <Text style={styles.featureDescription}>
+                  {feature.description}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
 
-      <View style={{ height: 110 }} />
-    </ScrollView>
+        {/* CTA Section */}
+        <View style={styles.ctaSection}>
+          <View style={styles.ctaCard}>
+            <Ionicons name="help-circle" size={48} color="#FF006E" />
+            <Text style={styles.ctaTitle}>Need Help Choosing?</Text>
+            <Text style={styles.ctaDescription}>
+              Our print experts are here to help you find the perfect solution
+            </Text>
+            <TouchableOpacity style={styles.ctaButton}>
+              <Text style={styles.ctaButtonText}>Contact Us</Text>
+              <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={{ height: 110 }} />
+      </ScrollView>
     </>
   );
 }

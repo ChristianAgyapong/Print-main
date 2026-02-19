@@ -11,9 +11,6 @@ export const OrderStatusTracker: React.FC<OrderStatusTrackerProps> = ({
 }) => {
   const statuses = [
     { key: "pending", label: "Pending", icon: "time-outline" },
-    { key: "processing", label: "Processing", icon: "construct-outline" },
-    { key: "printing", label: "Printing", icon: "print-outline" },
-    { key: "shipped", label: "Shipped", icon: "airplane-outline" },
     { key: "delivered", label: "Delivered", icon: "checkmark-circle" },
   ];
 
@@ -23,7 +20,6 @@ export const OrderStatusTracker: React.FC<OrderStatusTrackerProps> = ({
     <View style={styles.container}>
       {statuses.map((item, index) => {
         const isCompleted = index <= currentIndex;
-        const isCurrent = index === currentIndex;
 
         return (
           <React.Fragment key={item.key}>
@@ -32,7 +28,6 @@ export const OrderStatusTracker: React.FC<OrderStatusTrackerProps> = ({
                 style={[
                   styles.iconContainer,
                   isCompleted && styles.iconContainerActive,
-                  isCurrent && styles.iconContainerCurrent,
                 ]}
               >
                 <Ionicons
@@ -90,10 +85,6 @@ const styles = StyleSheet.create({
   iconContainerActive: {
     backgroundColor: "#10B981",
     borderColor: "#10B981",
-  },
-  iconContainerCurrent: {
-    backgroundColor: "#3B82F6",
-    borderColor: "#3B82F6",
   },
   statusLabel: {
     fontSize: 11,

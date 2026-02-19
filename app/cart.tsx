@@ -1,10 +1,10 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
-import { ordersService } from "@/lib/database-service";
+import { ordersService, profileService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
     Alert,
@@ -58,13 +58,25 @@ export default function CartScreen() {
     setLoading(true);
 
     try {
+      // Fetch user profile for order details
+      const profile = await profileService.get(user.id);
+      
       const orderItems = items.map((item) => ({
         product_id: item.product.id,
         quantity: item.quantity,
         price: item.product.price,
       }));
 
-      const order = await ordersService.create(user.id, orderItems);
+      // Create order with user details
+      const userDetails = {
+        name: profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Customer',
+        email: user.email || 'no-email@provided.com',
+        phone: profile?.phone || null,
+      };
+
+      console.log("📦 Checkout: Creating order with user details:", userDetails);
+
+      const order = await ordersService.create(user.id, orderItems, userDetails);
 
       if (order) {
         clearCart();

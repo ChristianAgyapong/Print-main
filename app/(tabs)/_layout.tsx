@@ -32,10 +32,7 @@ export default function TabLayout() {
           <BlurView
             intensity={80}
             tint="light"
-            style={[
-              StyleSheet.absoluteFill,
-              { backgroundColor: "#FFFFFF" },
-            ]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: "#FFFFFF" }]}
           />
         ),
         headerTintColor: "#1F2937",

@@ -11,8 +11,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Animated,
@@ -209,319 +209,323 @@ export default function HomeScreen() {
         }
       >
         {/* Hero Section */}
-      <View style={styles.heroSection}>
-        <LinearGradient
-          colors={["#FF006E", "#C2185B", "#880E4F"]}
-          style={styles.heroGradient}
-        >
-          <View style={styles.heroContent}>
-            <View style={styles.heroHeader}>
-              <View>
-                <Text style={styles.heroTitle}>PrintCraft Shop</Text>
-                <Text style={styles.heroSubtitle}>
-                  Professional printing services for business, marketing,
-                  branding, and more
-                </Text>
-              </View>
-            </View>
-
-            {/* Profile Completion Banner */}
-            {user && !profileComplete && (
-              <TouchableOpacity
-                style={styles.completionBanner}
-                onPress={() => router.push("/(tabs)/profile")}
-              >
-                <Ionicons name="star" size={16} color="#F59E0B" />
-                <Text style={styles.completionText}>
-                  Complete your profile for personalized recommendations
-                </Text>
-                <Ionicons
-                  name="arrow-forward"
-                  size={14}
-                  color="rgba(255,255,255,0.7)"
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-        </LinearGradient>
-
-        {/* Special Offer Carousel */}
-        <View style={styles.offerBannerWrapper}>
-          <ScrollView
-            ref={promoScrollRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            snapToInterval={PROMO_CARD_WIDTH + 12}
-            decelerationRate="fast"
-            contentContainerStyle={styles.promoScrollContent}
-            onMomentumScrollEnd={(e) => {
-              const index = Math.round(
-                e.nativeEvent.contentOffset.x / (PROMO_CARD_WIDTH + 12),
-              );
-              setCurrentPromoIndex(index);
-            }}
+        <View style={styles.heroSection}>
+          <LinearGradient
+            colors={["#FF006E", "#C2185B", "#880E4F"]}
+            style={styles.heroGradient}
           >
-            {promos.map((promo, index) => (
-              <TouchableOpacity
-                key={index}
-                activeOpacity={0.95}
-                style={[styles.promoCard, { width: PROMO_CARD_WIDTH }]}
-              >
-                <LinearGradient
-                  colors={promo.colors}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.promoGradient}
-                >
-                  {/* Decorative circles */}
-                  <View style={styles.promoDecor1} />
-                  <View style={styles.promoDecor2} />
-
-                  <View style={styles.promoContent}>
-                    <View style={styles.promoIconCircle}>
-                      <Ionicons
-                        name={promo.icon as any}
-                        size={24}
-                        color="#FFFFFF"
-                      />
-                    </View>
-                    <View style={styles.promoTextContainer}>
-                      <Text style={styles.promoTitle}>{promo.title}</Text>
-                      <Text style={styles.promoSubtitle}>{promo.subtitle}</Text>
-                    </View>
-                    <View style={styles.promoArrowCircle}>
-                      <Ionicons
-                        name="arrow-forward"
-                        size={20}
-                        color="#FFFFFF"
-                      />
-                    </View>
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </View>
-
-      {/* Shop By Category Label */}
-      <View style={styles.shopLabelContainer}>
-        <Text style={styles.shopLabel}>SHOP BY CATEGORY</Text>
-      </View>
-
-      {/* Products by Category */}
-      {loading ? (
-        <View style={styles.productsSection}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.productsScrollContent}
-          >
-            {[1, 2, 3, 4].map((i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
-          </ScrollView>
-        </View>
-      ) : products.length === 0 ? (
-        <View style={styles.productsSection}>
-          <EmptyState
-            icon="cube-outline"
-            title="No products available"
-            message="Check back later for new products"
-            action={
-              <TouchableOpacity
-                style={styles.retryButton}
-                onPress={loadProducts}
-              >
-                <Text style={styles.retryButtonText}>Retry</Text>
-              </TouchableOpacity>
-            }
-          />
-        </View>
-      ) : (
-        categoryLayouts.map((categoryLayout) => {
-          const categoryProducts =
-            productsByCategory[categoryLayout.name] || [];
-          if (categoryProducts.length === 0) return null;
-
-          return (
-            <View key={categoryLayout.name} style={styles.categorySection}>
-              {/* Category Header */}
-              <View style={styles.categoryHeader}>
-                <View style={styles.categoryHeaderLeft}>
-                  <View
-                    style={[
-                      styles.categoryIconCircle,
-                      { backgroundColor: `${categoryLayout.color}20` },
-                    ]}
-                  >
-                    <Ionicons
-                      name={categoryLayout.icon as any}
-                      size={20}
-                      color={categoryLayout.color}
-                    />
-                  </View>
-                  <Text style={styles.categoryTitle}>
-                    {categoryLayout.name}
+            <View style={styles.heroContent}>
+              <View style={styles.heroHeader}>
+                <View>
+                  <Text style={styles.heroTitle}>PrintCraft Shop</Text>
+                  <Text style={styles.heroSubtitle}>
+                    Professional printing services for business, marketing,
+                    branding, and more
                   </Text>
                 </View>
-                <TouchableOpacity
-                  style={styles.viewAllButton}
-                  onPress={() =>
-                    router.push(`/category/${categoryLayout.name}`)
-                  }
-                >
-                  <Text style={styles.viewAllText}>View All</Text>
-                  <Ionicons name="arrow-forward" size={14} color="#FF006E" />
-                </TouchableOpacity>
               </View>
 
-              {/* Products Display - Horizontal Carousel */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.productsScrollContent}
-              >
-                {categoryProducts.map((product) => (
-                  <TouchableOpacity
-                    key={product.id}
-                    style={styles.productCard}
-                    activeOpacity={0.9}
-                    onPress={() => router.push(`/product/${product.id}`)}
-                  >
-                    {product.image_url ? (
-                      <View style={styles.productImageContainer}>
-                        <Image
-                          source={{ uri: product.image_url }}
-                          style={styles.productImage}
-                          resizeMode="cover"
-                        />
-                        <View style={styles.deliveryBadge}>
-                          <Text style={styles.deliveryText}>3-5 days</Text>
-                        </View>
-                      </View>
-                    ) : (
-                      <LinearGradient
-                        colors={getProductGradient(product.category)}
-                        style={styles.productImageContainer}
-                      >
-                        <View style={styles.deliveryBadge}>
-                          <Text style={styles.deliveryText}>3-5 days</Text>
-                        </View>
-                        <Ionicons
-                          name={getProductIcon(product.category) as any}
-                          size={42}
-                          color="rgba(255,255,255,0.9)"
-                        />
-                      </LinearGradient>
-                    )}
+              {/* Profile Completion Banner */}
+              {user && !profileComplete && (
+                <TouchableOpacity
+                  style={styles.completionBanner}
+                  onPress={() => router.push("/(tabs)/profile")}
+                >
+                  <Ionicons name="star" size={16} color="#F59E0B" />
+                  <Text style={styles.completionText}>
+                    Complete your profile for personalized recommendations
+                  </Text>
+                  <Ionicons
+                    name="arrow-forward"
+                    size={14}
+                    color="rgba(255,255,255,0.7)"
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          </LinearGradient>
 
-                    <View style={styles.productInfo}>
-                      <Text style={styles.productCategory}>
-                        {product.category?.toUpperCase() || "PRODUCT"}
-                      </Text>
-                      <Text style={styles.productTitle} numberOfLines={2}>
-                        {product.title}
-                      </Text>
-                      <View style={styles.productFooter}>
-                        <Text style={styles.productPrice}>
-                          €{product.price.toFixed(2)}
+          {/* Special Offer Carousel */}
+          <View style={styles.offerBannerWrapper}>
+            <ScrollView
+              ref={promoScrollRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              snapToInterval={PROMO_CARD_WIDTH + 12}
+              decelerationRate="fast"
+              contentContainerStyle={styles.promoScrollContent}
+              onMomentumScrollEnd={(e) => {
+                const index = Math.round(
+                  e.nativeEvent.contentOffset.x / (PROMO_CARD_WIDTH + 12),
+                );
+                setCurrentPromoIndex(index);
+              }}
+            >
+              {promos.map((promo, index) => (
+                <TouchableOpacity
+                  key={index}
+                  activeOpacity={0.95}
+                  style={[styles.promoCard, { width: PROMO_CARD_WIDTH }]}
+                >
+                  <LinearGradient
+                    colors={promo.colors}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.promoGradient}
+                  >
+                    {/* Decorative circles */}
+                    <View style={styles.promoDecor1} />
+                    <View style={styles.promoDecor2} />
+
+                    <View style={styles.promoContent}>
+                      <View style={styles.promoIconCircle}>
+                        <Ionicons
+                          name={promo.icon as any}
+                          size={24}
+                          color="#FFFFFF"
+                        />
+                      </View>
+                      <View style={styles.promoTextContainer}>
+                        <Text style={styles.promoTitle}>{promo.title}</Text>
+                        <Text style={styles.promoSubtitle}>
+                          {promo.subtitle}
                         </Text>
-                        <TouchableOpacity
-                          style={styles.addButton}
-                          onPress={(e) => {
-                            e.stopPropagation();
-                            addItem(product);
-                          }}
-                        >
-                          <Ionicons name="add" size={16} color="#FFFFFF" />
-                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.promoArrowCircle}>
+                        <Ionicons
+                          name="arrow-forward"
+                          size={20}
+                          color="#FFFFFF"
+                        />
                       </View>
                     </View>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          );
-        })
-      )}
-
-      {/* How It Works */}
-      <View style={styles.howItWorksSection}>
-        <Text style={styles.sectionTitle}>HOW IT WORKS</Text>
-        <View style={styles.stepsContainer}>
-          <View style={styles.stepCard}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>1</Text>
-            </View>
-            <Ionicons name="search" size={24} color="#FF006E" />
-            <Text style={styles.stepTitle}>Choose</Text>
-            <Text style={styles.stepDescription}>Browse & select products</Text>
-          </View>
-
-          <View style={styles.stepCard}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>2</Text>
-            </View>
-            <Ionicons name="cloud-upload" size={24} color="#FF006E" />
-            <Text style={styles.stepTitle}>Upload</Text>
-            <Text style={styles.stepDescription}>Add your design files</Text>
-          </View>
-
-          <View style={styles.stepCard}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>3</Text>
-            </View>
-            <Ionicons name="checkmark-done" size={24} color="#FF006E" />
-            <Text style={styles.stepTitle}>Receive</Text>
-            <Text style={styles.stepDescription}>Fast delivery to you</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </View>
-      </View>
 
-      {/* Trust Stats */}
-      <View style={styles.statsSection}>
-        <LinearGradient
-          colors={["rgba(255, 0, 110, 0.1)", "rgba(139, 92, 246, 0.1)"]}
-          style={styles.statsGradient}
-        >
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>10K+</Text>
-              <Text style={styles.statLabel}>Happy Customers</Text>
+        {/* Shop By Category Label */}
+        <View style={styles.shopLabelContainer}>
+          <Text style={styles.shopLabel}>SHOP BY CATEGORY</Text>
+        </View>
+
+        {/* Products by Category */}
+        {loading ? (
+          <View style={styles.productsSection}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.productsScrollContent}
+            >
+              {[1, 2, 3, 4].map((i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </ScrollView>
+          </View>
+        ) : products.length === 0 ? (
+          <View style={styles.productsSection}>
+            <EmptyState
+              icon="cube-outline"
+              title="No products available"
+              message="Check back later for new products"
+              action={
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={loadProducts}
+                >
+                  <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+              }
+            />
+          </View>
+        ) : (
+          categoryLayouts.map((categoryLayout) => {
+            const categoryProducts =
+              productsByCategory[categoryLayout.name] || [];
+            if (categoryProducts.length === 0) return null;
+
+            return (
+              <View key={categoryLayout.name} style={styles.categorySection}>
+                {/* Category Header */}
+                <View style={styles.categoryHeader}>
+                  <View style={styles.categoryHeaderLeft}>
+                    <View
+                      style={[
+                        styles.categoryIconCircle,
+                        { backgroundColor: `${categoryLayout.color}20` },
+                      ]}
+                    >
+                      <Ionicons
+                        name={categoryLayout.icon as any}
+                        size={20}
+                        color={categoryLayout.color}
+                      />
+                    </View>
+                    <Text style={styles.categoryTitle}>
+                      {categoryLayout.name}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.viewAllButton}
+                    onPress={() =>
+                      router.push(`/category/${categoryLayout.name}`)
+                    }
+                  >
+                    <Text style={styles.viewAllText}>View All</Text>
+                    <Ionicons name="arrow-forward" size={14} color="#FF006E" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Products Display - Horizontal Carousel */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.productsScrollContent}
+                >
+                  {categoryProducts.map((product) => (
+                    <TouchableOpacity
+                      key={product.id}
+                      style={styles.productCard}
+                      activeOpacity={0.9}
+                      onPress={() => router.push(`/product/${product.id}`)}
+                    >
+                      {product.image_url ? (
+                        <View style={styles.productImageContainer}>
+                          <Image
+                            source={{ uri: product.image_url }}
+                            style={styles.productImage}
+                            resizeMode="cover"
+                          />
+                          <View style={styles.deliveryBadge}>
+                            <Text style={styles.deliveryText}>3-5 days</Text>
+                          </View>
+                        </View>
+                      ) : (
+                        <LinearGradient
+                          colors={getProductGradient(product.category)}
+                          style={styles.productImageContainer}
+                        >
+                          <View style={styles.deliveryBadge}>
+                            <Text style={styles.deliveryText}>3-5 days</Text>
+                          </View>
+                          <Ionicons
+                            name={getProductIcon(product.category) as any}
+                            size={42}
+                            color="rgba(255,255,255,0.9)"
+                          />
+                        </LinearGradient>
+                      )}
+
+                      <View style={styles.productInfo}>
+                        <Text style={styles.productCategory}>
+                          {product.category?.toUpperCase() || "PRODUCT"}
+                        </Text>
+                        <Text style={styles.productTitle} numberOfLines={2}>
+                          {product.title}
+                        </Text>
+                        <View style={styles.productFooter}>
+                          <Text style={styles.productPrice}>
+                            €{product.price.toFixed(2)}
+                          </Text>
+                          <TouchableOpacity
+                            style={styles.addButton}
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              addItem(product);
+                            }}
+                          >
+                            <Ionicons name="add" size={16} color="#FFFFFF" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            );
+          })
+        )}
+
+        {/* How It Works */}
+        <View style={styles.howItWorksSection}>
+          <Text style={styles.sectionTitle}>HOW IT WORKS</Text>
+          <View style={styles.stepsContainer}>
+            <View style={styles.stepCard}>
+              <View style={styles.stepNumber}>
+                <Text style={styles.stepNumberText}>1</Text>
+              </View>
+              <Ionicons name="search" size={24} color="#FF006E" />
+              <Text style={styles.stepTitle}>Choose</Text>
+              <Text style={styles.stepDescription}>
+                Browse & select products
+              </Text>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>50K+</Text>
-              <Text style={styles.statLabel}>Orders Completed</Text>
+
+            <View style={styles.stepCard}>
+              <View style={styles.stepNumber}>
+                <Text style={styles.stepNumberText}>2</Text>
+              </View>
+              <Ionicons name="cloud-upload" size={24} color="#FF006E" />
+              <Text style={styles.stepTitle}>Upload</Text>
+              <Text style={styles.stepDescription}>Add your design files</Text>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>4.9★</Text>
-              <Text style={styles.statLabel}>Average Rating</Text>
+
+            <View style={styles.stepCard}>
+              <View style={styles.stepNumber}>
+                <Text style={styles.stepNumberText}>3</Text>
+              </View>
+              <Ionicons name="checkmark-done" size={24} color="#FF006E" />
+              <Text style={styles.stepTitle}>Receive</Text>
+              <Text style={styles.stepDescription}>Fast delivery to you</Text>
             </View>
           </View>
-        </LinearGradient>
-      </View>
+        </View>
 
-      {/* Quick Actions Footer */}
-      <View style={styles.footerSection}>
-        <TouchableOpacity
-          style={styles.footerButton}
-          onPress={() => router.push("/(tabs)/orders")}
-        >
-          <Ionicons name="add-circle-outline" size={22} color="#3B82F6" />
-          <Text style={styles.footerButtonText}>Custom Order</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton}>
-          <Ionicons name="chatbubble-outline" size={22} color="#10B981" />
-          <Text style={styles.footerButtonText}>Get Quote</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Trust Stats */}
+        <View style={styles.statsSection}>
+          <LinearGradient
+            colors={["rgba(255, 0, 110, 0.1)", "rgba(139, 92, 246, 0.1)"]}
+            style={styles.statsGradient}
+          >
+            <View style={styles.statsGrid}>
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>10K+</Text>
+                <Text style={styles.statLabel}>Happy Customers</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>50K+</Text>
+                <Text style={styles.statLabel}>Orders Completed</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>4.9★</Text>
+                <Text style={styles.statLabel}>Average Rating</Text>
+              </View>
+            </View>
+          </LinearGradient>
+        </View>
 
-      <View style={{ height: 110 }} />
-    </ScrollView>
+        {/* Quick Actions Footer */}
+        <View style={styles.footerSection}>
+          <TouchableOpacity
+            style={styles.footerButton}
+            onPress={() => router.push("/(tabs)/orders")}
+          >
+            <Ionicons name="add-circle-outline" size={22} color="#3B82F6" />
+            <Text style={styles.footerButtonText}>Custom Order</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.footerButton}>
+            <Ionicons name="chatbubble-outline" size={22} color="#10B981" />
+            <Text style={styles.footerButtonText}>Get Quote</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ height: 110 }} />
+      </ScrollView>
     </>
   );
 }

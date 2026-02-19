@@ -2,8 +2,8 @@ import { EmptyState } from "@/components/empty-state";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
     Image,
     ScrollView,
@@ -115,8 +115,41 @@ export default function WishlistScreen() {
                 <Text style={styles.productTitle} numberOfLines={2}>
                   {product.title}
                 </Text>
+
+                {/* Design Information */}
+                {(product.design_name || product.design_type) && (
+                  <View style={styles.designInfo}>
+                    {product.design_name && (
+                      <View style={styles.designRow}>
+                        <Ionicons
+                          name="brush-outline"
+                          size={14}
+                          color="#6B7280"
+                        />
+                        <Text style={styles.designLabel}>Design:</Text>
+                        <Text style={styles.designValue} numberOfLines={1}>
+                          {product.design_name}
+                        </Text>
+                      </View>
+                    )}
+                    {product.design_type && (
+                      <View style={styles.designRow}>
+                        <Ionicons
+                          name="documents-outline"
+                          size={14}
+                          color="#6B7280"
+                        />
+                        <Text style={styles.designLabel}>Type:</Text>
+                        <Text style={styles.designValue}>
+                          {product.design_type}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+
                 <Text style={styles.productPrice}>
-                  �{product.price.toFixed(2)}
+                  €{product.price.toFixed(2)}
                 </Text>
               </View>
 
@@ -225,6 +258,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#FF006E",
+  },
+  designInfo: {
+    marginVertical: 8,
+    gap: 6,
+  },
+  designRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  designLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "600",
+  },
+  designValue: {
+    fontSize: 12,
+    color: "#1F2937",
+    fontWeight: "500",
+    flex: 1,
   },
   removeButton: {
     padding: 8,

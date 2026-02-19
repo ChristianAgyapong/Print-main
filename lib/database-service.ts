@@ -16,6 +16,9 @@ export interface Product {
 export interface Order {
   id: string;
   user_id: string;
+  user_name?: string | null;
+  user_email?: string | null;
+  user_phone?: string | null;
   status: string;
   total_amount: number;
   created_at: string;
@@ -158,25 +161,35 @@ export const ordersService = {
   async create(
     userId: string,
     items: { product_id: string; quantity: number; price: number }[],
+    userDetails?: { name?: string; email?: string; phone?: string }
   ): Promise<Order | null> {
     try {
+      console.log("📦 Creating order with user details:", userDetails);
       const totalAmount = items.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0,
       );
 
-      // Create order
+      // Create order with user details
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
           user_id: userId,
+          user_name: userDetails?.name || null,
+          user_email: userDetails?.email || null,
+          user_phone: userDetails?.phone || null,
           status: "pending",
           total_amount: totalAmount,
         })
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("❌ Error creating order:", orderError);
+        throw orderError;
+      }
+
+      console.log("✅ Order created with ID:", order.id);
 
       // Create order items
       const orderItems = items.map((item) => ({
@@ -333,6 +346,239 @@ export const profileService = {
         inProgressCount: 0,
         addressesCount: 0,
       };
+    }
+  },
+};
+
+// Admin Service
+export const adminService = {
+  // Check if user is admin (for now, checking against email domain or specific emails)
+  isAdmin: (email: string | undefined): boolean => {
+    if (!email) return false;
+    // Add your admin emails here
+    const adminEmails = ["admin@printcraft.com", "owner@printcraft.com"];
+    return adminEmails.includes(email.toLowerCase());
+  },
+
+  // Get all orders with user details
+  async getAllOrders(): Promise<(Order & { user?: { email: string; name: string; phone: string | null } })[]> {
+    try {
+      console.log("📦 Admin: Fetching all orders from backend...");
+      const { data, error } = await supabase
+        .from("orders")
+        .select(`
+          *,
+          items:order_items(
+            id,
+            order_id,
+            product_id,
+            quantity,
+            price,
+            product:products(*)
+          )
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("❌ Admin: Error fetching orders:", error);
+        console.error("Error details:", JSON.stringify(error, null, 2));
+        throw error;
+      }
+
+      console.log(`✅ Admin: Fetched ${data?.length || 0} orders from backend`);
+
+      // User details are now stored directly in the orders table
+      // No need to fetch from auth.admin separately
+      const ordersWithUsers = (data || []).map((order) => ({
+        ...order,
+        user: {
+          email: order.user_email || "N/A",
+          name: order.user_name || "Unknown Customer",
+          phone: order.user_phone || null,
+        },
+      }));
+
+      console.log(`✅ Admin: Loaded ${ordersWithUsers.length} orders with user details`);
+      return ordersWithUsers;
+    } catch (error) {
+      console.error("❌ Admin: Error fetching all orders:", error);
+      console.error("This might be a Row Level Security (RLS) policy issue.");
+      console.error("Check ADMIN_PANEL_GUIDE.md for Supabase setup instructions.");
+      return [];
+    }
+  },
+
+  // Update order status
+  async updateOrderStatus(
+    orderId: string,
+    status: string
+  ): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("id", orderId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      return false;
+    }
+  },
+
+  // Get all users (profiles)
+  async getAllUsers(): Promise<Profile[]> {
+    try {
+      console.log("👥 Admin: Fetching all users from backend...");
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("❌ Admin: Error fetching users:", error);
+        console.error("Error details:", JSON.stringify(error, null, 2));
+        console.error("\n⚠️  COMMON ISSUE: Row Level Security (RLS) policies may be blocking admin access.");
+        console.error("\n📖 SOLUTION: You need to add RLS policies for admin access.");
+        console.error("Run this SQL in your Supabase SQL Editor:");
+        console.error("\n-- Allow admins to read all profiles");
+        console.error("CREATE POLICY \"Admin can read all profiles\"");
+        console.error("ON profiles FOR SELECT");
+        console.error("USING (auth.jwt() ->> 'email' IN ('admin@printcraft.com', 'owner@printcraft.com'));");
+        console.error("\nOr temporarily disable RLS on profiles table for testing.");
+        throw error;
+      }
+
+      console.log(`✅ Admin: Fetched ${data?.length || 0} users from backend`);
+      return data || [];
+    } catch (error) {
+      console.error("❌ Admin: Failed to load users. Returning empty array.");
+      console.error("Check the console logs above for detailed error information.");
+      return [];
+    }
+  },
+
+  // Get user stats
+  async getUserStats(): Promise<{
+    totalUsers: number;
+    totalOrders: number;
+    totalRevenue: number;
+    totalProducts: number;
+  }> {
+    try {
+      console.log("📊 Admin: Fetching platform statistics...");
+      
+      const { count: usersCount, error: usersError } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
+
+      if (usersError) {
+        console.error("❌ Admin: Error counting users:", usersError);
+      } else {
+        console.log(`✅ Admin: Found ${usersCount || 0} users in backend`);
+      }
+
+      const { count: ordersCount, error: ordersError } = await supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true });
+
+      if (ordersError) {
+        console.error("❌ Admin: Error counting orders:", ordersError);
+      } else {
+        console.log(`✅ Admin: Found ${ordersCount || 0} orders in backend`);
+      }
+
+      const { data: orders, error: revenueError } = await supabase
+        .from("orders")
+        .select("total_amount");
+
+      if (revenueError) {
+        console.error("❌ Admin: Error fetching revenue:", revenueError);
+      }
+
+      const totalRevenue =
+        orders?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
+
+      const { count: productsCount, error: productsError } = await supabase
+        .from("products")
+        .select("*", { count: "exact", head: true });
+
+      if (productsError) {
+        console.error("❌ Admin: Error counting products:", productsError);
+      } else {
+        console.log(`✅ Admin: Found ${productsCount || 0} products in backend`);
+      }
+
+      const stats = {
+        totalUsers: usersCount || 0,
+        totalOrders: ordersCount || 0,
+        totalRevenue,
+        totalProducts: productsCount || 0,
+      };
+
+      console.log("📊 Admin: Platform statistics:", stats);
+      return stats;
+    } catch (error) {
+      console.error("❌ Admin: Error fetching admin stats:", error);
+      return {
+        totalUsers: 0,
+        totalOrders: 0,
+        totalRevenue: 0,
+        totalProducts: 0,
+      };
+    }
+  },
+
+  // Add new product
+  async addProduct(product: Omit<Product, "id" | "created_at" | "updated_at">): Promise<Product | null> {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .insert([product])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error adding product:", error);
+      return null;
+    }
+  },
+
+  // Update product
+  async updateProduct(
+    id: string,
+    updates: Partial<Omit<Product, "id" | "created_at" | "updated_at">>
+  ): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("products")
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq("id", id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error updating product:", error);
+      return false;
+    }
+  },
+
+  // Delete product
+  async deleteProduct(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      return false;
     }
   },
 };

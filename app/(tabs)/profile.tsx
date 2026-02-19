@@ -1,9 +1,10 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import { Profile, profileService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -21,6 +22,7 @@ import {
 
 export default function ProfileScreen() {
   const { user, signOut, loading } = useAuth();
+  const { isAdmin } = useAdmin();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -270,142 +272,162 @@ export default function ProfileScreen() {
       >
         {/* Profile Header */}
         <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <TouchableOpacity
-            style={styles.avatar}
-            onPress={() => profile?.avatar_url && setShowAvatarModal(true)}
-            activeOpacity={profile?.avatar_url ? 0.7 : 1}
-          >
-            {profile?.avatar_url ? (
-              <Image
-                key={profile.avatar_url}
-                source={{ uri: `${profile.avatar_url}?t=${Date.now()}` }}
-                style={styles.avatarImage}
-                resizeMode="cover"
-              />
-            ) : (
-              <Ionicons name="person" size={48} color="#fff" />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.editAvatarButton}
-            onPress={() => router.push("/edit-profile")}
-          >
-            <Ionicons name="camera" size={18} color="#fff" />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.userName}>
-          {profile?.full_name || user?.user_metadata?.full_name || "User"}
-        </Text>
-        <Text style={styles.userEmail}>{user?.email}</Text>
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{stats.ordersCount}</Text>
-            <Text style={styles.statLabel}>Orders</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{stats.designsCount}</Text>
-            <Text style={styles.statLabel}>Designs</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{stats.inProgressCount}</Text>
-            <Text style={styles.statLabel}>In Progress</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Profile Sections */}
-      {profileSections.map((section, sectionIndex) => (
-        <View key={sectionIndex} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          <View style={styles.sectionContent}>
-            {section.items.map((item, itemIndex) => (
-              <TouchableOpacity
-                key={itemIndex}
-                style={[
-                  styles.menuItem,
-                  itemIndex === section.items.length - 1 && styles.menuItemLast,
-                ]}
-                activeOpacity={0.7}
-                onPress={() => handleMenuItemPress(item)}
-              >
-                <View style={styles.menuItemLeft}>
-                  <View style={styles.menuIconContainer}>
-                    <Ionicons
-                      name={item.icon as any}
-                      size={22}
-                      color="#FF006E"
-                    />
-                  </View>
-                  <View style={styles.menuItemText}>
-                    <Text style={styles.menuItemLabel}>{item.label}</Text>
-                    {item.value ? (
-                      <Text style={styles.menuItemValue}>{item.value}</Text>
-                    ) : null}
-                  </View>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#B8B8D1" />
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      ))}
-
-      {/* Logout Button */}
-      <View style={styles.section}>
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="log-out-outline" size={22} color="#EF4444" />
-          <Text style={styles.logoutButtonText}>Sign Out</Text>
-        </TouchableOpacity>
-      </View>
-
-        {/* App Version */}
-      <View style={styles.versionContainer}>
-        <Text style={styles.versionText}>PrintCraft v1.0.0</Text>
-        <View style={styles.versionSubtextRow}>
-          <Text style={styles.versionSubtext}>Made with </Text>
-          <Ionicons name="heart" size={12} color="#F87171" />
-          <Text style={styles.versionSubtext}> for print lovers</Text>
-        </View>
-      </View>
-
-      <View style={{ height: 110 }} />
-
-      {/* Avatar Preview Modal */}
-      <Modal
-        visible={showAvatarModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowAvatarModal(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalContainer}
-          activeOpacity={1}
-          onPress={() => setShowAvatarModal(false)}
-        >
-          <View style={styles.modalHeader}>
+          <View style={styles.avatarContainer}>
             <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setShowAvatarModal(false)}
+              style={styles.avatar}
+              onPress={() => profile?.avatar_url && setShowAvatarModal(true)}
+              activeOpacity={profile?.avatar_url ? 0.7 : 1}
             >
-              <Ionicons name="close" size={28} color="#fff" />
+              {profile?.avatar_url ? (
+                <Image
+                  key={profile.avatar_url}
+                  source={{ uri: `${profile.avatar_url}?t=${Date.now()}` }}
+                  style={styles.avatarImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Ionicons name="person" size={48} color="#fff" />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.editAvatarButton}
+              onPress={() => router.push("/edit-profile")}
+            >
+              <Ionicons name="camera" size={18} color="#fff" />
             </TouchableOpacity>
           </View>
-          {profile?.avatar_url && (
-            <Image
-              source={{ uri: `${profile.avatar_url}?t=${Date.now()}` }}
-              style={styles.modalImage}
-              resizeMode="contain"
-            />
-          )}
-        </TouchableOpacity>
-      </Modal>
+          <Text style={styles.userName}>
+            {profile?.full_name || user?.user_metadata?.full_name || "User"}
+          </Text>
+          <Text style={styles.userEmail}>{user?.email}</Text>
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{stats.ordersCount}</Text>
+              <Text style={styles.statLabel}>Orders</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{stats.designsCount}</Text>
+              <Text style={styles.statLabel}>Designs</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{stats.inProgressCount}</Text>
+              <Text style={styles.statLabel}>In Progress</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Admin Panel Button */}
+        {isAdmin && (
+          <TouchableOpacity
+            style={styles.adminPanelButton}
+            onPress={() => router.push("/admin" as any)}
+          >
+            <View style={styles.adminPanelContent}>
+              <View style={styles.adminIconContainer}>
+                <Ionicons name="shield-checkmark" size={24} color="#FF006E" />
+              </View>
+              <View style={styles.adminTextContainer}>
+                <Text style={styles.adminPanelTitle}>Admin Panel</Text>
+                <Text style={styles.adminPanelSubtitle}>Manage orders, users & products</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#FF006E" />
+          </TouchableOpacity>
+        )}
+
+        {/* Profile Sections */}
+        {profileSections.map((section, sectionIndex) => (
+          <View key={sectionIndex} style={styles.section}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <View style={styles.sectionContent}>
+              {section.items.map((item, itemIndex) => (
+                <TouchableOpacity
+                  key={itemIndex}
+                  style={[
+                    styles.menuItem,
+                    itemIndex === section.items.length - 1 &&
+                      styles.menuItemLast,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => handleMenuItemPress(item)}
+                >
+                  <View style={styles.menuItemLeft}>
+                    <View style={styles.menuIconContainer}>
+                      <Ionicons
+                        name={item.icon as any}
+                        size={22}
+                        color="#FF006E"
+                      />
+                    </View>
+                    <View style={styles.menuItemText}>
+                      <Text style={styles.menuItemLabel}>{item.label}</Text>
+                      {item.value ? (
+                        <Text style={styles.menuItemValue}>{item.value}</Text>
+                      ) : null}
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#B8B8D1" />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ))}
+
+        {/* Logout Button */}
+        <View style={styles.section}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="log-out-outline" size={22} color="#EF4444" />
+            <Text style={styles.logoutButtonText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* App Version */}
+        <View style={styles.versionContainer}>
+          <Text style={styles.versionText}>PrintCraft v1.0.0</Text>
+          <View style={styles.versionSubtextRow}>
+            <Text style={styles.versionSubtext}>Made with </Text>
+            <Ionicons name="heart" size={12} color="#F87171" />
+            <Text style={styles.versionSubtext}> for print lovers</Text>
+          </View>
+        </View>
+
+        <View style={{ height: 110 }} />
+
+        {/* Avatar Preview Modal */}
+        <Modal
+          visible={showAvatarModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAvatarModal(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalContainer}
+            activeOpacity={1}
+            onPress={() => setShowAvatarModal(false)}
+          >
+            <View style={styles.modalHeader}>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowAvatarModal(false)}
+              >
+                <Ionicons name="close" size={28} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            {profile?.avatar_url && (
+              <Image
+                source={{ uri: `${profile.avatar_url}?t=${Date.now()}` }}
+                style={styles.modalImage}
+                resizeMode="contain"
+              />
+            )}
+          </TouchableOpacity>
+        </Modal>
       </ScrollView>
     </>
   );
@@ -512,6 +534,51 @@ const styles = StyleSheet.create({
     width: 1,
     height: 32,
     backgroundColor: "rgba(0, 0, 0, 0.12)",
+  },
+  adminPanelButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginTop: 24,
+    marginBottom: 8,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: "#FF006E",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: "rgba(255, 0, 110, 0.2)",
+  },
+  adminPanelContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  adminIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255, 0, 110, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  adminTextContainer: {
+    flex: 1,
+  },
+  adminPanelTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginBottom: 4,
+  },
+  adminPanelSubtitle: {
+    fontSize: 13,
+    color: "#6B7280",
   },
   section: {
     marginTop: 24,

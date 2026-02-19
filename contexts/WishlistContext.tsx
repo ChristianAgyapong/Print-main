@@ -3,9 +3,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
 
+export interface WishlistItem extends Product {
+  design_name?: string;
+  design_type?: string;
+}
+
 interface WishlistContextType {
-  wishlist: Product[];
-  addToWishlist: (product: Product) => void;
+  wishlist: WishlistItem[];
+  addToWishlist: (
+    product: Product,
+    designName?: string,
+    designType?: string,
+  ) => void;
   removeFromWishlist: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
@@ -22,7 +31,7 @@ export const WishlistProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
 
   // Load wishlist from storage on mount
   useEffect(() => {
@@ -47,19 +56,35 @@ export const WishlistProvider = ({
 
   const saveWishlist = async () => {
     try {
-      await AsyncStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
+      await AsyncStorage.setItem(
+        WISHLIST_STORAGE_KEY,
+        JSON.stringify(wishlist),
+      );
     } catch (error) {
       console.error("Error saving wishlist:", error);
     }
   };
 
-  const addToWishlist = (product: Product) => {
+  const addToWishlist = (
+    product: Product,
+    designName?: string,
+    designType?: string,
+  ) => {
     if (isInWishlist(product.id)) {
-      Alert.alert("Already in Wishlist", "This item is already in your wishlist");
+      Alert.alert(
+        "Already in Wishlist",
+        "This item is already in your wishlist",
+      );
       return;
     }
 
-    setWishlist((prev) => [...prev, product]);
+    const wishlistItem: WishlistItem = {
+      ...product,
+      design_name: designName,
+      design_type: designType,
+    };
+
+    setWishlist((prev) => [...prev, wishlistItem]);
   };
 
   const removeFromWishlist = (productId: string) => {

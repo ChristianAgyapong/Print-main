@@ -2,8 +2,8 @@ import { useCart } from "@/contexts/CartContext";
 import { Product, productsService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,

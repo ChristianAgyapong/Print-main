@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { AdminProvider } from "@/contexts/AdminContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -151,6 +152,14 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="admin"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
           name="modal"
           options={{
             presentation: "modal",
@@ -166,11 +175,13 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <RootLayoutNav />
-        </WishlistProvider>
-      </CartProvider>
+      <AdminProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <RootLayoutNav />
+          </WishlistProvider>
+        </CartProvider>
+      </AdminProvider>
     </AuthProvider>
   );
 }
