@@ -1,6 +1,5 @@
 import FileUpload from "@/components/file-upload";
 import { useCart } from "@/contexts/CartContext";
-import { useWishlist } from "@/contexts/WishlistContext";
 import { Product, productsService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -23,7 +22,6 @@ export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { addItem, isInCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,16 +68,6 @@ export default function ProductDetailsScreen() {
         { text: "View Cart", onPress: () => router.push("/cart") },
       ],
     );
-  };
-
-  const handleToggleWishlist = () => {
-    if (!product) return;
-
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist(product);
-    }
   };
 
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
@@ -144,16 +132,6 @@ export default function ProductDetailsScreen() {
             >
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.wishlistIconButton}
-              onPress={handleToggleWishlist}
-            >
-              <Ionicons
-                name={isInWishlist(product.id) ? "heart" : "heart-outline"}
-                size={24}
-                color={isInWishlist(product.id) ? "#EF4444" : "#fff"}
-              />
-            </TouchableOpacity>
             <View style={styles.deliveryBadge}>
               <Ionicons name="time-outline" size={16} color="#1F2937" />
               <Text style={styles.deliveryText}>3-5 days</Text>
@@ -166,16 +144,6 @@ export default function ProductDetailsScreen() {
               onPress={handleBack}
             >
               <Ionicons name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.wishlistIconButton}
-              onPress={handleToggleWishlist}
-            >
-              <Ionicons
-                name={isInWishlist(product.id) ? "heart" : "heart-outline"}
-                size={24}
-                color={isInWishlist(product.id) ? "#EF4444" : "#fff"}
-              />
             </TouchableOpacity>
             <Text style={styles.productEmoji}>🎨</Text>
             <View style={styles.deliveryBadge}>
@@ -378,22 +346,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
-  },
-  wishlistIconButton: {
-    position: "absolute",
-    top: 50,
-    right: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 0, 110, 0.9)",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
   },
   productEmoji: {
     fontSize: 80,

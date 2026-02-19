@@ -22,7 +22,7 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -363,7 +363,12 @@ export default function HomeScreen() {
                     {categoryLayout.name}
                   </Text>
                 </View>
-                <TouchableOpacity style={styles.viewAllButton}>
+                <TouchableOpacity
+                  style={styles.viewAllButton}
+                  onPress={() =>
+                    router.push(`/category/${categoryLayout.name}`)
+                  }
+                >
                   <Text style={styles.viewAllText}>View All</Text>
                   <Ionicons name="arrow-forward" size={14} color="#FF006E" />
                 </TouchableOpacity>
