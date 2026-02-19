@@ -1,3 +1,4 @@
+import FileUpload from "@/components/file-upload";
 import { useCart } from "@/contexts/CartContext";
 import { Product, productsService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
@@ -5,16 +6,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import FileUpload from "@/components/file-upload";
 
 export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -60,7 +60,7 @@ export default function ProductDetailsScreen() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     }
   };
 
@@ -78,10 +78,7 @@ export default function ProductDetailsScreen() {
       <SafeAreaView style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
         <Text style={styles.errorText}>Product not found</Text>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -105,10 +102,7 @@ export default function ProductDetailsScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Product Image */}
         <LinearGradient colors={gradient} style={styles.imageContainer}>
-          <TouchableOpacity
-            style={styles.backIconButton}
-            onPress={handleBack}
-          >
+          <TouchableOpacity style={styles.backIconButton} onPress={handleBack}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.productEmoji}>🎨</Text>
@@ -146,10 +140,13 @@ export default function ProductDetailsScreen() {
             <View style={styles.uploadContainer}>
               <FileUpload
                 onUploadComplete={(upload) => {
-                  Alert.alert('Success!', 'Design uploaded successfully. You can now add this to your cart.');
+                  Alert.alert(
+                    "Success!",
+                    "Design uploaded successfully. You can now add this to your cart.",
+                  );
                 }}
                 onUploadError={(error) => {
-                  Alert.alert('Upload Failed', error);
+                  Alert.alert("Upload Failed", error);
                 }}
               />
             </View>

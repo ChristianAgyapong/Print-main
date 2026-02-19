@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function AuthScreen() {
   const router = useRouter();
   const { signIn, signUp, signInWithGoogle, signInWithApple, resetPassword } = useAuth();
-  
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,7 +43,7 @@ export default function AuthScreen() {
           Alert.alert('Sign Up Failed', error.message || 'Could not create account');
         } else {
           Alert.alert(
-            'Success', 
+            'Success',
             'Account created! Please check your email to verify your account.',
             [{ text: 'OK', onPress: () => setIsLogin(true) }]
           );
@@ -77,7 +77,7 @@ export default function AuthScreen() {
     setLoading(true);
     try {
       const { error } = await signInWithGoogle();
-      
+
       if (error) {
         console.error('Google Sign-In Error:', error);
         Alert.alert('Google Sign-In Error', error.message || 'Could not sign in with Google');
@@ -109,15 +109,15 @@ export default function AuthScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="dark" />
-      
+
       {/* Back Button */}
       <View style={styles.backButtonContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
@@ -126,13 +126,15 @@ export default function AuthScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logoEmoji}>🎨</Text>
+          <View style={styles.logoIconContainer}>
+            <Ionicons name="color-palette" size={40} color="#FF006E" />
+          </View>
           <Text style={styles.logoText}>PrintCraft</Text>
           <Text style={styles.headerSubtitle}>
             {isLogin ? 'Welcome back!' : 'Create your account'}
@@ -193,7 +195,7 @@ export default function AuthScreen() {
           )}
 
           {/* Submit Button */}
-          <Pressable 
+          <Pressable
             style={({ pressed }) => [
               styles.submitButton,
               pressed && styles.buttonPressed,
@@ -231,7 +233,7 @@ export default function AuthScreen() {
           </View>
 
           {/* Social Auth Buttons */}
-          <Pressable 
+          <Pressable
             style={styles.socialButton}
             onPress={handleGoogleSignIn}
             disabled={loading}
@@ -239,7 +241,7 @@ export default function AuthScreen() {
             <Text style={styles.socialButtonText}>Continue with Google</Text>
           </Pressable>
 
-          <Pressable 
+          <Pressable
             style={styles.socialButton}
             onPress={handleAppleSignIn}
             disabled={loading}
@@ -276,7 +278,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-paddingHorizontal: 24,
+    paddingHorizontal: 24,
     paddingBottom: 40,
   },
   header: {
@@ -284,8 +286,13 @@ paddingHorizontal: 24,
     marginBottom: 30,
     marginTop: 10,
   },
-  logoEmoji: {
-    fontSize: 50,
+  logoIconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(255, 0, 110, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 8,
   },
   logoText: {

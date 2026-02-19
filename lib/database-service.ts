@@ -238,14 +238,14 @@ export const profileService = {
   // Update profile
   async update(userId: string, updates: Partial<Profile>): Promise<boolean> {
     try {
-      console.log('Updating profile with:', updates);
+      console.log("Updating profile with:", updates);
       const { error } = await supabase
         .from("profiles")
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq("id", userId);
 
       if (error) throw error;
-      console.log('Profile updated successfully');
+      console.log("Profile updated successfully");
       return true;
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -261,7 +261,15 @@ export const profileService = {
         full_name: fullName,
       });
 
-      if (error) throw error;
+      // If duplicate key error (profile already exists), return true
+      if (error) {
+        if (error.code === "23505") {
+          console.log("✅ Profile already exists in database");
+          return true;
+        }
+        throw error;
+      }
+      console.log("✅ Profile created in database");
       return true;
     } catch (error) {
       console.error("Error creating profile:", error);

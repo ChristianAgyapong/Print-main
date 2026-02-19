@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Pressable, Dimensions, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 const isSmallDevice = width < 375;
@@ -16,7 +17,7 @@ export default function LandingPage() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      
+
       {/* Background with gradient effect */}
       <View style={styles.backgroundGradient}>
         {/* Decorative circles */}
@@ -25,7 +26,7 @@ export default function LandingPage() {
         <View style={[styles.circle, styles.circle3]} />
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -34,67 +35,70 @@ export default function LandingPage() {
         <View style={styles.content}>
           {/* Logo Section */}
           <View style={styles.logoContainer}>
-          <View style={styles.logoWrapper}>
-            <Text style={styles.logoEmoji}>🎨</Text>
-          </View>
-          <Text style={styles.logoText}>PrintCraft</Text>
-          <Text style={styles.tagline}>Design • Print • Perfect</Text>
-        </View>
-
-        {/* Hero Section */}
-        <View style={styles.heroSection}>
-          <Text style={styles.title}>Transform Your</Text>
-          <Text style={styles.titleAccent}>Creative Vision</Text>
-          
-          <Text style={styles.description}>
-            Premium quality printing services for all your design needs. From business cards to large format prints, we bring your ideas to life.
-          </Text>
-        </View>
-
-        {/* Features Grid */}
-        <View style={styles.featuresContainer}>
-          <View style={styles.featureCard}>
-            <View style={styles.featureIconContainer}>
-              <Text style={styles.featureIcon}>⚡</Text>
+            <View style={styles.logoWrapper}>
+              <Ionicons name="color-palette" size={isSmallDevice ? 38 : 45} color="#FF006E" />
             </View>
-            <Text style={styles.featureTitle}>Fast Delivery</Text>
-            <Text style={styles.featureDescription}>24-48 hours</Text>
+            <Text style={styles.logoText}>PrintCraft</Text>
+            <Text style={styles.tagline}>Design • Print • Perfect</Text>
           </View>
 
-          <View style={styles.featureCard}>
-            <View style={styles.featureIconContainer}>
-              <Text style={styles.featureIcon}>✨</Text>
+          {/* Hero Section */}
+          <View style={styles.heroSection}>
+            <Text style={styles.title}>Transform Your</Text>
+            <Text style={styles.titleAccent}>Creative Vision</Text>
+
+            <Text style={styles.description}>
+              Premium quality printing services for all your design needs. From business cards to large format prints, we bring your ideas to life.
+            </Text>
+          </View>
+
+          {/* Features Grid */}
+          <View style={styles.featuresContainer}>
+            <View style={styles.featureCard}>
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="flash" size={isSmallDevice ? 20 : 24} color="#FF006E" />
+              </View>
+              <Text style={styles.featureTitle}>Fast Delivery</Text>
+              <Text style={styles.featureDescription}>24-48 hours</Text>
             </View>
-            <Text style={styles.featureTitle}>Top Quality</Text>
-            <Text style={styles.featureDescription}>Premium materials</Text>
-          </View>
 
-          <View style={styles.featureCard}>
-            <View style={styles.featureIconContainer}>
-              <Text style={styles.featureIcon}>🎯</Text>
+            <View style={styles.featureCard}>
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="sparkles" size={isSmallDevice ? 20 : 24} color="#FF006E" />
+              </View>
+              <Text style={styles.featureTitle}>Top Quality</Text>
+              <Text style={styles.featureDescription}>Premium materials</Text>
             </View>
-            <Text style={styles.featureTitle}>Custom Design</Text>
-            <Text style={styles.featureDescription}>Tailored for you</Text>
-          </View>
-        </View>
 
-        {/* CTA Section */}
-        <View style={styles.ctaContainer}>
-          <Pressable 
-            style={({ pressed }) => [
-              styles.button,
-              pressed && styles.buttonPressed
-            ]}
-            onPress={handleGetStarted}
-          >
-            <Text style={styles.buttonText}>Get Started Now</Text>
-            <Text style={styles.buttonArrow}>→</Text>
-          </Pressable>
-
-          <View style={styles.trustIndicator}>
-            <Text style={styles.trustText}>⭐ 4.9 rating • 10,000+ happy customers</Text>
+            <View style={styles.featureCard}>
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="locate" size={isSmallDevice ? 20 : 24} color="#FF006E" />
+              </View>
+              <Text style={styles.featureTitle}>Custom Design</Text>
+              <Text style={styles.featureDescription}>Tailored for you</Text>
+            </View>
           </View>
-        </View>
+
+          {/* CTA Section */}
+          <View style={styles.ctaContainer}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                pressed && styles.buttonPressed
+              ]}
+              onPress={handleGetStarted}
+            >
+              <Text style={styles.buttonText}>Get Started Now</Text>
+              <Ionicons name="arrow-forward" size={isSmallDevice ? 18 : 22} color="#FFFFFF" />
+            </Pressable>
+
+            <View style={styles.trustIndicator}>
+              <View style={styles.trustRow}>
+                <Ionicons name="star" size={14} color="#F59E0B" />
+                <Text style={styles.trustText}> 4.9 rating • 10,000+ happy customers</Text>
+              </View>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -168,9 +172,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  logoEmoji: {
-    fontSize: isSmallDevice ? 38 : 45,
-  },
+
   logoText: {
     fontSize: isSmallDevice ? 28 : isMediumDevice ? 32 : 36,
     fontWeight: '800',
@@ -237,9 +239,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 10,
   },
-  featureIcon: {
-    fontSize: isSmallDevice ? 20 : 24,
-  },
+
   featureTitle: {
     fontSize: isSmallDevice ? 12 : 14,
     color: '#FFFFFF',
@@ -284,13 +284,12 @@ const styles = StyleSheet.create({
     marginRight: 10,
     letterSpacing: 0.5,
   },
-  buttonArrow: {
-    fontSize: isSmallDevice ? 18 : 22,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
   trustIndicator: {
     marginTop: isSmallDevice ? 20 : 24,
+    alignItems: 'center',
+  },
+  trustRow: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
   trustText: {

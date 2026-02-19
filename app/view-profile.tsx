@@ -33,7 +33,7 @@ export default function ViewProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       loadProfile();
-    }, [user])
+    }, [user]),
   );
 
   const loadProfile = async () => {
@@ -53,19 +53,28 @@ export default function ViewProfileScreen() {
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Not set";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    try {
+      const date = new Date(dateString);
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return "Invalid date";
+      }
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid date";
+    }
   };
 
   const handleBack = () => {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/(tabs)/profile');
+      router.replace("/(tabs)/profile");
     }
   };
 
@@ -101,10 +110,7 @@ export default function ViewProfileScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={handleBack}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Personal Information</Text>

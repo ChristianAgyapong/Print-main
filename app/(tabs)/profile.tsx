@@ -22,6 +22,7 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [stats, setStats] = useState({
@@ -31,13 +32,20 @@ export default function ProfileScreen() {
     addressesCount: 0,
   });
 
+  // Redirect to landing if no user
+  useEffect(() => {
+    if (!user && !loggingOut) {
+      router.replace("/");
+    }
+  }, [user, loggingOut]);
+
   // Reload profile when tab comes into focus (removed duplicate useEffect)
   useFocusEffect(
     useCallback(() => {
       if (user) {
         loadProfileData();
       }
-    }, [user])
+    }, [user]),
   );
 
   const loadProfileData = async () => {
@@ -74,12 +82,13 @@ export default function ProfileScreen() {
         style: "destructive",
         onPress: async () => {
           try {
+            setLoggingOut(true);
             await signOut();
-            // Explicitly navigate to landing page
-            router.replace('/');
+            // Navigation handled by auth state
           } catch (error) {
-            console.error('Error during logout:', error);
-            Alert.alert('Error', 'Failed to logout. Please try again.');
+            console.error("Error during logout:", error);
+            setLoggingOut(false);
+            Alert.alert("Error", "Failed to logout. Please try again.");
           }
         },
       },
@@ -232,6 +241,17 @@ export default function ProfileScreen() {
     }
   };
 
+  // Don't render profile while logging out or without user
+  if (!user || loggingOut) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3B82F6" />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       style={styles.container}
@@ -241,116 +261,113 @@ export default function ProfileScreen() {
       }
     >
       {/* Profile Header */}
-          <View style={styles.header}>
-            <View style={styles.avatarContainer}>
-              <TouchableOpacity
-                style={styles.avatar}
-                onPress={() => profile?.avatar_url && setShowAvatarModal(true)}
-                activeOpacity={profile?.avatar_url ? 0.7 : 1}
-              >
-                {profile?.avatar_url ? (
-                  <Image
-                    key={profile.avatar_url}
-                    source={{ uri: `${profile.avatar_url}?t=${Date.now()}` }}
-                    style={styles.avatarImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <Ionicons name="person" size={48} color="#fff" />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.editAvatarButton}
-                onPress={() => router.push("/edit-profile")}
-              >
-                <Ionicons name="camera" size={18} color="#fff" />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.userName}>
-              {profile?.full_name || user?.user_metadata?.full_name || "User"}
-            </Text>
-            <Text style={styles.userEmail}>{user?.email}</Text>
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{stats.ordersCount}</Text>
-                <Text style={styles.statLabel}>Orders</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{stats.designsCount}</Text>
-                <Text style={styles.statLabel}>Designs</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{stats.inProgressCount}</Text>
-                <Text style={styles.statLabel}>In Progress</Text>
-              </View>
-            </View>
+      <View style={styles.header}>
+        <View style={styles.avatarContainer}>
+          <TouchableOpacity
+            style={styles.avatar}
+            onPress={() => profile?.avatar_url && setShowAvatarModal(true)}
+            activeOpacity={profile?.avatar_url ? 0.7 : 1}
+          >
+            {profile?.avatar_url ? (
+              <Image
+                key={profile.avatar_url}
+                source={{ uri: `${profile.avatar_url}?t=${Date.now()}` }}
+                style={styles.avatarImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <Ionicons name="person" size={48} color="#fff" />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.editAvatarButton}
+            onPress={() => router.push("/edit-profile")}
+          >
+            <Ionicons name="camera" size={18} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.userName}>
+          {profile?.full_name || user?.user_metadata?.full_name || "User"}
+        </Text>
+        <Text style={styles.userEmail}>{user?.email}</Text>
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{stats.ordersCount}</Text>
+            <Text style={styles.statLabel}>Orders</Text>
           </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{stats.designsCount}</Text>
+            <Text style={styles.statLabel}>Designs</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{stats.inProgressCount}</Text>
+            <Text style={styles.statLabel}>In Progress</Text>
+          </View>
+        </View>
+      </View>
 
-          {/* Profile Sections */}
-          {profileSections.map((section, sectionIndex) => (
-            <View key={sectionIndex} style={styles.section}>
-              <Text style={styles.sectionTitle}>{section.title}</Text>
-              <View style={styles.sectionContent}>
-                {section.items.map((item, itemIndex) => (
-                  <TouchableOpacity
-                    key={itemIndex}
-                    style={[
-                      styles.menuItem,
-                      itemIndex === section.items.length - 1 &&
-                        styles.menuItemLast,
-                    ]}
-                    activeOpacity={0.7}
-                    onPress={() => handleMenuItemPress(item)}
-                  >
-                    <View style={styles.menuItemLeft}>
-                      <View style={styles.menuIconContainer}>
-                        <Ionicons
-                          name={item.icon as any}
-                          size={22}
-                          color="#3B82F6"
-                        />
-                      </View>
-                      <View style={styles.menuItemText}>
-                        <Text style={styles.menuItemLabel}>{item.label}</Text>
-                        {item.value ? (
-                          <Text style={styles.menuItemValue}>{item.value}</Text>
-                        ) : null}
-                      </View>
-                    </View>
+      {/* Profile Sections */}
+      {profileSections.map((section, sectionIndex) => (
+        <View key={sectionIndex} style={styles.section}>
+          <Text style={styles.sectionTitle}>{section.title}</Text>
+          <View style={styles.sectionContent}>
+            {section.items.map((item, itemIndex) => (
+              <TouchableOpacity
+                key={itemIndex}
+                style={[
+                  styles.menuItem,
+                  itemIndex === section.items.length - 1 && styles.menuItemLast,
+                ]}
+                activeOpacity={0.7}
+                onPress={() => handleMenuItemPress(item)}
+              >
+                <View style={styles.menuItemLeft}>
+                  <View style={styles.menuIconContainer}>
                     <Ionicons
-                      name="chevron-forward"
-                      size={20}
-                      color="#9CA3AF"
+                      name={item.icon as any}
+                      size={22}
+                      color="#3B82F6"
                     />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          ))}
-
-          {/* Logout Button */}
-          <View style={styles.section}>
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="log-out-outline" size={22} color="#EF4444" />
-              <Text style={styles.logoutButtonText}>Logout</Text>
-            </TouchableOpacity>
+                  </View>
+                  <View style={styles.menuItemText}>
+                    <Text style={styles.menuItemLabel}>{item.label}</Text>
+                    {item.value ? (
+                      <Text style={styles.menuItemValue}>{item.value}</Text>
+                    ) : null}
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            ))}
           </View>
+        </View>
+      ))}
 
-          {/* App Version */}
-          <View style={styles.versionContainer}>
-            <Text style={styles.versionText}>PrintCraft v1.0.0</Text>
-            <Text style={styles.versionSubtext}>
-              Made with ❤️ for print lovers
-            </Text>
-          </View>
+      {/* Logout Button */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="log-out-outline" size={22} color="#EF4444" />
+          <Text style={styles.logoutButtonText}>Sign Out</Text>
+        </TouchableOpacity>
+      </View>
 
-          <View style={{ height: 40 }} />
+      {/* App Version */}
+      <View style={styles.versionContainer}>
+        <Text style={styles.versionText}>PrintCraft v1.0.0</Text>
+        <View style={styles.versionSubtextRow}>
+          <Text style={styles.versionSubtext}>Made with </Text>
+          <Ionicons name="heart" size={12} color="#F87171" />
+          <Text style={styles.versionSubtext}> for print lovers</Text>
+        </View>
+      </View>
+
+      <View style={{ height: 40 }} />
 
       {/* Avatar Preview Modal */}
       <Modal
@@ -389,6 +406,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F9FAFB",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     backgroundColor: "#fff",
@@ -565,6 +587,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#9CA3AF",
     marginBottom: 4,
+  },
+  versionSubtextRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   versionSubtext: {
     fontSize: 12,

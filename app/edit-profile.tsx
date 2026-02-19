@@ -3,7 +3,7 @@ import { Profile, profileService } from "@/lib/database-service";
 import { storageService } from "@/lib/storage-service";
 import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -85,12 +85,13 @@ export default function EditProfileScreen() {
   const pickImage = async () => {
     try {
       // Request permission
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (status !== 'granted') {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== "granted") {
         Alert.alert(
-          'Permission Required',
-          'Please allow access to your photos to change your profile picture.'
+          "Permission Required",
+          "Please allow access to your photos to change your profile picture.",
         );
         return;
       }
@@ -107,8 +108,8 @@ export default function EditProfileScreen() {
         setAvatarUri(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to pick image");
     }
   };
 
@@ -118,6 +119,25 @@ export default function EditProfileScreen() {
     if (!fullName.trim()) {
       Alert.alert("Validation Error", "Full name is required");
       return;
+    }
+
+    // Validate date of birth format if provided
+    if (dateOfBirth && dateOfBirth.trim()) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(dateOfBirth)) {
+        Alert.alert(
+          "Invalid Date Format",
+          "Please enter date of birth in YYYY-MM-DD format (e.g., 1990-01-15)",
+        );
+        return;
+      }
+
+      // Validate it's a valid date
+      const date = new Date(dateOfBirth);
+      if (isNaN(date.getTime())) {
+        Alert.alert("Invalid Date", "Please enter a valid date");
+        return;
+      }
     }
 
     setSaving(true);
@@ -131,23 +151,25 @@ export default function EditProfileScreen() {
           const uploadedUrl = await storageService.uploadAvatar(
             avatarUri,
             user.id,
-            profile?.avatar_url
+            profile?.avatar_url,
           );
-          
+
           if (uploadedUrl) {
             avatarUrl = uploadedUrl;
-            console.log('Avatar uploaded successfully:', avatarUrl);
+            console.log("Avatar uploaded successfully:", avatarUrl);
           } else {
-            throw new Error('Failed to get avatar URL');
+            throw new Error("Failed to get avatar URL");
           }
         } catch (uploadError: any) {
-          console.error('Avatar upload error:', uploadError);
+          console.error("Avatar upload error:", uploadError);
           setUploading(false);
           setSaving(false);
-          
+
           // Show specific error message from storage service
-          const errorMessage = uploadError.message || 'Failed to upload profile picture. Please try again.';
-          Alert.alert('Upload Error', errorMessage);
+          const errorMessage =
+            uploadError.message ||
+            "Failed to upload profile picture. Please try again.";
+          Alert.alert("Upload Error", errorMessage);
           return; // Stop the save process
         } finally {
           setUploading(false);
@@ -164,22 +186,28 @@ export default function EditProfileScreen() {
 
       if (authError) throw authError;
 
-      // Update profile in profiles table
-      const profileSuccess = await profileService.update(user.id, {
+      // Prepare profile updates with proper null handling for optional fields
+      const profileUpdates: Partial<Profile> = {
         full_name: fullName,
         avatar_url: avatarUrl,
-        phone: phone,
-        bio: bio,
-        address_street: addressStreet,
-        address_city: addressCity,
-        address_state: addressState,
-        address_zip: addressZip,
-        address_country: addressCountry,
-        company: company,
-        job_title: jobTitle,
-        date_of_birth: dateOfBirth,
-        gender: gender,
-      });
+        phone: phone || null,
+        bio: bio || null,
+        address_street: addressStreet || null,
+        address_city: addressCity || null,
+        address_state: addressState || null,
+        address_zip: addressZip || null,
+        address_country: addressCountry || null,
+        company: company || null,
+        job_title: jobTitle || null,
+        date_of_birth: dateOfBirth && dateOfBirth.trim() ? dateOfBirth : null,
+        gender: gender || null,
+      };
+
+      // Update profile in profiles table
+      const profileSuccess = await profileService.update(
+        user.id,
+        profileUpdates,
+      );
 
       if (!profileSuccess) {
         // If profile doesn't exist, create it
@@ -192,17 +220,17 @@ export default function EditProfileScreen() {
         }
       }
 
-      console.log('Profile updated with avatar URL:', avatarUrl);
+      console.log("Profile updated with avatar URL:", avatarUrl);
 
       // Show success message and navigate back
       Alert.alert("Success", "Profile updated successfully!");
-      
+
       // Navigate back with fallback to profile tab
       setTimeout(() => {
         if (router.canGoBack()) {
           router.back();
         } else {
-          router.replace('/(tabs)/profile');
+          router.replace("/(tabs)/profile");
         }
       }, 100);
     } catch (error: any) {
@@ -216,7 +244,7 @@ export default function EditProfileScreen() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/(tabs)/profile');
+      router.replace("/(tabs)/profile");
     }
   };
 
@@ -224,7 +252,7 @@ export default function EditProfileScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={0}
       >
         {loading ? (
@@ -240,299 +268,301 @@ export default function EditProfileScreen() {
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
-            {/* Header */}
-            <View style={styles.header}>
-              <TouchableOpacity
-                onPress={handleBack}
-                style={styles.backButton}
-              >
-                <Ionicons name="arrow-back" size={24} color="#1F2937" />
-              </TouchableOpacity>
-              <Text style={styles.headerTitle}>Edit Profile</Text>
-              <View style={{ width: 40 }} />
-            </View>
+              {/* Header */}
+              <View style={styles.header}>
+                <TouchableOpacity
+                  onPress={handleBack}
+                  style={styles.backButton}
+                >
+                  <Ionicons name="arrow-back" size={24} color="#1F2937" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Edit Profile</Text>
+                <View style={{ width: 40 }} />
+              </View>
 
-            {/* Avatar */}
-            <View style={styles.avatarSection}>
-              <TouchableOpacity
-                style={styles.avatar}
-                onPress={() => avatarUri && setShowAvatarModal(true)}
-                activeOpacity={avatarUri ? 0.7 : 1}
-              >
-                {avatarUri ? (
-                  <Image
-                    key={avatarUri}
-                    source={{ uri: avatarUri }}
-                    style={styles.avatarImage}
-                    resizeMode="cover"
+              {/* Avatar */}
+              <View style={styles.avatarSection}>
+                <TouchableOpacity
+                  style={styles.avatar}
+                  onPress={() => avatarUri && setShowAvatarModal(true)}
+                  activeOpacity={avatarUri ? 0.7 : 1}
+                >
+                  {avatarUri ? (
+                    <Image
+                      key={avatarUri}
+                      source={{ uri: avatarUri }}
+                      style={styles.avatarImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <Ionicons name="person" size={48} color="#fff" />
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.changePhotoButton}
+                  onPress={pickImage}
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <ActivityIndicator size="small" color="#3B82F6" />
+                  ) : (
+                    <>
+                      <Ionicons name="camera" size={18} color="#3B82F6" />
+                      <Text style={styles.changePhotoText}>Change Photo</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {/* Form */}
+              <View style={styles.form}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Full Name *</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={fullName}
+                    onChangeText={setFullName}
+                    placeholder="Enter your full name"
+                    placeholderTextColor="#9CA3AF"
                   />
-                ) : (
-                  <Ionicons name="person" size={48} color="#fff" />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.changePhotoButton}
-                onPress={pickImage}
-                disabled={uploading}
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Email</Text>
+                  <TextInput
+                    style={[styles.input, styles.inputDisabled]}
+                    value={user?.email || ""}
+                    editable={false}
+                    placeholderTextColor="#9CA3AF"
+                  />
+                  <Text style={styles.helperText}>Email cannot be changed</Text>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Phone Number</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={phone}
+                    onChangeText={setPhone}
+                    placeholder="Enter your phone number"
+                    keyboardType="phone-pad"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+
+                <View style={styles.sectionDivider}>
+                  <Text style={styles.sectionTitle}>About</Text>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Bio</Text>
+                  <TextInput
+                    style={[styles.input, styles.textArea]}
+                    value={bio}
+                    onChangeText={setBio}
+                    placeholder="Tell us about yourself"
+                    placeholderTextColor="#9CA3AF"
+                    multiline
+                    numberOfLines={4}
+                    textAlignVertical="top"
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Company</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={company}
+                    onChangeText={setCompany}
+                    placeholder="Your company name"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Job Title</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={jobTitle}
+                    onChangeText={setJobTitle}
+                    placeholder="Your job title"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+
+                <View style={styles.sectionDivider}>
+                  <Text style={styles.sectionTitle}>Personal Information</Text>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Date of Birth</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={dateOfBirth}
+                    onChangeText={setDateOfBirth}
+                    placeholder="YYYY-MM-DD (e.g., 1990-01-15)"
+                    placeholderTextColor="#9CA3AF"
+                    autoCapitalize="none"
+                    keyboardType="numbers-and-punctuation"
+                  />
+                  <Text style={styles.helperText}>
+                    Optional: Enter in YYYY-MM-DD format
+                  </Text>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Gender</Text>
+                  <View style={styles.genderContainer}>
+                    {["Male", "Female", "Other", "Prefer not to say"].map(
+                      (option) => (
+                        <TouchableOpacity
+                          key={option}
+                          style={[
+                            styles.genderOption,
+                            gender === option && styles.genderOptionSelected,
+                          ]}
+                          onPress={() => setGender(option)}
+                        >
+                          <Text
+                            style={[
+                              styles.genderOptionText,
+                              gender === option &&
+                                styles.genderOptionTextSelected,
+                            ]}
+                          >
+                            {option}
+                          </Text>
+                        </TouchableOpacity>
+                      ),
+                    )}
+                  </View>
+                </View>
+
+                <View style={styles.sectionDivider}>
+                  <Text style={styles.sectionTitle}>Address</Text>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Street Address</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={addressStreet}
+                    onChangeText={setAddressStreet}
+                    placeholder="123 Main Street"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+
+                <View style={styles.row}>
+                  <View style={[styles.inputGroup, styles.halfWidth]}>
+                    <Text style={styles.label}>City</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={addressCity}
+                      onChangeText={setAddressCity}
+                      placeholder="City"
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                  <View style={[styles.inputGroup, styles.halfWidth]}>
+                    <Text style={styles.label}>State/Province</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={addressState}
+                      onChangeText={setAddressState}
+                      placeholder="State"
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.row}>
+                  <View style={[styles.inputGroup, styles.halfWidth]}>
+                    <Text style={styles.label}>ZIP/Postal Code</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={addressZip}
+                      onChangeText={setAddressZip}
+                      placeholder="12345"
+                      placeholderTextColor="#9CA3AF"
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                  <View style={[styles.inputGroup, styles.halfWidth]}>
+                    <Text style={styles.label}>Country</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={addressCountry}
+                      onChangeText={setAddressCountry}
+                      placeholder="Country"
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.infoBox}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={20}
+                    color="#3B82F6"
+                  />
+                  <Text style={styles.infoText}>
+                    Your personal information is stored securely and will only
+                    be used to improve your experience.
+                  </Text>
+                </View>
+              </View>
+            </ScrollView>
+
+            {/* Save Button */}
+            <View style={styles.bottomBar}>
+              <TouchableOpacity
+                style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+                onPress={handleSave}
+                disabled={saving}
               >
-                {uploading ? (
-                  <ActivityIndicator size="small" color="#3B82F6" />
+                {saving ? (
+                  <ActivityIndicator color="#fff" />
                 ) : (
                   <>
-                    <Ionicons name="camera" size={18} color="#3B82F6" />
-                    <Text style={styles.changePhotoText}>Change Photo</Text>
+                    <Ionicons name="checkmark" size={20} color="#fff" />
+                    <Text style={styles.saveButtonText}>Save Changes</Text>
                   </>
                 )}
               </TouchableOpacity>
             </View>
+          </>
+        )}
 
-            {/* Form */}
-            <View style={styles.form}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Full Name *</Text>
-                <TextInput
-                  style={styles.input}
-                  value={fullName}
-                  onChangeText={setFullName}
-                  placeholder="Enter your full name"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={[styles.input, styles.inputDisabled]}
-                  value={user?.email || ""}
-                  editable={false}
-                  placeholderTextColor="#9CA3AF"
-                />
-                <Text style={styles.helperText}>Email cannot be changed</Text>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Phone Number</Text>
-                <TextInput
-                  style={styles.input}
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder="Enter your phone number"
-                  keyboardType="phone-pad"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={styles.sectionDivider}>
-                <Text style={styles.sectionTitle}>About</Text>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Bio</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  value={bio}
-                  onChangeText={setBio}
-                  placeholder="Tell us about yourself"
-                  placeholderTextColor="#9CA3AF"
-                  multiline
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Company</Text>
-                <TextInput
-                  style={styles.input}
-                  value={company}
-                  onChangeText={setCompany}
-                  placeholder="Your company name"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Job Title</Text>
-                <TextInput
-                  style={styles.input}
-                  value={jobTitle}
-                  onChangeText={setJobTitle}
-                  placeholder="Your job title"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={styles.sectionDivider}>
-                <Text style={styles.sectionTitle}>Personal Information</Text>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Date of Birth</Text>
-                <TextInput
-                  style={styles.input}
-                  value={dateOfBirth}
-                  onChangeText={setDateOfBirth}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor="#9CA3AF"
-                />
-                <Text style={styles.helperText}>
-                  Format: YYYY-MM-DD (e.g., 1990-01-15)
-                </Text>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Gender</Text>
-                <View style={styles.genderContainer}>
-                  {["Male", "Female", "Other", "Prefer not to say"].map(
-                    (option) => (
-                      <TouchableOpacity
-                        key={option}
-                        style={[
-                          styles.genderOption,
-                          gender === option && styles.genderOptionSelected,
-                        ]}
-                        onPress={() => setGender(option)}
-                      >
-                        <Text
-                          style={[
-                            styles.genderOptionText,
-                            gender === option &&
-                              styles.genderOptionTextSelected,
-                          ]}
-                        >
-                          {option}
-                        </Text>
-                      </TouchableOpacity>
-                    ),
-                  )}
-                </View>
-              </View>
-
-              <View style={styles.sectionDivider}>
-                <Text style={styles.sectionTitle}>Address</Text>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Street Address</Text>
-                <TextInput
-                  style={styles.input}
-                  value={addressStreet}
-                  onChangeText={setAddressStreet}
-                  placeholder="123 Main Street"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={styles.row}>
-                <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.label}>City</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={addressCity}
-                    onChangeText={setAddressCity}
-                    placeholder="City"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-                <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.label}>State/Province</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={addressState}
-                    onChangeText={setAddressState}
-                    placeholder="State"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-
-              <View style={styles.row}>
-                <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.label}>ZIP/Postal Code</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={addressZip}
-                    onChangeText={setAddressZip}
-                    placeholder="12345"
-                    placeholderTextColor="#9CA3AF"
-                    keyboardType="number-pad"
-                  />
-                </View>
-                <View style={[styles.inputGroup, styles.halfWidth]}>
-                  <Text style={styles.label}>Country</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={addressCountry}
-                    onChangeText={setAddressCountry}
-                    placeholder="Country"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-
-              <View style={styles.infoBox}>
-                <Ionicons
-                  name="information-circle-outline"
-                  size={20}
-                  color="#3B82F6"
-                />
-                <Text style={styles.infoText}>
-                  Your personal information is stored securely and will only be
-                  used to improve your experience.
-                </Text>
-              </View>
-            </View>
-          </ScrollView>
-
-          {/* Save Button */}
-          <View style={styles.bottomBar}>
-            <TouchableOpacity
-              style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-              onPress={handleSave}
-              disabled={saving}
-            >
-              {saving ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <>
-                  <Ionicons name="checkmark" size={20} color="#fff" />
-                  <Text style={styles.saveButtonText}>Save Changes</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
-
-      {/* Avatar Preview Modal */}
-      <Modal
-        visible={showAvatarModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowAvatarModal(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalContainer}
-          activeOpacity={1}
-          onPress={() => setShowAvatarModal(false)}
+        {/* Avatar Preview Modal */}
+        <Modal
+          visible={showAvatarModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowAvatarModal(false)}
         >
-          <View style={styles.modalHeader}>
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setShowAvatarModal(false)}
-            >
-              <Ionicons name="close" size={28} color="#fff" />
-            </TouchableOpacity>
-          </View>
-          {avatarUri && (
-            <Image
-              source={{ uri: avatarUri }}
-              style={styles.modalImage}
-              resizeMode="contain"
-            />
-          )}
-        </TouchableOpacity>
-      </Modal>
+          <TouchableOpacity
+            style={styles.modalContainer}
+            activeOpacity={1}
+            onPress={() => setShowAvatarModal(false)}
+          >
+            <View style={styles.modalHeader}>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowAvatarModal(false)}
+              >
+                <Ionicons name="close" size={28} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            {avatarUri && (
+              <Image
+                source={{ uri: avatarUri }}
+                style={styles.modalImage}
+                resizeMode="contain"
+              />
+            )}
+          </TouchableOpacity>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

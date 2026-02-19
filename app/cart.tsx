@@ -127,7 +127,7 @@ export default function CartScreen() {
           {items.map((item) => (
             <View key={item.product.id} style={styles.cartItem}>
               <View style={styles.itemImageContainer}>
-                <Text style={styles.itemEmoji}>🎨</Text>
+                <Ionicons name="color-palette" size={32} color="#9CA3AF" />
               </View>
               <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.product.title}</Text>
@@ -316,9 +316,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
-  },
-  itemEmoji: {
-    fontSize: 32,
   },
   itemDetails: {
     flex: 1,

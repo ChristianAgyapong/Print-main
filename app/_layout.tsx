@@ -33,10 +33,20 @@ function RootLayoutNav() {
     ].includes(segments[0]);
     const onLandingPage = !segments[0];
 
+    console.log("🧭 Navigation guard:", {
+      hasUser: !!user,
+      segments: segments.join("/"),
+      onLandingPage,
+      inTabsGroup,
+      inAuthGroup,
+      inProtectedRoute,
+    });
+
     if (user) {
       // User is signed in
       if (onLandingPage || inAuthGroup) {
         // User is signed in but on landing/auth page, redirect to tabs
+        console.log("✅ User signed in, redirecting to tabs");
         router.replace("/(tabs)");
       }
       // Allow navigation within protected routes and tabs
@@ -44,6 +54,7 @@ function RootLayoutNav() {
       // User is not signed in
       if (inTabsGroup || inProtectedRoute) {
         // User is not signed in but trying to access protected routes, redirect to landing
+        console.log("❌ User not signed in, redirecting to landing");
         router.replace("/");
       }
     }

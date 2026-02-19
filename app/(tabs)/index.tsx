@@ -1,34 +1,47 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, RefreshControl } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useState, useEffect, useCallback } from 'react';
-import { Product, productsService, Profile, profileService } from '@/lib/database-service';
-import { useCart } from '@/contexts/CartContext';
-import { useFocusEffect } from '@react-navigation/native';
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import {
+    Product,
+    productsService,
+    profileService
+} from "@/lib/database-service";
+import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Dimensions,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const PRODUCT_CARD_WIDTH = (width - 42) / 2;
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const { addItem } = useCart();
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('All Products');
+  const [selectedCategory, setSelectedCategory] = useState("All Products");
   const [profileComplete, setProfileComplete] = useState(true); // Default true to hide banner until we check
 
   const categories = [
-    { id: '1', name: 'All Products', icon: 'apps' },
-    { id: '2', name: 'Commercial', icon: 'briefcase' },
-    { id: '3', name: 'Stationery', icon: 'pencil' },
-    { id: '4', name: 'Packaging', icon: 'cube' },
-    { id: '5', name: 'Large Format', icon: 'expand' },
-    { id: '6', name: 'Digital', icon: 'desktop' },
+    { id: "1", name: "All Products", icon: "apps" },
+    { id: "2", name: "Commercial", icon: "briefcase" },
+    { id: "3", name: "Stationery", icon: "pencil" },
+    { id: "4", name: "Packaging", icon: "cube" },
+    { id: "5", name: "Large Format", icon: "expand" },
+    { id: "6", name: "Digital", icon: "desktop" },
   ];
 
   useEffect(() => {
@@ -43,7 +56,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       checkProfileCompletion();
-    }, [user])
+    }, [user]),
   );
 
   const checkProfileCompletion = async () => {
@@ -54,7 +67,7 @@ export default function HomeScreen() {
 
     try {
       const profile = await profileService.get(user.id);
-      
+
       // Check if profile has key fields filled
       if (!profile) {
         setProfileComplete(false);
@@ -63,21 +76,26 @@ export default function HomeScreen() {
 
       // Consider profile complete if at least these fields are filled
       const hasBasicInfo = profile.full_name && profile.phone;
-      const hasAddress = profile.address_street && profile.address_city && profile.address_country;
-      const hasAdditionalInfo = profile.bio || profile.company || profile.job_title;
-      
+      const hasAddress =
+        profile.address_street &&
+        profile.address_city &&
+        profile.address_country;
+      const hasAdditionalInfo =
+        profile.bio || profile.company || profile.job_title;
+
       // Profile is complete if they have basic info and either address or additional info
       const isComplete = hasBasicInfo && (hasAddress || hasAdditionalInfo);
       setProfileComplete(isComplete);
     } catch (error) {
-      console.error('Error checking profile completion:', error);
+      console.error("Error checking profile completion:", error);
       setProfileComplete(true); // Hide banner on error
     }
   };
 
   const loadProducts = async () => {
     setLoading(true);
-    const category = selectedCategory === 'All Products' ? undefined : selectedCategory;
+    const category =
+      selectedCategory === "All Products" ? undefined : selectedCategory;
     const data = await productsService.getAll(category);
     setProducts(data);
     setLoading(false);
@@ -91,18 +109,29 @@ export default function HomeScreen() {
 
   const getProductGradient = (category: string | null): string[] => {
     const gradients: { [key: string]: string[] } = {
-      'Stationery': ['#1E40AF', '#1E3A8A'],
-      'Large Format': ['#059669', '#047857'],
-      'Commercial': ['#8B5CF6', '#7C3AED'],
-      'Digital': ['#DB2777', '#BE185D'],
-      'Packaging': ['#F59E0B', '#D97706'],
+      Stationery: ["#1E40AF", "#1E3A8A"],
+      "Large Format": ["#059669", "#047857"],
+      Commercial: ["#8B5CF6", "#7C3AED"],
+      Digital: ["#DB2777", "#BE185D"],
+      Packaging: ["#F59E0B", "#D97706"],
     };
-    return gradients[category || 'Commercial'] || ['#3B82F6', '#2563EB'];
+    return gradients[category || "Commercial"] || ["#3B82F6", "#2563EB"];
+  };
+
+  const getProductIcon = (category: string | null): string => {
+    const icons: { [key: string]: string } = {
+      Stationery: "card",
+      "Large Format": "flag",
+      Commercial: "megaphone",
+      Digital: "image",
+      Packaging: "cube",
+    };
+    return icons[category || ""] || "color-palette";
   };
 
   return (
-    <ScrollView 
-      style={styles.container} 
+    <ScrollView
+      style={styles.container}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -111,20 +140,26 @@ export default function HomeScreen() {
       {/* Hero Section */}
       <View style={styles.heroSection}>
         <LinearGradient
-          colors={['#F9FAFB', '#E5E7EB']}
+          colors={["#F9FAFB", "#E5E7EB"]}
           style={styles.heroGradient}
         >
           <View style={styles.heroContent}>
             <Text style={styles.heroTitle}>PrintCraft Shop</Text>
             <Text style={styles.heroSubtitle}>
-              Professional printing services for business, marketing, branding, and more
+              Professional printing services for business, marketing, branding,
+              and more
             </Text>
-            
+
             {/* Profile Completion Banner */}
             {user && !profileComplete && (
-              <TouchableOpacity style={styles.completionBanner} onPress={() => router.push('/(tabs)/profile')}>
+              <TouchableOpacity
+                style={styles.completionBanner}
+                onPress={() => router.push("/(tabs)/profile")}
+              >
                 <Ionicons name="star" size={18} color="#F59E0B" />
-                <Text style={styles.completionText}>Complete your profile to get personalized recommendations</Text>
+                <Text style={styles.completionText}>
+                  Complete your profile to get personalized recommendations
+                </Text>
                 <Ionicons name="arrow-forward" size={16} color="#6B7280" />
               </TouchableOpacity>
             )}
@@ -145,20 +180,28 @@ export default function HomeScreen() {
               key={category.id}
               style={[
                 styles.categoryButton,
-                selectedCategory === category.name && styles.categoryButtonActive
+                selectedCategory === category.name &&
+                  styles.categoryButtonActive,
               ]}
               activeOpacity={0.7}
               onPress={() => setSelectedCategory(category.name)}
             >
-              <Ionicons 
-                name={category.icon as any} 
-                size={20} 
-                color={selectedCategory === category.name ? '#3B82F6' : '#6B7280'} 
+              <Ionicons
+                name={category.icon as any}
+                size={20}
+                color={
+                  selectedCategory === category.name ? "#3B82F6" : "#6B7280"
+                }
               />
-              <Text style={[
-                styles.categoryButtonText,
-                selectedCategory === category.name && styles.categoryButtonTextActive
-              ]}>{category.name}</Text>
+              <Text
+                style={[
+                  styles.categoryButtonText,
+                  selectedCategory === category.name &&
+                    styles.categoryButtonTextActive,
+                ]}
+              >
+                {category.name}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -195,21 +238,25 @@ export default function HomeScreen() {
                   <View style={styles.deliveryBadge}>
                     <Text style={styles.deliveryText}>3-5 days</Text>
                   </View>
-                  <Text style={styles.productEmoji}>
-                    {product.category === 'Stationery' ? '💳' : 
-                     product.category === 'Large Format' ? '🏳️' :
-                     product.category === 'Commercial' ? '🪧' :
-                     product.category === 'Digital' ? '🖼️' :
-                     product.category === 'Packaging' ? '📦' : '🎨'}
-                  </Text>
+                  <Ionicons
+                    name={getProductIcon(product.category) as any}
+                    size={52}
+                    color="rgba(255,255,255,0.9)"
+                  />
                 </LinearGradient>
-                
+
                 <View style={styles.productInfo}>
-                  <Text style={styles.productCategory}>{product.category?.toUpperCase() || 'PRODUCT'}</Text>
-                  <Text style={styles.productTitle} numberOfLines={2}>{product.title}</Text>
+                  <Text style={styles.productCategory}>
+                    {product.category?.toUpperCase() || "PRODUCT"}
+                  </Text>
+                  <Text style={styles.productTitle} numberOfLines={2}>
+                    {product.title}
+                  </Text>
                   <View style={styles.productFooter}>
-                    <Text style={styles.productPrice}>€{product.price.toFixed(2)}</Text>
-                    <TouchableOpacity 
+                    <Text style={styles.productPrice}>
+                      €{product.price.toFixed(2)}
+                    </Text>
+                    <TouchableOpacity
                       style={styles.addButton}
                       onPress={(e) => {
                         e.stopPropagation();
@@ -228,7 +275,10 @@ export default function HomeScreen() {
 
       {/* Quick Actions Footer */}
       <View style={styles.footerSection}>
-        <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/(tabs)/orders')}>
+        <TouchableOpacity
+          style={styles.footerButton}
+          onPress={() => router.push("/(tabs)/orders")}
+        >
           <Ionicons name="add-circle-outline" size={24} color="#3B82F6" />
           <Text style={styles.footerButtonText}>Start Custom Order</Text>
         </TouchableOpacity>
@@ -246,10 +296,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   heroSection: {
-    width: '100%',
+    width: "100%",
   },
   heroGradient: {
     paddingTop: 40,
@@ -257,51 +307,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   heroContent: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   heroTitle: {
     fontSize: 36,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#1F2937",
+    textAlign: "center",
     marginBottom: 12,
     letterSpacing: -0.5,
   },
   heroSubtitle: {
     fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: "#6B7280",
+    textAlign: "center",
     lineHeight: 24,
     paddingHorizontal: 20,
     marginBottom: 20,
   },
   completionBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFBEB',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFBEB",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
     gap: 8,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: "#FDE68A",
   },
   completionText: {
     flex: 1,
     fontSize: 13,
-    color: '#92400E',
-    fontWeight: '500',
+    color: "#92400E",
+    fontWeight: "500",
   },
   categoriesSection: {
     paddingVertical: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   categoryLabel: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#9CA3AF',
+    fontWeight: "700",
+    color: "#9CA3AF",
     letterSpacing: 1.5,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 16,
   },
   categoriesScroll: {
@@ -309,106 +359,103 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   categoryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: "#F9FAFB",
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
     gap: 8,
   },
   categoryButtonActive: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#3B82F6',
+    backgroundColor: "#EFF6FF",
+    borderColor: "#3B82F6",
   },
   categoryButtonText: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#6B7280',
+    fontWeight: "600",
+    color: "#6B7280",
   },
   categoryButtonTextActive: {
-    color: '#3B82F6',
+    color: "#3B82F6",
   },
   productsSection: {
     paddingHorizontal: 16,
     paddingBottom: 24,
   },
   productsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   productCard: {
     width: PRODUCT_CARD_WIDTH,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   productImageContainer: {
-    width: '100%',
+    width: "100%",
     height: 160,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
   },
   deliveryBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 12,
     left: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 6,
   },
   deliveryText: {
     fontSize: 11,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  productEmoji: {
-    fontSize: 48,
+    fontWeight: "600",
+    color: "#1F2937",
   },
   productInfo: {
     padding: 14,
   },
   productCategory: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#9CA3AF',
+    fontWeight: "700",
+    color: "#9CA3AF",
     letterSpacing: 0.5,
     marginBottom: 4,
   },
   productTitle: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#1F2937',
+    fontWeight: "700",
+    color: "#1F2937",
     marginBottom: 8,
   },
   productFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   productPrice: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#3B82F6',
+    fontWeight: "bold",
+    color: "#3B82F6",
   },
   addButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#EFF6FF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#EFF6FF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   footerSection: {
     paddingHorizontal: 20,
@@ -416,53 +463,53 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   footerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F9FAFB',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F9FAFB",
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 12,
     gap: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
   },
   footerButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
   },
   loadingContainer: {
     paddingVertical: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   emptyContainer: {
     paddingVertical: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6B7280',
-    fontWeight: '500',
+    color: "#6B7280",
+    fontWeight: "500",
   },
   retryButton: {
     marginTop: 16,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    backgroundColor: '#3B82F6',
+    backgroundColor: "#3B82F6",
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

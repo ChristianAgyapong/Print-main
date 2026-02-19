@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Session, User } from '@supabase/supabase-js';
-import * as WebBrowser from 'expo-web-browser';
-import * as Linking from 'expo-linking';
-import { Platform } from 'react-native';
-import { profileService } from '@/lib/database-service';
+import { profileService } from "@/lib/database-service";
+import { supabase } from "@/lib/supabase";
+import { Session, User } from "@supabase/supabase-js";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Platform } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -12,7 +12,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName?: string,
+  ) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<{ error: any }>;
@@ -36,26 +40,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("🔐 Auth state changed:", event, "Has session:", !!session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // Create profile for new users (sign up or OAuth)
-      if (event === 'SIGNED_IN' && session?.user) {
+      // Create profile only for new users (initial sign up)
+      if (
+        (event === "INITIAL_SESSION" || event === "SIGNED_IN") &&
+        session?.user
+      ) {
         const userId = session.user.id;
-        const fullName = session.user.user_metadata?.full_name || 
-                        session.user.user_metadata?.name || 
-                        session.user.email?.split('@')[0] || 
-                        'User';
+        const fullName =
+          session.user.user_metadata?.full_name ||
+          session.user.user_metadata?.name ||
+          session.user.email?.split("@")[0] ||
+          "User";
 
         // Check if profile exists
         const existingProfile = await profileService.get(userId);
-        
+
         if (!existingProfile) {
-          console.log('📝 Creating profile for new user:', userId);
-          await profileService.create(userId, fullName);
-          console.log('✅ Profile created successfully');
+          console.log("📝 Creating profile for user:", userId);
+          const created = await profileService.create(userId, fullName);
+          if (created) {
+            console.log("✅ Profile created successfully");
+          } else {
+            console.log("ℹ️ Profile already exists or creation skipped");
+          }
         }
       }
     });
@@ -75,19 +90,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
       });
 
-      // Create profile in profiles table after successful signup
-      if (!error && data.user) {
-        const userId = data.user.id;
-        const name = fullName || data.user.email?.split('@')[0] || 'User';
-        
-        console.log('📝 Creating profile for user:', userId);
-        await profileService.create(userId, name);
-        console.log('✅ Profile created in database');
-      }
-
+      // Profile creation is handled by auth state listener
       return { error };
     } catch (error) {
-      console.error('❌ Error in signUp:', error);
+      console.error("❌ Error in signUp:", error);
       return { error };
     }
   };
@@ -112,13 +118,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Create redirect URL based on environment
       const redirectUrl = Platform.select({
-        default: Linking.createURL('auth/callback'),
+        default: Linking.createURL("auth/callback"),
       });
-      
-      console.log('🔗 Redirect URL:', redirectUrl);
-      
+
+      console.log("🔗 Redirect URL:", redirectUrl);
+
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: redirectUrl,
           skipBrowserRedirect: true,
@@ -126,53 +132,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
-        console.error('❌ OAuth Error:', error);
+        console.error("❌ OAuth Error:", error);
         return { error };
       }
       if (!data?.url) {
-        console.error('❌ No OAuth URL returned');
-        return { error: new Error('No OAuth URL returned') };
+        console.error("❌ No OAuth URL returned");
+        return { error: new Error("No OAuth URL returned") };
       }
 
-      console.log('🌐 Opening OAuth URL...');
+      console.log("🌐 Opening OAuth URL...");
       const result = await WebBrowser.openAuthSessionAsync(
         data.url,
-        redirectUrl
+        redirectUrl,
       );
 
-      console.log('📱 Browser result:', result);
+      console.log("📱 Browser result:", result);
 
-      if (result.type === 'success') {
+      if (result.type === "success") {
         const { url } = result;
-        console.log('✅ Success URL:', url);
-        
+        console.log("✅ Success URL:", url);
+
         // Extract tokens from the URL hash or query parameters
         const urlObj = new URL(url);
         const hash = urlObj.hash.substring(1); // Remove '#'
         const hashParams = new URLSearchParams(hash);
         const queryParams = urlObj.searchParams;
-        
-        const access_token = hashParams.get('access_token') || queryParams.get('access_token');
-        const refresh_token = hashParams.get('refresh_token') || queryParams.get('refresh_token');
 
-        console.log('🔑 Tokens found:', { hasAccessToken: !!access_token, hasRefreshToken: !!refresh_token });
+        const access_token =
+          hashParams.get("access_token") || queryParams.get("access_token");
+        const refresh_token =
+          hashParams.get("refresh_token") || queryParams.get("refresh_token");
+
+        console.log("🔑 Tokens found:", {
+          hasAccessToken: !!access_token,
+          hasRefreshToken: !!refresh_token,
+        });
 
         if (access_token && refresh_token) {
           await supabase.auth.setSession({
             access_token,
             refresh_token,
           });
-          console.log('✅ Session set successfully');
+          console.log("✅ Session set successfully");
         } else {
-          console.error('❌ No tokens found in URL');
+          console.error("❌ No tokens found in URL");
         }
       } else {
-        console.log('⚠️ Browser result type:', result.type);
+        console.log("⚠️ Browser result type:", result.type);
       }
 
       return { error: null };
     } catch (error) {
-      console.error('❌ Exception in signInWithGoogle:', error);
+      console.error("❌ Exception in signInWithGoogle:", error);
       return { error };
     }
   };
@@ -181,11 +192,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Create redirect URL based on environment
       const redirectUrl = Platform.select({
-        default: Linking.createURL('auth/callback'),
+        default: Linking.createURL("auth/callback"),
       });
-      
+
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
+        provider: "apple",
         options: {
           redirectTo: redirectUrl,
           skipBrowserRedirect: true,
@@ -193,23 +204,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) return { error };
-      if (!data?.url) return { error: new Error('No OAuth URL returned') };
+      if (!data?.url) return { error: new Error("No OAuth URL returned") };
 
       const result = await WebBrowser.openAuthSessionAsync(
         data.url,
-        redirectUrl
+        redirectUrl,
       );
 
-      if (result.type === 'success') {
+      if (result.type === "success") {
         const { url } = result;
         // Extract tokens from the URL hash or query parameters
         const urlObj = new URL(url);
         const hash = urlObj.hash.substring(1); // Remove '#'
         const hashParams = new URLSearchParams(hash);
         const queryParams = urlObj.searchParams;
-        
-        const access_token = hashParams.get('access_token') || queryParams.get('access_token');
-        const refresh_token = hashParams.get('refresh_token') || queryParams.get('refresh_token');
+
+        const access_token =
+          hashParams.get("access_token") || queryParams.get("access_token");
+        const refresh_token =
+          hashParams.get("refresh_token") || queryParams.get("refresh_token");
 
         if (access_token && refresh_token) {
           await supabase.auth.setSession({
@@ -227,7 +240,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const resetPassword = async (email: string) => {
     try {
-      const redirectUrl = Linking.createURL('reset-password');
+      const redirectUrl = Linking.createURL("reset-password");
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
@@ -255,7 +268,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

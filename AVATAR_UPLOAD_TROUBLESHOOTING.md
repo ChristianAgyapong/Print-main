@@ -11,11 +11,13 @@ If your avatar image uploads but doesn't appear in the profile, follow these ste
 The `avatars` bucket must be created in Supabase Storage.
 
 ### Check if bucket exists:
+
 1. Go to **Supabase Dashboard** → **Storage**
 2. Look for a bucket named `avatars`
 3. If it doesn't exist, **run the SQL setup script**
 
 ### Create the bucket:
+
 Run this SQL in **Supabase SQL Editor**:
 
 ```sql
@@ -28,6 +30,7 @@ ON CONFLICT (id) DO NOTHING;
 ```
 
 ### Create Storage Policies:
+
 After creating the bucket, run these policies:
 
 ```sql
@@ -72,6 +75,7 @@ USING (bucket_id = 'avatars');
 Open your development console and look for these logs:
 
 ### Expected successful flow:
+
 ```
 Avatar uploaded successfully. URL: https://[your-project].supabase.co/storage/v1/object/public/avatars/...
 Updating profile with: { avatar_url: "https://...", ... }
@@ -80,6 +84,7 @@ Profile updated with avatar URL: https://...
 ```
 
 ### Common errors:
+
 - **"Bucket not found"** → Run Step 1
 - **"Row level security policy violation"** → Check policies from Step 1
 - **"Failed to upload"** → Check file size (max 5MB) and format (JPG, PNG, GIF)
@@ -94,6 +99,7 @@ Profile updated with avatar URL: https://...
 4. It should contain a full URL like: `https://[project-id].supabase.co/storage/v1/object/public/avatars/[user-id]/avatar-[timestamp].jpg`
 
 ### If avatar_url is empty or null:
+
 - The upload succeeded but database update failed
 - Check console logs for "Error updating profile"
 - Verify RLS policies on profiles table allow updates
@@ -122,6 +128,7 @@ If the image was uploaded but shows old image:
    - Close and reopen the app
 
 2. **Clear React Native cache:**
+
    ```bash
    npm start -- --clear
    ```
@@ -153,12 +160,15 @@ Try uploading with these steps to isolate the issue:
 ## ✅ Step 7: Verify Permissions
 
 ### iOS/Android Camera/Gallery Permissions:
+
 The app requests permissions automatically, but if denied:
 
 **iOS:**
+
 - Settings → Your App → Photos → Select "Selected Photos" or "All Photos"
 
 **Android:**
+
 - Settings → Apps → Your App → Permissions → Photos → Allow
 
 ---
@@ -166,29 +176,37 @@ The app requests permissions automatically, but if denied:
 ## 🐛 Common Issues & Solutions
 
 ### Issue: "Success" message but no avatar
+
 **Cause:** Upload succeeded but database update failed  
-**Solution:** 
+**Solution:**
+
 - Check profiles table RLS policies
 - Verify avatar_url column exists in profiles table
 - Check console logs for database errors
 
 ### Issue: Avatar shows old image
+
 **Cause:** Image caching  
 **Solution:**
+
 - Pull to refresh on profile screen
 - Cache busting is now enabled with `?t=timestamp`
 - Restart app if needed
 
 ### Issue: "Upload Error" alert
+
 **Cause:** Storage bucket doesn't exist or no upload permissions  
 **Solution:**
+
 - Complete Step 1 above
 - Verify bucket exists and is public
 - Check storage policies
 
 ### Issue: Image too large
+
 **Cause:** File exceeds 5MB limit  
 **Solution:**
+
 - Use a smaller image
 - The app crops to square which may reduce size
 - Try a different image format (JPG is usually smaller than PNG)
@@ -214,12 +232,14 @@ The app requests permissions automatically, but if denied:
 ## 🔧 Quick Fix Commands
 
 ### Restart with fresh cache:
+
 ```bash
 cd print-app
 npm start -- --clear
 ```
 
 ### Check Supabase connection:
+
 ```bash
 # In your app console
 npm start
@@ -260,6 +280,7 @@ When working correctly:
 ## 🎯 Success Indicators
 
 You'll know it's working when:
+
 - ✅ Console logs show successful upload and update
 - ✅ Database avatar_url column has full URL
 - ✅ Avatar appears on Profile tab

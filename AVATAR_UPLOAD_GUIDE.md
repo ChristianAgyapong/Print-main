@@ -1,23 +1,27 @@
 # Profile Avatar Upload Feature 🖼️
 
 ## Overview
+
 Users can now upload and update their profile pictures, which are stored securely in Supabase Storage.
 
 ## Features Implemented
 
 ### 1. **Avatar Upload**
+
 - Users can select images from their device gallery
 - Images are cropped to 1:1 aspect ratio (square)
 - Image quality is optimized to 80% to reduce file size
 - Maximum file size: 5MB
 
 ### 2. **Storage Integration**
+
 - Images stored in Supabase Storage bucket: `avatars`
 - Organized by user: `avatars/{user_id}/avatar-{timestamp}.{extension}`
 - Old avatars automatically deleted when uploading new ones
 - Public bucket for easy access
 
 ### 3. **Avatar Display**
+
 - Profile Tab: Shows avatar with edit button overlay
 - Edit Profile: Shows current avatar with "Change Photo" button
 - View Profile: Displays avatar in header section
@@ -26,6 +30,7 @@ Users can now upload and update their profile pictures, which are stored securel
 ## Setup Instructions
 
 ### Step 1: Create Storage Bucket
+
 1. Go to your Supabase Dashboard
 2. Navigate to **Storage** section
 3. Run the SQL in `AVATAR_STORAGE_SETUP.sql` in the SQL Editor
@@ -34,6 +39,7 @@ Users can now upload and update their profile pictures, which are stored securel
    - Storage policies for upload/update/delete/view
 
 ### Step 2: Test the Feature
+
 1. Sign in to the app
 2. Go to Profile tab
 3. Tap the camera icon or tap your avatar
@@ -47,6 +53,7 @@ Users can now upload and update their profile pictures, which are stored securel
 ### Files Modified
 
 #### 1. `lib/storage-service.ts`
+
 ```typescript
 - Added AVATARS_BUCKET constant
 - Added MAX_AVATAR_SIZE (5MB) limit
@@ -55,6 +62,7 @@ Users can now upload and update their profile pictures, which are stored securel
 ```
 
 #### 2. `app/edit-profile.tsx`
+
 ```typescript
 - Added expo-image-picker integration
 - Added avatarUri state
@@ -65,6 +73,7 @@ Users can now upload and update their profile pictures, which are stored securel
 ```
 
 #### 3. `app/view-profile.tsx`
+
 ```typescript
 - Added Image component import
 - Updated avatar section to display image
@@ -72,6 +81,7 @@ Users can now upload and update their profile pictures, which are stored securel
 ```
 
 #### 4. `app/(tabs)/profile.tsx`
+
 ```typescript
 - Added Image component import
 - Updated avatar section to display image
@@ -81,6 +91,7 @@ Users can now upload and update their profile pictures, which are stored securel
 ### API Functions
 
 #### `storageService.uploadAvatar()`
+
 ```typescript
 async uploadAvatar(
   imageUri: string,      // Local image URI from picker
@@ -92,6 +103,7 @@ async uploadAvatar(
 **Returns:** Public URL of uploaded avatar or null on error
 
 **Features:**
+
 - Validates file size (max 5MB)
 - Validates file type (images only)
 - Deletes old avatar if provided
@@ -99,6 +111,7 @@ async uploadAvatar(
 - Returns public URL for immediate use
 
 #### `storageService.deleteAvatar()`
+
 ```typescript
 async deleteAvatar(
   avatarUrl: string,  // Full URL of avatar to delete
@@ -109,12 +122,15 @@ async deleteAvatar(
 **Returns:** `true` if deleted successfully, `false` otherwise
 
 ### Database Schema
+
 The `profiles` table already includes:
+
 ```sql
 avatar_url TEXT -- Stores the public URL of the user's avatar
 ```
 
 ### Storage Structure
+
 ```
 avatars/
 └── {user_id}/
@@ -123,6 +139,7 @@ avatars/
 ```
 
 ### Permissions
+
 ```sql
 - authenticated users can INSERT to their folder
 - authenticated users can UPDATE their folder
@@ -133,6 +150,7 @@ avatars/
 ## User Flow
 
 1. **First Time Upload:**
+
    ```
    User taps "Change Photo"
    → Permission request (if needed)
@@ -147,6 +165,7 @@ avatars/
    ```
 
 2. **Updating Avatar:**
+
    ```
    Current avatar displayed
    → User taps "Change Photo"
@@ -167,22 +186,27 @@ avatars/
 ## Error Handling
 
 ### File Size Exceeded
+
 ```
 "Image size exceeds 5MB limit"
 ```
 
 ### Invalid File Type
+
 ```
 "Please select a valid image file"
 ```
 
 ### Upload Failed
+
 ```
 "Profile saved but avatar upload failed. Please try again."
 ```
+
 Note: Profile data still saves, only avatar fails
 
 ### Permission Denied
+
 ```
 "Please allow access to your photos to change your profile picture."
 ```
@@ -190,12 +214,14 @@ Note: Profile data still saves, only avatar fails
 ## Best Practices
 
 ### For Users:
+
 - Use square images for best results
 - Keep file size under 5MB
 - Use JPG/PNG format
 - Good lighting recommended
 
 ### For Developers:
+
 - Always validate file size before upload
 - Delete old avatars to save storage space
 - Handle errors gracefully (partial success)
@@ -205,12 +231,14 @@ Note: Profile data still saves, only avatar fails
 ## Troubleshooting
 
 ### Avatar Not Showing
+
 1. Check if `avatar_url` is saved in profiles table
 2. Verify storage bucket is public
 3. Check storage policies are correct
 4. Ensure URL is accessible in browser
 
 ### Upload Fails
+
 1. Check Supabase storage quota
 2. Verify bucket exists and is configured
 3. Check storage policies
@@ -218,6 +246,7 @@ Note: Profile data still saves, only avatar fails
 5. Check file size and type
 
 ### Permission Denied
+
 1. User needs to grant media library access
 2. Check app permissions in device settings
 3. Request permission before opening picker
@@ -225,6 +254,7 @@ Note: Profile data still saves, only avatar fails
 ## Future Enhancements
 
 ### Potential Features:
+
 - [ ] Image cropping in-app
 - [ ] Multiple image filters
 - [ ] Avatar templates/stickers
@@ -238,6 +268,7 @@ Note: Profile data still saves, only avatar fails
 ## Security Considerations
 
 ✅ **Implemented:**
+
 - User-based folder structure
 - Authenticated upload only
 - File size validation
@@ -246,6 +277,7 @@ Note: Profile data still saves, only avatar fails
 - RLS policies on storage
 
 ⚠️ **Recommendations:**
+
 - Consider adding content moderation
 - Implement rate limiting for uploads
 - Add EXIF data stripping for privacy
@@ -264,6 +296,7 @@ Note: Profile data still saves, only avatar fails
 ## Support
 
 If you encounter issues:
+
 1. Check Supabase Dashboard → Storage → avatars bucket
 2. Verify SQL policies in Storage → Policies
 3. Check app logs for error messages
