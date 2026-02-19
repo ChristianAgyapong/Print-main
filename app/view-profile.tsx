@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
+﻿import { useAuth } from "@/contexts/AuthContext";
 import { Profile, profileService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -95,7 +95,7 @@ export default function ViewProfileScreen() {
           >
             <View style={styles.infoLeft}>
               <View style={styles.iconContainer}>
-                <Ionicons name={item.icon as any} size={20} color="#3B82F6" />
+                <Ionicons name={item.icon as any} size={20} color="#FF006E" />
               </View>
               <Text style={styles.infoLabel}>{item.label}</Text>
             </View>
@@ -111,20 +111,20 @@ export default function ViewProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Personal Information</Text>
         <TouchableOpacity
           onPress={() => router.push("/edit-profile")}
           style={styles.editButton}
         >
-          <Ionicons name="create-outline" size={24} color="#3B82F6" />
+          <Ionicons name="create-outline" size={24} color="#FF006E" />
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3B82F6" />
+          <ActivityIndicator size="large" color="#FF006E" />
           <Text style={styles.loadingText}>Loading profile...</Text>
         </View>
       ) : (
@@ -202,7 +202,7 @@ export default function ViewProfileScreen() {
                         <Ionicons
                           name="business-outline"
                           size={20}
-                          color="#3B82F6"
+                          color="#FF006E"
                         />
                       </View>
                       <Text style={styles.infoLabel}>Company</Text>
@@ -217,7 +217,7 @@ export default function ViewProfileScreen() {
                         <Ionicons
                           name="briefcase-outline"
                           size={20}
-                          color="#3B82F6"
+                          color="#FF006E"
                         />
                       </View>
                       <Text style={styles.infoLabel}>Job Title</Text>
@@ -256,7 +256,7 @@ export default function ViewProfileScreen() {
                     <Ionicons
                       name="location-outline"
                       size={20}
-                      color="#3B82F6"
+                      color="#FF006E"
                     />
                   </View>
                   <View style={styles.addressText}>
@@ -301,7 +301,7 @@ export default function ViewProfileScreen() {
                 <Ionicons
                   name="information-circle-outline"
                   size={64}
-                  color="#D1D5DB"
+                  color="#B8B8D1"
                 />
                 <Text style={styles.emptyStateTitle}>
                   Complete Your Profile
@@ -360,16 +360,16 @@ export default function ViewProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFF8F0",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9F5F0",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "rgba(0, 0, 0, 0.08)",
   },
   backButton: {
     width: 40,
@@ -401,18 +401,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   profileHeader: {
-    backgroundColor: "#fff",
+    backgroundColor: "#F9F5F0",
     paddingVertical: 32,
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "rgba(0, 0, 0, 0.08)",
     marginBottom: 20,
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#FF006E",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
@@ -446,14 +446,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionContent: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.08)",
   },
   infoRow: {
     flexDirection: "row",
@@ -461,7 +463,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "rgba(0, 0, 0, 0.08)",
   },
   infoRowLast: {
     borderBottomWidth: 0,
@@ -479,7 +481,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 8,
-    backgroundColor: "#EFF6FF",
+    backgroundColor: "rgba(255, 0, 110, 0.15)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -491,7 +493,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 16,
-    color: "#1F2937",
+    color: "#FF006E",
     fontWeight: "600",
     textAlign: "right",
     maxWidth: "50%",
@@ -502,6 +504,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     lineHeight: 22,
     fontWeight: "400",
+    color: "#1F2937",
   },
   addressContainer: {
     flexDirection: "row",
@@ -536,7 +539,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   completeButton: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#FF006E",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -548,7 +551,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.95)",
+    backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -566,7 +569,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(0, 0, 0, 0.12)",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "flex-end",

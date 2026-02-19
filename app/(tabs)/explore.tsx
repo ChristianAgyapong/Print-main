@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+﻿import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
@@ -111,7 +111,7 @@ export default function ServicesScreen() {
                 ))}
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#9CA3AF" />
+            <Ionicons name="chevron-forward" size={24} color="#B8B8D1" />
           </TouchableOpacity>
         ))}
       </View>
@@ -123,7 +123,7 @@ export default function ServicesScreen() {
           {features.map((feature, index) => (
             <View key={index} style={styles.featureCard}>
               <View style={styles.featureIconContainer}>
-                <Ionicons name={feature.icon as any} size={28} color="#3B82F6" />
+                <Ionicons name={feature.icon as any} size={28} color="#FF006E" />
               </View>
               <Text style={styles.featureTitle}>{feature.title}</Text>
               <Text style={styles.featureDescription}>{feature.description}</Text>
@@ -135,7 +135,7 @@ export default function ServicesScreen() {
       {/* CTA Section */}
       <View style={styles.ctaSection}>
         <View style={styles.ctaCard}>
-          <Ionicons name="help-circle" size={48} color="#3B82F6" />
+          <Ionicons name="help-circle" size={48} color="#FF006E" />
           <Text style={styles.ctaTitle}>Need Help Choosing?</Text>
           <Text style={styles.ctaDescription}>
             Our print experts are here to help you find the perfect solution
@@ -147,7 +147,7 @@ export default function ServicesScreen() {
         </View>
       </View>
 
-      <View style={{ height: 120 }} />
+      <View style={{ height: 110 }} />
     </ScrollView>
   );
 }
@@ -155,13 +155,13 @@ export default function ServicesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFF8F0',
   },
   header: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#F9F5F0',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
   },
   headerTitle: {
     fontSize: 28,
@@ -185,16 +185,18 @@ const styles = StyleSheet.create({
   },
   serviceCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#FF006E',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   serviceIconContainer: {
     width: 64,
@@ -225,14 +227,14 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   serviceItemTag: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: 'rgba(255, 0, 110, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
   serviceItemText: {
     fontSize: 11,
-    color: '#4B5563',
+    color: '#FF006E',
     fontWeight: '600',
   },
   featuresGrid: {
@@ -242,22 +244,24 @@ const styles = StyleSheet.create({
   },
   featureCard: {
     width: (width - 52) / 2,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#FF006E',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   featureIconContainer: {
     width: 56,
     height: 56,
     borderRadius: 16,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(255, 0, 110, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -280,10 +284,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   ctaCard: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(255, 0, 110, 0.1)',
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 0, 110, 0.3)',
   },
   ctaTitle: {
     fontSize: 22,
@@ -303,7 +309,7 @@ const styles = StyleSheet.create({
   ctaButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#FF006E',
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 12,

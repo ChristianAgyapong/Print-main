@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, RefreshControl } from 'react-native';
+﻿import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
@@ -203,11 +203,11 @@ export default function OrdersScreen() {
                     <OrderStatusTracker status={order.status} />
                     <View style={styles.orderActions}>
                       <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="information-circle-outline" size={20} color="#3B82F6" />
+                        <Ionicons name="information-circle-outline" size={20} color="#FF006E" />
                         <Text style={styles.actionButtonText}>Track Order</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="chatbubble-outline" size={20} color="#10B981" />
+                        <Ionicons name="chatbubble-outline" size={20} color="#FF006E" />
                         <Text style={styles.actionButtonText}>Contact</Text>
                       </TouchableOpacity>
                     </View>
@@ -216,13 +216,13 @@ export default function OrdersScreen() {
 
                 <View style={styles.orderFooter}>
                   <TouchableOpacity style={styles.reorderButton}>
-                    <Ionicons name="repeat-outline" size={18} color="#3B82F6" />
+                    <Ionicons name="repeat-outline" size={18} color="#FF006E" />
                     <Text style={styles.reorderText}>Reorder</Text>
                   </TouchableOpacity>
                   <Ionicons 
                     name={expandedOrder === order.id ? "chevron-up" : "chevron-down"}
                     size={20} 
-                    color="#9CA3AF" 
+                    color="#B8B8D1" 
                   />
                 </View>
               </TouchableOpacity>
@@ -235,23 +235,23 @@ export default function OrdersScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="add-circle-outline" size={24} color="#3B82F6" />
+          <Ionicons name="add-circle-outline" size={24} color="#FF006E" />
           <Text style={styles.actionButtonText}>Upload Design</Text>
-          <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          <Ionicons name="chevron-forward" size={20} color="#B8B8D1" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="calculator-outline" size={24} color="#8B5CF6" />
+          <Ionicons name="calculator-outline" size={24} color="#FF006E" />
           <Text style={styles.actionButtonText}>Get Quote</Text>
-          <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          <Ionicons name="chevron-forward" size={20} color="#B8B8D1" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="help-circle-outline" size={24} color="#10B981" />
+          <Ionicons name="help-circle-outline" size={24} color="#FF006E" />
           <Text style={styles.actionButtonText}>Order Help</Text>
-          <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          <Ionicons name="chevron-forward" size={20} color="#B8B8D1" />
         </TouchableOpacity>
       </View>
 
-      <View style={{ height: 120 }} />
+      <View style={{ height: 110 }} />
     </ScrollView>
   );
 }
@@ -259,13 +259,13 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFF8F0',
   },
   header: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#F9F5F0',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
   },
   headerTitle: {
     fontSize: 28,
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     fontSize: 14,
-    color: '#3B82F6',
+    color: '#FF006E',
     fontWeight: '600',
   },
   categoryGrid: {
@@ -305,15 +305,17 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     width: (width - 52) / 2,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#FF006E',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   iconContainer: {
     width: 56,
@@ -335,15 +337,17 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   orderCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#FF006E',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   orderHeader: {
     flexDirection: 'row',
@@ -380,7 +384,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: 'rgba(0, 0, 0, 0.08)',
   },
   orderActions: {
     flexDirection: 'row',
@@ -400,11 +404,11 @@ const styles = StyleSheet.create({
   },
   reorderText: {
     fontSize: 14,
-    color: '#3B82F6',
+    color: '#FF006E',
     fontWeight: '600',
   },
   browseButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#FF006E',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
@@ -435,7 +439,7 @@ const styles = StyleSheet.create({
   orderTotal: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#FF006E',
   },
   statusBadge: {
     paddingHorizontal: 12,
@@ -476,15 +480,17 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#FF006E',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   actionButtonText: {
     flex: 1,

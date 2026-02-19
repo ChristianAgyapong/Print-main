@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
+﻿import { useAuth } from "@/contexts/AuthContext";
 import { Profile, profileService } from "@/lib/database-service";
 import { storageService } from "@/lib/storage-service";
 import { supabase } from "@/lib/supabase";
@@ -274,7 +274,7 @@ export default function EditProfileScreen() {
                   onPress={handleBack}
                   style={styles.backButton}
                 >
-                  <Ionicons name="arrow-back" size={24} color="#1F2937" />
+                  <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Edit Profile</Text>
                 <View style={{ width: 40 }} />
@@ -304,10 +304,10 @@ export default function EditProfileScreen() {
                   disabled={uploading}
                 >
                   {uploading ? (
-                    <ActivityIndicator size="small" color="#3B82F6" />
+                    <ActivityIndicator size="small" color="#FF006E" />
                   ) : (
                     <>
-                      <Ionicons name="camera" size={18} color="#3B82F6" />
+                      <Ionicons name="camera" size={18} color="#FF006E" />
                       <Text style={styles.changePhotoText}>Change Photo</Text>
                     </>
                   )}
@@ -571,7 +571,7 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFF8F0",
   },
   loadingContainer: {
     flex: 1,
@@ -594,9 +594,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9F5F0",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "rgba(0, 0, 0, 0.08)",
   },
   backButton: {
     width: 40,
@@ -611,14 +611,14 @@ const styles = StyleSheet.create({
   avatarSection: {
     alignItems: "center",
     paddingVertical: 32,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9F5F0",
     marginBottom: 20,
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#FF006E",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
   changePhotoText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#3B82F6",
+    color: "#FF006E",
   },
   form: {
     paddingHorizontal: 20,
@@ -649,13 +649,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: "#6B7280",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#D1D5DB",
+    borderColor: "rgba(0, 0, 0, 0.08)",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
     color: "#1F2937",
   },
   inputDisabled: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#F9F5F0",
     color: "#6B7280",
   },
   textArea: {
@@ -680,7 +680,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 8,
     borderBottomWidth: 2,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "rgba(0, 0, 0, 0.08)",
   },
   sectionTitle: {
     fontSize: 18,
@@ -706,12 +706,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    backgroundColor: "#fff",
+    borderColor: "rgba(0, 0, 0, 0.12)",
+    backgroundColor: "#FFFFFF",
   },
   genderOptionSelected: {
-    backgroundColor: "#3B82F6",
-    borderColor: "#3B82F6",
+    backgroundColor: "#FF006E",
+    borderColor: "#FF006E",
   },
   genderOptionText: {
     fontSize: 14,
@@ -724,16 +724,18 @@ const styles = StyleSheet.create({
   infoBox: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#EFF6FF",
+    backgroundColor: "rgba(255, 0, 110, 0.1)",
     padding: 16,
     borderRadius: 12,
     marginTop: 10,
     gap: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 110, 0.3)",
   },
   infoText: {
     flex: 1,
     fontSize: 14,
-    color: "#1E40AF",
+    color: "#FF006E",
     lineHeight: 20,
   },
   bottomBar: {
@@ -742,15 +744,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9F5F0",
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: "rgba(0, 0, 0, 0.08)",
   },
   saveButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#FF006E",
     paddingVertical: 16,
     borderRadius: 12,
     gap: 8,
@@ -765,7 +767,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.95)",
+    backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -783,7 +785,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(0, 0, 0, 0.12)",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "flex-end",

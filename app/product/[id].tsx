@@ -96,7 +96,7 @@ export default function ProductDetailsScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+        <ActivityIndicator size="large" color="#FF006E" />
         <Text style={styles.loadingText}>Loading product...</Text>
       </SafeAreaView>
     );
@@ -208,19 +208,19 @@ export default function ProductDetailsScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Features</Text>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+              <Ionicons name="checkmark-circle" size={20} color="#FF006E" />
               <Text style={styles.featureText}>Premium quality materials</Text>
             </View>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+              <Ionicons name="checkmark-circle" size={20} color="#FF006E" />
               <Text style={styles.featureText}>Fast turnaround time</Text>
             </View>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+              <Ionicons name="checkmark-circle" size={20} color="#FF006E" />
               <Text style={styles.featureText}>Professional finish</Text>
             </View>
             <View style={styles.featureItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+              <Ionicons name="checkmark-circle" size={20} color="#FF006E" />
               <Text style={styles.featureText}>
                 100% satisfaction guarantee
               </Text>
@@ -230,14 +230,14 @@ export default function ProductDetailsScreen() {
           {/* Delivery Info */}
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
-              <Ionicons name="cube-outline" size={24} color="#3B82F6" />
+              <Ionicons name="cube-outline" size={24} color="#FF006E" />
               <View style={styles.infoContent}>
                 <Text style={styles.infoTitle}>Free Shipping</Text>
                 <Text style={styles.infoSubtitle}>On orders over €100</Text>
               </View>
             </View>
             <View style={styles.infoRow}>
-              <Ionicons name="refresh-outline" size={24} color="#3B82F6" />
+              <Ionicons name="refresh-outline" size={24} color="#FF006E" />
               <View style={styles.infoContent}>
                 <Text style={styles.infoTitle}>Easy Returns</Text>
                 <Text style={styles.infoSubtitle}>30-day return policy</Text>
@@ -256,14 +256,14 @@ export default function ProductDetailsScreen() {
               style={styles.quantityButton}
               onPress={decrementQuantity}
             >
-              <Ionicons name="remove" size={20} color="#1F2937" />
+              <Ionicons name="remove" size={20} color="#FFFFFF" />
             </TouchableOpacity>
             <Text style={styles.quantityValue}>{quantity}</Text>
             <TouchableOpacity
               style={styles.quantityButton}
               onPress={incrementQuantity}
             >
-              <Ionicons name="add" size={20} color="#1F2937" />
+              <Ionicons name="add" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -291,36 +291,36 @@ export default function ProductDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#0F0F1E",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#0F0F1E",
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: "#6B7280",
+    color: "#B8B8D1",
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#0F0F1E",
   },
   errorText: {
     fontSize: 18,
-    color: "#6B7280",
+    color: "#B8B8D1",
     marginTop: 16,
     marginBottom: 24,
   },
   backButton: {
     paddingHorizontal: 24,
     paddingVertical: 12,
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#FF006E",
     borderRadius: 8,
   },
   backButtonText: {
@@ -352,12 +352,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "rgba(255, 0, 110, 0.9)",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
   },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 0, 110, 0.9)",
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   deliveryText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#FFFFFF",
   },
   contentContainer: {
     padding: 20,
@@ -386,14 +386,14 @@ const styles = StyleSheet.create({
   category: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#9CA3AF",
+    color: "#B8B8D1",
     letterSpacing: 1,
     marginBottom: 8,
   },
   productName: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: "#FFFFFF",
     marginBottom: 12,
   },
   priceRow: {
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#3B82F6",
+    color: "#FF006E",
   },
   ratingContainer: {
     flexDirection: "row",
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#B8B8D1",
     fontWeight: "600",
     marginLeft: 4,
   },
@@ -424,12 +424,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F2937",
+    color: "#FFFFFF",
     marginBottom: 12,
   },
   description: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "#B8B8D1",
     lineHeight: 24,
   },
   featureItem: {
@@ -440,11 +440,11 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 15,
-    color: "#374151",
+    color: "#B8B8D1",
   },
   uploadInfo: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#B8B8D1",
     marginBottom: 12,
     lineHeight: 20,
   },
@@ -452,10 +452,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   infoCard: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   infoRow: {
     flexDirection: "row",
@@ -469,19 +471,19 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#FFFFFF",
     marginBottom: 2,
   },
   infoSubtitle: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#B8B8D1",
   },
   bottomBar: {
     flexDirection: "row",
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     gap: 12,
   },
   quantityContainer: {
@@ -490,13 +492,13 @@ const styles = StyleSheet.create({
   quantityLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#6B7280",
+    color: "#B8B8D1",
     marginBottom: 8,
   },
   quantityControls: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "rgba(255, 0, 110, 0.15)",
     borderRadius: 8,
     padding: 4,
   },
@@ -506,21 +508,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 6,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
   quantityValue: {
     flex: 1,
     textAlign: "center",
     fontSize: 16,
     fontWeight: "700",
-    color: "#1F2937",
+    color: "#FFFFFF",
   },
   addToCartButton: {
     flex: 2,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#FF006E",
     borderRadius: 12,
     paddingVertical: 16,
     gap: 8,

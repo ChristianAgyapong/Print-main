@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Dimensions, Platform, ScrollView } from 'react-native';
+﻿import { View, Text, StyleSheet, Pressable, Dimensions, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -108,7 +108,7 @@ export default function LandingPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F1E',
+    backgroundColor: '#FFF8F0',
   },
   backgroundGradient: {
     position: 'absolute',
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#0F0F1E',
+    backgroundColor: '#FFF8F0',
   },
   circle: {
     position: 'absolute',
@@ -165,18 +165,18 @@ const styles = StyleSheet.create({
     width: isSmallDevice ? 70 : 85,
     height: isSmallDevice ? 70 : 85,
     borderRadius: isSmallDevice ? 35 : 42.5,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(0, 0, 0, 0.12)',
   },
 
   logoText: {
     fontSize: isSmallDevice ? 28 : isMediumDevice ? 32 : 36,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#1F2937',
     letterSpacing: 1.5,
     marginBottom: 8,
   },
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: isSmallDevice ? 32 : isMediumDevice ? 38 : 44,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#1F2937',
     textAlign: 'center',
     marginBottom: 8,
     lineHeight: isSmallDevice ? 40 : isMediumDevice ? 46 : 52,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: isSmallDevice ? 14 : 16,
-    color: '#B8B8D1',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: isSmallDevice ? 22 : 26,
     paddingHorizontal: isSmallDevice ? 0 : 10,
@@ -223,12 +223,12 @@ const styles = StyleSheet.create({
   },
   featureCard: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: isSmallDevice ? 14 : 18,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   featureIconContainer: {
     width: isSmallDevice ? 44 : 52,
@@ -242,14 +242,14 @@ const styles = StyleSheet.create({
 
   featureTitle: {
     fontSize: isSmallDevice ? 12 : 14,
-    color: '#FFFFFF',
+    color: '#1F2937',
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 4,
   },
   featureDescription: {
     fontSize: isSmallDevice ? 10 : 11,
-    color: '#B8B8D1',
+    color: '#6B7280',
     textAlign: 'center',
     fontWeight: '500',
   },
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: isSmallDevice ? 16 : 18,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#1F2937',
     marginRight: 10,
     letterSpacing: 0.5,
   },
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   },
   trustText: {
     fontSize: isSmallDevice ? 12 : 13,
-    color: '#B8B8D1',
+    color: '#6B7280',
     fontWeight: '500',
   },
 });

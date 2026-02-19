@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+﻿import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -36,7 +36,7 @@ export default function WishlistScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Wishlist</Text>
         {wishlist.length > 0 && (
@@ -103,7 +103,7 @@ export default function WishlistScreen() {
             </TouchableOpacity>
           ))}
 
-          <View style={{ height: 120 }} />
+          <View style={{ height: 110 }} />
         </ScrollView>
       )}
     </View>
@@ -113,7 +113,7 @@ export default function WishlistScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF8F0',
   },
   header: {
     flexDirection: 'row',
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingTop: 60,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
   },
   backButton: {
     width: 40,
@@ -150,17 +150,17 @@ const styles = StyleSheet.create({
   },
   productCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#FF006E',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   productImage: {
     width: 80,
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#3B82F6',
+    color: '#FF006E',
   },
   removeButton: {
     padding: 8,
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   browseButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#FF006E',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

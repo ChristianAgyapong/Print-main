@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
+﻿import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import {
@@ -146,7 +146,7 @@ export default function HomeScreen() {
       {/* Hero Section */}
       <View style={styles.heroSection}>
         <LinearGradient
-          colors={["#F9FAFB", "#E5E7EB"]}
+          colors={['#FF006E', '#D6005C']}
           style={styles.heroGradient}
         >
           <View style={styles.heroContent}>
@@ -228,6 +228,27 @@ export default function HomeScreen() {
         </ScrollView>
       </View>
 
+      {/* Special Offer Banner */}
+      <View style={styles.offerBanner}>
+        <LinearGradient
+          colors={["#FF006E", "#D6005C", "#AD004A"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.offerGradient}
+        >
+          <View style={styles.offerContent}>
+            <Ionicons name="pricetag" size={32} color="#FFFFFF" />
+            <View style={styles.offerText}>
+              <Text style={styles.offerTitle}>First Order Discount</Text>
+              <Text style={styles.offerSubtitle}>
+                Get 20% off your first order over €100
+              </Text>
+            </View>
+            <Ionicons name="arrow-forward-circle" size={28} color="#FFFFFF" />
+          </View>
+        </LinearGradient>
+      </View>
+
       {/* Products Grid */}
       <View style={styles.productsSection}>
         {loading ? (
@@ -298,6 +319,70 @@ export default function HomeScreen() {
         )}
       </View>
 
+      {/* How It Works */}
+      <View style={styles.howItWorksSection}>
+        <Text style={styles.sectionTitle}>HOW IT WORKS</Text>
+        <View style={styles.stepsContainer}>
+          <View style={styles.stepCard}>
+            <View style={styles.stepNumber}>
+              <Text style={styles.stepNumberText}>1</Text>
+            </View>
+            <Ionicons name="search" size={32} color="#FF006E" />
+            <Text style={styles.stepTitle}>Choose Product</Text>
+            <Text style={styles.stepDescription}>
+              Browse our catalog and select what you need
+            </Text>
+          </View>
+
+          <View style={styles.stepCard}>
+            <View style={styles.stepNumber}>
+              <Text style={styles.stepNumberText}>2</Text>
+            </View>
+            <Ionicons name="cloud-upload" size={32} color="#FF006E" />
+            <Text style={styles.stepTitle}>Upload Design</Text>
+            <Text style={styles.stepDescription}>
+              Upload your artwork or let us design for you
+            </Text>
+          </View>
+
+          <View style={styles.stepCard}>
+            <View style={styles.stepNumber}>
+              <Text style={styles.stepNumberText}>3</Text>
+            </View>
+            <Ionicons name="checkmark-done" size={32} color="#FF006E" />
+            <Text style={styles.stepTitle}>We Print & Ship</Text>
+            <Text style={styles.stepDescription}>
+              We'll print and deliver to your door
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Trust Stats */}
+      <View style={styles.statsSection}>
+        <LinearGradient
+          colors={["rgba(255, 0, 110, 0.1)", "rgba(139, 92, 246, 0.1)"]}
+          style={styles.statsGradient}
+        >
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>10K+</Text>
+              <Text style={styles.statLabel}>Happy Customers</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>50K+</Text>
+              <Text style={styles.statLabel}>Orders Completed</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>4.9★</Text>
+              <Text style={styles.statLabel}>Average Rating</Text>
+            </View>
+          </View>
+        </LinearGradient>
+      </View>
+
       {/* Quick Actions Footer */}
       <View style={styles.footerSection}>
         <TouchableOpacity
@@ -313,7 +398,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={{ height: 120 }} />
+      <View style={{ height: 110 }} />
     </ScrollView>
   );
 }
@@ -321,7 +406,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF8F0",
   },
   heroSection: {
     width: "100%",
@@ -343,13 +428,13 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 36,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: "#FFFFFF",
     marginBottom: 8,
     letterSpacing: -0.5,
   },
   heroSubtitle: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "rgba(255,255,255,0.85)",
     lineHeight: 24,
     maxWidth: "80%",
   },
@@ -357,20 +442,22 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   wishlistBadge: {
     position: "absolute",
     top: -4,
     right: -4,
-    backgroundColor: "#EF4444",
+    backgroundColor: "#FF006E",
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -386,28 +473,28 @@ const styles = StyleSheet.create({
   completionBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFBEB",
+    backgroundColor: "rgba(255, 0, 110, 0.15)",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
     gap: 8,
     borderWidth: 1,
-    borderColor: "#FDE68A",
+    borderColor: "rgba(255, 0, 110, 0.3)",
   },
   completionText: {
     flex: 1,
     fontSize: 13,
-    color: "#92400E",
+    color: "rgba(255,255,255,0.9)",
     fontWeight: "500",
   },
   categoriesSection: {
     paddingVertical: 24,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF8F0",
   },
   categoryLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#9CA3AF",
+    color: "#6B7280",
     letterSpacing: 1.5,
     textAlign: "center",
     marginBottom: 16,
@@ -421,15 +508,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(0, 0, 0, 0.08)",
     gap: 8,
   },
   categoryButtonActive: {
-    backgroundColor: "#EFF6FF",
-    borderColor: "#3B82F6",
+    backgroundColor: "rgba(255, 0, 110, 0.15)",
+    borderColor: "#FF006E",
   },
   categoryButtonText: {
     fontSize: 15,
@@ -437,7 +524,36 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
   categoryButtonTextActive: {
-    color: "#3B82F6",
+    color: "#FF006E",
+  },
+  offerBanner: {
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  offerGradient: {
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.08)",
+  },
+  offerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  offerText: {
+    flex: 1,
+  },
+  offerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    marginBottom: 4,
+  },
+  offerSubtitle: {
+    fontSize: 13,
+    color: "rgba(255, 255, 255, 0.9)",
+    lineHeight: 18,
   },
   productsSection: {
     paddingHorizontal: 16,
@@ -453,12 +569,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 4,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.08)",
   },
   productImageContainer: {
     width: "100%",
@@ -487,7 +605,7 @@ const styles = StyleSheet.create({
   productCategory: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#9CA3AF",
+    color: "#6B7280",
     letterSpacing: 0.5,
     marginBottom: 4,
   },
@@ -505,13 +623,13 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#3B82F6",
+    color: "#FF006E",
   },
   addButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#EFF6FF",
+    backgroundColor: "rgba(255, 0, 110, 0.15)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -524,13 +642,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFFFFF",
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 12,
     gap: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(0, 0, 0, 0.08)",
   },
   footerButtonText: {
     fontSize: 16,
@@ -562,12 +680,95 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#FF006E",
     borderRadius: 8,
   },
   retryButtonText: {
     color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "600",
+  },
+  howItWorksSection: {
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  stepsContainer: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 20,
+  },
+  stepCard: {
+    flex: 1,
+    backgroundColor: "#F9F5F0",
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.08)",
+  },
+  stepNumber: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 0, 110, 0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepNumberText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#FF006E",
+  },
+  stepTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1F2937",
+    textAlign: "center",
+    marginTop: 8,
+  },
+  stepDescription: {
+    fontSize: 11,
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 16,
+  },
+  statsSection: {
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  statsGradient: {
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.08)",
+  },
+  statsGrid: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+  },
+  statItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  statNumber: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#FF006E",
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    textAlign: "center",
+  },
+  statDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "rgba(0, 0, 0, 0.08)",
   },
 });

@@ -1,4 +1,4 @@
-import { Tabs, useRouter } from 'expo-router';
+﻿import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +18,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#FFFFFF',
+        tabBarActiveTintColor: '#FF006E',
         tabBarInactiveTintColor: '#9CA3AF',
         headerShown: true,
         headerStyle: {
@@ -26,13 +26,13 @@ export default function TabLayout() {
         },
         headerBackground: () => (
           <LinearGradient
-            colors={['#2563EB', '#3B82F6', '#60A5FA']}
+            colors={['#FFF8F0', '#FAFAF8', '#FFF8F0']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={StyleSheet.absoluteFill}
           />
         ),
-        headerTintColor: '#FFFFFF',
+        headerTintColor: '#1F2937',
         headerTitleStyle: {
           fontWeight: '700',
           fontSize: 20,
@@ -42,29 +42,32 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarStyle: {
           position: 'absolute',
-          bottom: 20,
-          left: 20,
-          right: 20,
-          height: 80,
-          backgroundColor: 'rgba(30, 30, 35, 0.95)',
-          borderRadius: 40,
-          paddingBottom: 5,
-          paddingTop: 5,
-          paddingHorizontal: 8,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 85,
+          backgroundColor: 'rgba(255, 248, 240, 0.97)',
+          borderTopLeftRadius: 32,
+          borderTopRightRadius: 32,
+          paddingBottom: 8,
+          paddingTop: 8,
+          paddingHorizontal: 12,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 8 },
+          shadowOffset: { width: 0, height: -6 },
           shadowOpacity: 0.3,
           shadowRadius: 20,
-          elevation: 20,
-          borderWidth: 1,
-          borderColor: 'rgba(255, 255, 255, 0.1)',
+          elevation: 25,
+          borderTopWidth: 1,
+          borderLeftWidth: 1,
+          borderRightWidth: 1,
+          borderColor: 'rgba(0, 0, 0, 0.08)',
         },
         tabBarBackground: () => (
           Platform.OS === 'ios' ? (
             <BlurView
-              intensity={80}
-              tint="dark"
-              style={[StyleSheet.absoluteFill, { borderRadius: 40 }]}
+              intensity={100}
+              tint="light"
+              style={[StyleSheet.absoluteFill, { borderTopLeftRadius: 32, borderTopRightRadius: 32 }]}
             />
           ) : null
         ),
@@ -85,7 +88,7 @@ export default function TabLayout() {
             onPress={() => router.push('/cart')}
           >
             <View style={styles.cartIconContainer}>
-              <Ionicons name="cart" size={22} color="#FFFFFF" />
+              <Ionicons name="cart" size={22} color="#FF006E" />
               {itemCount > 0 && (
                 <View style={styles.cartBadge}>
                   <Text style={styles.cartBadgeText}>{itemCount}</Text>
@@ -189,8 +192,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   iconContainerActive: {
-    backgroundColor: '#3B82F6',
-    shadowColor: '#3B82F6',
+    backgroundColor: '#FF006E',
+    shadowColor: '#FF006E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.5,
     shadowRadius: 12,
@@ -201,7 +204,7 @@ const styles = StyleSheet.create({
     width: 55,
     height: 55,
     borderRadius: 28,
-    backgroundColor: '#60A5FA',
+    backgroundColor: '#FF006E',
     opacity: 0.3,
   },
   iconWrapper: {
@@ -215,10 +218,10 @@ const styles = StyleSheet.create({
   cartIconContainer: {
     position: 'relative',
     padding: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(255, 0, 110, 0.08)',
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderColor: 'rgba(255, 0, 110, 0.25)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -229,7 +232,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: '#FBBF24',
+    backgroundColor: '#FF006E',
     borderRadius: 12,
     minWidth: 22,
     height: 22,
@@ -237,15 +240,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 6,
     borderWidth: 2.5,
-    borderColor: '#2563EB',
-    shadowColor: '#FBBF24',
+    borderColor: '#FFF8F0',
+    shadowColor: '#FF006E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 6,
     elevation: 6,
   },
   cartBadgeText: {
-    color: '#1F2937',
+    color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '900',
   },

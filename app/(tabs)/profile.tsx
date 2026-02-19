@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
+﻿import { useAuth } from "@/contexts/AuthContext";
 import { Profile, profileService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -333,7 +333,7 @@ export default function ProfileScreen() {
                     <Ionicons
                       name={item.icon as any}
                       size={22}
-                      color="#3B82F6"
+                      color="#FF006E"
                     />
                   </View>
                   <View style={styles.menuItemText}>
@@ -343,7 +343,7 @@ export default function ProfileScreen() {
                     ) : null}
                   </View>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                <Ionicons name="chevron-forward" size={20} color="#B8B8D1" />
               </TouchableOpacity>
             ))}
           </View>
@@ -372,7 +372,7 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <View style={{ height: 120 }} />
+      <View style={{ height: 110 }} />
 
       {/* Avatar Preview Modal */}
       <Modal
@@ -410,7 +410,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFF8F0",
   },
   loadingContainer: {
     flex: 1,
@@ -418,13 +418,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#fff",
+    backgroundColor: "#F9F5F0",
     paddingTop: 30,
     paddingBottom: 24,
     paddingHorizontal: 20,
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "rgba(0, 0, 0, 0.08)",
   },
   avatarContainer: {
     position: "relative",
@@ -434,14 +434,14 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#FF006E",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 4,
-    borderColor: "#fff",
-    shadowColor: "#000",
+    borderColor: "rgba(0, 0, 0, 0.12)",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
     overflow: "hidden",
@@ -458,11 +458,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#8B5CF6",
+    backgroundColor: "#FF006E",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: "#fff",
+    borderColor: "rgba(0, 0, 0, 0.12)",
   },
   userName: {
     fontSize: 24,
@@ -478,10 +478,12 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "rgba(255, 0, 110, 0.1)",
     borderRadius: 12,
     padding: 16,
     width: "100%",
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 110, 0.3)",
   },
   statItem: {
     flex: 1,
@@ -500,7 +502,7 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 32,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "rgba(0, 0, 0, 0.12)",
   },
   section: {
     marginTop: 24,
@@ -515,14 +517,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   sectionContent: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.08)",
   },
   menuItem: {
     flexDirection: "row",
@@ -530,7 +534,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "rgba(0, 0, 0, 0.08)",
   },
   menuItemLast: {
     borderBottomWidth: 0,
@@ -544,7 +548,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: "#EFF6FF",
+    backgroundColor: "rgba(255, 0, 110, 0.15)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -560,20 +564,21 @@ const styles = StyleSheet.create({
   },
   menuItemValue: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#FF006E",
+    fontWeight: "600",
   },
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1.5,
-    borderColor: "#FEE2E2",
-    shadowColor: "#000",
+    borderColor: "rgba(239, 68, 68, 0.3)",
+    shadowColor: "#EF4444",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -590,7 +595,7 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 14,
-    color: "#9CA3AF",
+    color: "#6B7280",
     marginBottom: 4,
   },
   versionSubtextRow: {
@@ -599,11 +604,11 @@ const styles = StyleSheet.create({
   },
   versionSubtext: {
     fontSize: 12,
-    color: "#D1D5DB",
+    color: "#6B7280",
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.95)",
+    backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -621,7 +626,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(0, 0, 0, 0.12)",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "flex-end",

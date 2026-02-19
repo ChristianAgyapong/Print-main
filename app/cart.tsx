@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/AuthContext";
+﻿import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { ordersService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
@@ -90,7 +90,7 @@ export default function CartScreen() {
   if (items.length === 0) {
     return (
       <SafeAreaView style={styles.emptyContainer}>
-        <Ionicons name="cart-outline" size={80} color="#E5E7EB" />
+        <Ionicons name="cart-outline" size={80} color="#B8B8D1" />
         <Text style={styles.emptyTitle}>Your cart is empty</Text>
         <Text style={styles.emptySubtitle}>Add items to get started</Text>
         <TouchableOpacity
@@ -218,7 +218,7 @@ export default function CartScreen() {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={loading ? ['#9CA3AF', '#6B7280'] : ['#3B82F6', '#2563EB', '#1D4ED8']}
+            colors={loading ? ['#9CA3AF', '#6B7280'] : ['#FF006E', '#D6005C', '#AD004A']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.checkoutButton}
@@ -237,14 +237,14 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFF8F0",
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFF8F0",
   },
   emptyTitle: {
     fontSize: 24,
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   shopButton: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#FF006E",
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 12,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   shopButtonText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#1F2937",
   },
   scrollView: {
     flex: 1,
@@ -277,9 +277,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F9F5F0",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "rgba(0, 0, 0, 0.08)",
   },
   backButton: {
     width: 40,
@@ -313,13 +313,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 14,
     marginBottom: 14,
-    shadowColor: "#3B82F6",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
     borderWidth: 1,
-    borderColor: "#E0E7FF",
+    borderColor: "rgba(0, 0, 0, 0.08)",
   },
   itemImageContainer: {
     width: 85,
@@ -328,9 +328,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 14,
-    shadowColor: "#3B82F6",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   itemPrice: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#3B82F6",
+    color: "#FF006E",
   },
   itemActions: {
     justifyContent: "space-between",
@@ -361,18 +361,18 @@ const styles = StyleSheet.create({
   quantityControls: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#EFF6FF",
+    backgroundColor: "rgba(255, 0, 110, 0.15)",
     borderRadius: 10,
     padding: 3,
     borderWidth: 1.5,
-    borderColor: "#DBEAFE",
+    borderColor: "rgba(255, 0, 110, 0.3)",
   },
   quantityButton: {
     width: 32,
     height: 32,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(0, 0, 0, 0.08)",
     borderRadius: 8,
   },
   quantityText: {
@@ -393,13 +393,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     borderRadius: 16,
     padding: 22,
-    shadowColor: "#3B82F6",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 6,
     borderWidth: 1,
-    borderColor: "#E0E7FF",
+    borderColor: "rgba(0, 0, 0, 0.08)",
   },
   summaryTitle: {
     fontSize: 18,
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "rgba(0, 0, 0, 0.12)",
     marginVertical: 12,
   },
   totalLabel: {
@@ -434,16 +434,16 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#3B82F6",
+    color: "#FF006E",
   },
   bottomBar: {
     padding: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F9F5F0",
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    shadowColor: "#000",
+    borderTopColor: "rgba(0, 0, 0, 0.08)",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 10,
   },
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 14,
     gap: 10,
-    shadowColor: "#3B82F6",
+    shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
   checkoutButtonText: {
     fontSize: 17,
     fontWeight: "800",
-    color: "#FFFFFF",
+    color: "#1F2937",
     letterSpacing: 0.5,
   },
 });
