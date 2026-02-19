@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -198,14 +199,16 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      {/* Hero Section */}
+    <>
+      <StatusBar style="dark" />
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Hero Section */}
       <View style={styles.heroSection}>
         <LinearGradient
           colors={["#FF006E", "#C2185B", "#880E4F"]}
@@ -519,6 +522,7 @@ export default function HomeScreen() {
 
       <View style={{ height: 110 }} />
     </ScrollView>
+    </>
   );
 }
 

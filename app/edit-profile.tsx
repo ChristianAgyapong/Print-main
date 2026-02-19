@@ -1,4 +1,4 @@
-﻿import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Profile, profileService } from "@/lib/database-service";
 import { storageService } from "@/lib/storage-service";
 import { supabase } from "@/lib/supabase";
@@ -250,6 +250,7 @@ export default function EditProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -594,9 +595,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    borderBottomColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -616,7 +617,7 @@ const styles = StyleSheet.create({
   avatarSection: {
     alignItems: "center",
     paddingVertical: 32,
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     marginBottom: 20,
   },
   avatar: {
@@ -751,7 +752,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "rgba(255, 255, 255, 0.88)",
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.6)",
+    borderTopColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.04,

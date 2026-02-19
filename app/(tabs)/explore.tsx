@@ -1,4 +1,5 @@
-﻿import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 import {
     Dimensions,
     ScrollView,
@@ -86,9 +87,11 @@ export default function ServicesScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.header}>
+    <>
+      <StatusBar style="dark" />
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
         <Text style={styles.headerTitle}>Our Services</Text>
         <Text style={styles.headerSubtitle}>
           Professional printing solutions for every need
@@ -173,6 +176,7 @@ export default function ServicesScreen() {
 
       <View style={{ height: 110 }} />
     </ScrollView>
+    </>
   );
 }
 
@@ -183,9 +187,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    borderBottomColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,

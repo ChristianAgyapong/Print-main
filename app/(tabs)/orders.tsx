@@ -1,9 +1,10 @@
-﻿import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { OrderStatusTracker } from "@/components/order-status-tracker";
 import { OrderCardSkeleton } from "@/components/skeleton-loader";
 import { useAuth } from "@/contexts/AuthContext";
 import { Order, ordersService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -112,15 +113,17 @@ export default function OrdersScreen() {
   ];
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      {/* Header */}
-      <View style={styles.header}>
+    <>
+      <StatusBar style="dark" />
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
         <Text style={styles.headerTitle}>Custom Orders</Text>
         <Text style={styles.headerSubtitle}>Create your perfect print</Text>
       </View>
@@ -236,7 +239,7 @@ export default function OrdersScreen() {
                   <View style={styles.orderRow}>
                     <Ionicons name="cash-outline" size={16} color="#6B7280" />
                     <Text style={styles.orderDetailText}>
-                      €{order.total_amount.toFixed(2)}
+                      �{order.total_amount.toFixed(2)}
                     </Text>
                   </View>
                 </View>
@@ -306,6 +309,7 @@ export default function OrdersScreen() {
 
       <View style={{ height: 110 }} />
     </ScrollView>
+    </>
   );
 }
 
@@ -316,9 +320,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    borderBottomColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,

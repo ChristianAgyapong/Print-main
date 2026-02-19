@@ -1,7 +1,8 @@
-﻿import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/empty-state";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import {
     Image,
@@ -44,6 +45,7 @@ export default function WishlistScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="dark" />
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -114,7 +116,7 @@ export default function WishlistScreen() {
                   {product.title}
                 </Text>
                 <Text style={styles.productPrice}>
-                  €{product.price.toFixed(2)}
+                  �{product.price.toFixed(2)}
                 </Text>
               </View>
 
@@ -146,9 +148,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     paddingTop: 60,
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    borderBottomColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
   },
   productCard: {
     flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,

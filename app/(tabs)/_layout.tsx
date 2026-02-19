@@ -1,4 +1,4 @@
-﻿import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Tabs, useRouter } from "expo-router";
 import React from "react";
@@ -34,7 +34,7 @@ export default function TabLayout() {
             tint="light"
             style={[
               StyleSheet.absoluteFill,
-              { backgroundColor: "rgba(255, 255, 255, 0.72)" },
+              { backgroundColor: "#FFFFFF" },
             ]}
           />
         ),

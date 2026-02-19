@@ -1,4 +1,4 @@
-﻿import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { storageService, Upload } from "@/lib/storage-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -94,7 +94,7 @@ export default function SavedDesignsScreen() {
           {item.filename}
         </Text>
         <Text style={styles.uploadMeta}>
-          {storageService.formatFileSize(item.file_size)} •{" "}
+          {storageService.formatFileSize(item.file_size)} �{" "}
           {formatDate(item.created_at)}
         </Text>
       </View>
@@ -117,6 +117,7 @@ export default function SavedDesignsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
@@ -177,9 +178,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    borderBottomColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,

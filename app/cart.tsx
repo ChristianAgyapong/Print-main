@@ -1,4 +1,4 @@
-﻿import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { ordersService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
@@ -91,6 +91,7 @@ export default function CartScreen() {
   if (items.length === 0) {
     return (
       <SafeAreaView style={styles.emptyContainer}>
+        <StatusBar style="dark" />
         <Ionicons name="cart-outline" size={80} color="#B8B8D1" />
         <Text style={styles.emptyTitle}>Your cart is empty</Text>
         <Text style={styles.emptySubtitle}>Add items to get started</Text>
@@ -106,6 +107,7 @@ export default function CartScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -148,7 +150,7 @@ export default function CartScreen() {
                 <Text style={styles.itemName}>{item.product.title}</Text>
                 <Text style={styles.itemCategory}>{item.product.category}</Text>
                 <Text style={styles.itemPrice}>
-                  €{item.product.price.toFixed(2)}
+                  �{item.product.price.toFixed(2)}
                 </Text>
               </View>
               <View style={styles.itemActions}>
@@ -187,25 +189,25 @@ export default function CartScreen() {
           <Text style={styles.summaryTitle}>Order Summary</Text>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>€{totalAmount.toFixed(2)}</Text>
+            <Text style={styles.summaryValue}>�{totalAmount.toFixed(2)}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Shipping</Text>
             <Text style={styles.summaryValue}>
-              {totalAmount >= 100 ? "FREE" : "€10.00"}
+              {totalAmount >= 100 ? "FREE" : "�10.00"}
             </Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Tax (21%)</Text>
             <Text style={styles.summaryValue}>
-              €{(totalAmount * 0.21).toFixed(2)}
+              �{(totalAmount * 0.21).toFixed(2)}
             </Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.summaryRow}>
             <Text style={styles.totalLabel}>Total</Text>
             <Text style={styles.totalValue}>
-              €
+              �
               {(
                 totalAmount +
                 (totalAmount >= 100 ? 0 : 10) +
@@ -290,9 +292,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    borderBottomColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -327,7 +329,7 @@ const styles = StyleSheet.create({
   },
   cartItem: {
     flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 14,
     marginBottom: 14,
@@ -459,7 +461,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.6)",
+    borderTopColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.06,

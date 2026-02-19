@@ -1,6 +1,7 @@
-﻿import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Profile, profileService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -258,15 +259,17 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
-      {/* Profile Header */}
-      <View style={styles.header}>
+    <>
+      <StatusBar style="dark" />
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
+        {/* Profile Header */}
+        <View style={styles.header}>
         <View style={styles.avatarContainer}>
           <TouchableOpacity
             style={styles.avatar}
@@ -362,7 +365,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* App Version */}
+        {/* App Version */}
       <View style={styles.versionContainer}>
         <Text style={styles.versionText}>PrintCraft v1.0.0</Text>
         <View style={styles.versionSubtextRow}>
@@ -403,7 +406,8 @@ export default function ProfileScreen() {
           )}
         </TouchableOpacity>
       </Modal>
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 }
 
@@ -418,13 +422,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     paddingTop: 30,
     paddingBottom: 24,
     paddingHorizontal: 20,
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    borderBottomColor: "#E5E7EB",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -522,7 +526,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   sectionContent: {
-    backgroundColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#000",
