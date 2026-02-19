@@ -3,14 +3,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { Order, ordersService } from '@/lib/database-service';
+import { OrderStatusTracker } from '@/components/order-status-tracker';
+import { EmptyState } from '@/components/empty-state';
+import { OrderCardSkeleton } from '@/components/skeleton-loader';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
 export default function OrdersScreen() {
   const { user } = useAuth();
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -140,39 +146,88 @@ export default function OrdersScreen() {
 
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>Loading orders...</Text>
+            {[1, 2, 3].map((i) => (
+              <OrderCardSkeleton key={i} />
+            ))}
           </View>
         ) : orders.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="receipt-outline" size={64} color="#D1D5DB" />
-            <Text style={styles.emptyTitle}>No orders yet</Text>
-            <Text style={styles.emptyText}>Start your first order by browsing our products</Text>
-          </View>
+          <EmptyState
+            icon="receipt-outline"
+            title="No orders yet"
+            message="Start your first order by browsing our products"
+            action={
+              <TouchableOpacity
+                style={styles.browseButton}
+                onPress={() => router.push("/(tabs)")}
+              >
+                <Text style={styles.browseButtonText}>Browse Products</Text>
+              </TouchableOpacity>
+            }
+          />
         ) : (
-          orders.slice(0, 5).map((order) => (
-            <TouchableOpacity
-              key={order.id}
-              style={styles.orderCard}
-              activeOpacity={0.7}
-            >
-              <View style={styles.orderHeader}>
-                <View style={styles.orderInfo}>
-                  <Text style={styles.orderTitle}>Order #{order.id.slice(0, 8).toUpperCase()}</Text>
-                  <Text style={styles.orderDate}>{formatDate(order.created_at)}</Text>
+          <>
+            {orders.map((order) => (
+              <TouchableOpacity
+                key={order.id}
+                style={styles.orderCard}
+                activeOpacity={0.7}
+                onPress={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+              >
+                <View style={styles.orderHeader}>
+                  <View>
+                    <Text style={styles.orderNumber}>Order #{order.id.slice(0, 8).toUpperCase()}</Text>
+                    <Text style={styles.orderDate}>{formatDate(order.created_at)}</Text>
+                  </View>
+                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
+                    <Text style={[styles.statusText, { color: getStatusColor(order.status) }]}>
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </Text>
+                  </View>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
-                  <Text style={[styles.statusText, { color: getStatusColor(order.status) }]}>
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                  </Text>
+
+                <View style={styles.orderDetails}>
+                  <View style={styles.orderRow}>
+                    <Ionicons name="cube-outline" size={16} color="#6B7280" />
+                    <Text style={styles.orderDetailText}>
+                      {order.items?.length || 0} {order.items?.length === 1 ? 'item' : 'items'}
+                    </Text>
+                  </View>
+                  <View style={styles.orderRow}>
+                    <Ionicons name="cash-outline" size={16} color="#6B7280" />
+                    <Text style={styles.orderDetailText}>€{order.total_amount.toFixed(2)}</Text>
+                  </View>
                 </View>
-              </View>
-              <View style={styles.orderDetails}>
-                <Text style={styles.orderTotal}>Total: €{order.total_amount.toFixed(2)}</Text>
-                <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-              </View>
-            </TouchableOpacity>
-          ))
+
+                {expandedOrder === order.id && (
+                  <View style={styles.expandedContent}>
+                    <OrderStatusTracker status={order.status} />
+                    <View style={styles.orderActions}>
+                      <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="information-circle-outline" size={20} color="#3B82F6" />
+                        <Text style={styles.actionButtonText}>Track Order</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="chatbubble-outline" size={20} color="#10B981" />
+                        <Text style={styles.actionButtonText}>Contact</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                <View style={styles.orderFooter}>
+                  <TouchableOpacity style={styles.reorderButton}>
+                    <Ionicons name="repeat-outline" size={18} color="#3B82F6" />
+                    <Text style={styles.reorderText}>Reorder</Text>
+                  </TouchableOpacity>
+                  <Ionicons 
+                    name={expandedOrder === order.id ? "chevron-up" : "chevron-down"}
+                    size={20} 
+                    color="#9CA3AF" 
+                  />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </>
         )}
       </View>
 
@@ -196,7 +251,7 @@ export default function OrdersScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={{ height: 40 }} />
+      <View style={{ height: 120 }} />
     </ScrollView>
   );
 }
@@ -295,6 +350,69 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
+  },
+  orderNumber: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  orderDate: {
+    fontSize: 13,
+    color: '#6B7280',
+  },
+  orderDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  orderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  orderDetailText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  expandedContent: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  orderActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  orderFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  reorderButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  reorderText: {
+    fontSize: 14,
+    color: '#3B82F6',
+    fontWeight: '600',
+  },
+  browseButton: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  browseButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   orderInfo: {
     flex: 1,

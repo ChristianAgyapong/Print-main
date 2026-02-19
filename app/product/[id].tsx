@@ -1,5 +1,6 @@
 import FileUpload from "@/components/file-upload";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import { Product, productsService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,16 +15,19 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Animated,
 } from "react-native";
 
 export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { addItem, isInCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const scaleAnim = new Animated.Value(1);
 
   useEffect(() => {
     loadProduct();
@@ -42,6 +46,21 @@ export default function ProductDetailsScreen() {
     if (!product) return;
 
     addItem(product, quantity);
+    
+    // Animate button
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     Alert.alert(
       "Added to Cart",
       `${product.title} has been added to your cart.`,
@@ -50,6 +69,16 @@ export default function ProductDetailsScreen() {
         { text: "View Cart", onPress: () => router.push("/cart") },
       ],
     );
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
   };
 
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
@@ -105,6 +134,16 @@ export default function ProductDetailsScreen() {
           <TouchableOpacity style={styles.backIconButton} onPress={handleBack}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.wishlistIconButton} 
+            onPress={handleToggleWishlist}
+          >
+            <Ionicons 
+              name={isInWishlist(product.id) ? "heart" : "heart-outline"}
+              size={24} 
+              color={isInWishlist(product.id) ? "#EF4444" : "#fff"} 
+            />
+          </TouchableOpacity>
           <Text style={styles.productEmoji}>🎨</Text>
           <View style={styles.deliveryBadge}>
             <Ionicons name="time-outline" size={16} color="#1F2937" />
@@ -120,7 +159,20 @@ export default function ProductDetailsScreen() {
             </Text>
           )}
           <Text style={styles.productName}>{product.title}</Text>
-          <Text style={styles.price}>€{product.price.toFixed(2)}</Text>
+          <View style={styles.priceRow}>
+            <Text style={styles.price}>€{product.price.toFixed(2)}</Text>
+            <View style={styles.ratingContainer}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Ionicons
+                  key={star}
+                  name="star"
+                  size={16}
+                  color="#F59E0B"
+                />
+              ))}
+              <Text style={styles.ratingText}>4.8 (124)</Text>
+            </View>
+          </View>
 
           {/* Description */}
           <View style={styles.section}>
@@ -293,6 +345,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  wishlistIconButton: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
   productEmoji: {
     fontSize: 80,
   },
@@ -328,11 +396,27 @@ const styles = StyleSheet.create({
     color: "#1F2937",
     marginBottom: 12,
   },
+  priceRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
   price: {
     fontSize: 32,
     fontWeight: "bold",
     color: "#3B82F6",
-    marginBottom: 24,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "600",
+    marginLeft: 4,
   },
   section: {
     marginBottom: 24,

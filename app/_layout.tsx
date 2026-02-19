@@ -10,6 +10,7 @@ import "react-native-reanimated";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 function RootLayoutNav() {
@@ -134,6 +135,14 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="wishlist"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
           name="change-password"
           options={{
             headerShown: false,
@@ -158,7 +167,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <CartProvider>
-        <RootLayoutNav />
+        <WishlistProvider>
+          <RootLayoutNav />
+        </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   );

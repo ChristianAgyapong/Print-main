@@ -4,6 +4,7 @@ import { ordersService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
 import {
   Alert,
   SafeAreaView,
@@ -126,9 +127,14 @@ export default function CartScreen() {
           </Text>
           {items.map((item) => (
             <View key={item.product.id} style={styles.cartItem}>
-              <View style={styles.itemImageContainer}>
-                <Ionicons name="color-palette" size={32} color="#9CA3AF" />
-              </View>
+              <LinearGradient
+                colors={['#EFF6FF', '#DBEAFE', '#BFDBFE']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.itemImageContainer}
+              >
+                <Ionicons name="color-palette" size={36} color="#3B82F6" />
+              </LinearGradient>
               <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.product.title}</Text>
                 <Text style={styles.itemCategory}>{item.product.category}</Text>
@@ -144,7 +150,7 @@ export default function CartScreen() {
                       updateQuantity(item.product.id, item.quantity - 1)
                     }
                   >
-                    <Ionicons name="remove" size={16} color="#6B7280" />
+                    <Ionicons name="remove" size={18} color="#3B82F6" />
                   </TouchableOpacity>
                   <Text style={styles.quantityText}>{item.quantity}</Text>
                   <TouchableOpacity
@@ -153,14 +159,14 @@ export default function CartScreen() {
                       updateQuantity(item.product.id, item.quantity + 1)
                     }
                   >
-                    <Ionicons name="add" size={16} color="#6B7280" />
+                    <Ionicons name="add" size={18} color="#3B82F6" />
                   </TouchableOpacity>
                 </View>
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={() => removeItem(item.product.id)}
                 >
-                  <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                  <Ionicons name="trash" size={22} color="#EF4444" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -206,17 +212,22 @@ export default function CartScreen() {
       {/* Checkout Button */}
       <View style={styles.bottomBar}>
         <TouchableOpacity
-          style={[
-            styles.checkoutButton,
-            loading && styles.checkoutButtonDisabled,
-          ]}
+          style={[styles.checkoutButtonWrapper]}
           onPress={handleCheckout}
           disabled={loading}
+          activeOpacity={0.8}
         >
-          <Text style={styles.checkoutButtonText}>
-            {loading ? "Processing..." : "Proceed to Checkout"}
-          </Text>
-          <Ionicons name="arrow-forward" size={20} color="#fff" />
+          <LinearGradient
+            colors={loading ? ['#9CA3AF', '#6B7280'] : ['#3B82F6', '#2563EB', '#1D4ED8']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.checkoutButton}
+          >
+            <Text style={styles.checkoutButtonText}>
+              {loading ? "Processing..." : "Proceed to Checkout"}
+            </Text>
+            <Ionicons name="arrow-forward-circle" size={24} color="#fff" />
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -299,23 +310,29 @@ const styles = StyleSheet.create({
   cartItem: {
     flexDirection: "row",
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+    shadowColor: "#3B82F6",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#E0E7FF",
   },
   itemImageContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: "#F3F4F6",
+    width: 85,
+    height: 85,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 14,
+    shadowColor: "#3B82F6",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
   itemDetails: {
     flex: 1,
@@ -344,35 +361,45 @@ const styles = StyleSheet.create({
   quantityControls: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    borderRadius: 8,
-    padding: 2,
+    backgroundColor: "#EFF6FF",
+    borderRadius: 10,
+    padding: 3,
+    borderWidth: 1.5,
+    borderColor: "#DBEAFE",
   },
   quantityButton: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
   },
   quantityText: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: 15,
+    fontWeight: "800",
     color: "#1F2937",
-    marginHorizontal: 12,
+    marginHorizontal: 14,
   },
   deleteButton: {
-    padding: 8,
+    padding: 10,
+    backgroundColor: "#FEE2E2",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#FECACA",
   },
   summarySection: {
     backgroundColor: "#FFFFFF",
     marginHorizontal: 20,
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderRadius: 16,
+    padding: 22,
+    shadowColor: "#3B82F6",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: "#E0E7FF",
   },
   summaryTitle: {
     fontSize: 18,
@@ -414,22 +441,35 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  checkoutButtonWrapper: {
+    borderRadius: 14,
   },
   checkoutButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#3B82F6",
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
+    paddingVertical: 18,
+    borderRadius: 14,
+    gap: 10,
+    shadowColor: "#3B82F6",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   checkoutButtonDisabled: {
     backgroundColor: "#9CA3AF",
   },
   checkoutButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 17,
+    fontWeight: "800",
     color: "#FFFFFF",
+    letterSpacing: 0.5,
   },
 });

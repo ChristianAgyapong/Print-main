@@ -19,7 +19,7 @@ import {
 } from "react-native";
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -32,12 +32,12 @@ export default function ProfileScreen() {
     addressesCount: 0,
   });
 
-  // Redirect to landing if no user
+  // Redirect to landing if no user (only after auth loading is complete)
   useEffect(() => {
-    if (!user && !loggingOut) {
+    if (!loading && !user && !loggingOut) {
       router.replace("/");
     }
-  }, [user, loggingOut]);
+  }, [user, loggingOut, loading]);
 
   // Reload profile when tab comes into focus (removed duplicate useEffect)
   useFocusEffect(
@@ -241,8 +241,8 @@ export default function ProfileScreen() {
     }
   };
 
-  // Don't render profile while logging out or without user
-  if (!user || loggingOut) {
+  // Show loading while auth is loading or logging out
+  if (loading || loggingOut) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -250,6 +250,11 @@ export default function ProfileScreen() {
         </View>
       </View>
     );
+  }
+
+  // If auth finished loading and still no user, return null (will redirect via useEffect)
+  if (!user) {
+    return null;
   }
 
   return (
@@ -367,7 +372,7 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <View style={{ height: 40 }} />
+      <View style={{ height: 120 }} />
 
       {/* Avatar Preview Modal */}
       <Modal

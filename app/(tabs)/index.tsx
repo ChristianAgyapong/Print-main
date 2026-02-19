@@ -1,10 +1,13 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import {
     Product,
     productsService,
     profileService
 } from "@/lib/database-service";
+import { ProductCardSkeleton } from "@/components/skeleton-loader";
+import { EmptyState } from "@/components/empty-state";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -19,6 +22,7 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Animated,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -28,12 +32,14 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const { addItem } = useCart();
+  const { wishlist } = useWishlist();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All Products");
   const [profileComplete, setProfileComplete] = useState(true); // Default true to hide banner until we check
+  const scrollY = new Animated.Value(0);
 
   const categories = [
     { id: "1", name: "All Products", icon: "apps" },
@@ -144,11 +150,26 @@ export default function HomeScreen() {
           style={styles.heroGradient}
         >
           <View style={styles.heroContent}>
-            <Text style={styles.heroTitle}>PrintCraft Shop</Text>
-            <Text style={styles.heroSubtitle}>
-              Professional printing services for business, marketing, branding,
-              and more
-            </Text>
+            <View style={styles.heroHeader}>
+              <View>
+                <Text style={styles.heroTitle}>PrintCraft Shop</Text>
+                <Text style={styles.heroSubtitle}>
+                  Professional printing services for business, marketing, branding,
+                  and more
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.wishlistButton}
+                onPress={() => router.push("/wishlist")}
+              >
+                <Ionicons name="heart" size={24} color="#EF4444" />
+                {wishlist.length > 0 && (
+                  <View style={styles.wishlistBadge}>
+                    <Text style={styles.wishlistBadgeText}>{wishlist.length}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
 
             {/* Profile Completion Banner */}
             {user && !profileComplete && (
@@ -210,18 +231,22 @@ export default function HomeScreen() {
       {/* Products Grid */}
       <View style={styles.productsSection}>
         {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>Loading products...</Text>
+          <View style={styles.productsGrid}>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
           </View>
         ) : products.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="cube-outline" size={64} color="#D1D5DB" />
-            <Text style={styles.emptyText}>No products found</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={loadProducts}>
-              <Text style={styles.retryButtonText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
+          <EmptyState
+            icon="cube-outline"
+            title="No products available"
+            message="Check back later for new products"
+            action={
+              <TouchableOpacity style={styles.retryButton} onPress={loadProducts}>
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </TouchableOpacity>
+            }
+          />
         ) : (
           <View style={styles.productsGrid}>
             {products.map((product) => (
@@ -288,7 +313,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={{ height: 40 }} />
+      <View style={{ height: 120 }} />
     </ScrollView>
   );
 }
@@ -307,23 +332,56 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   heroContent: {
-    alignItems: "center",
+    flex: 1,
+  },
+  heroHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 20,
   },
   heroTitle: {
     fontSize: 36,
     fontWeight: "bold",
     color: "#1F2937",
-    textAlign: "center",
-    marginBottom: 12,
+    marginBottom: 8,
     letterSpacing: -0.5,
   },
   heroSubtitle: {
     fontSize: 16,
     color: "#6B7280",
-    textAlign: "center",
     lineHeight: 24,
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    maxWidth: "80%",
+  },
+  wishlistButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  wishlistBadge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    backgroundColor: "#EF4444",
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  wishlistBadgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "700",
   },
   completionBanner: {
     flexDirection: "row",
