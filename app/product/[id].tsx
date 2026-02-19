@@ -1,4 +1,3 @@
-import FileUpload from "@/components/file-upload";
 import { useCart } from "@/contexts/CartContext";
 import { Product, productsService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
@@ -180,24 +179,61 @@ export default function ProductDetailsScreen() {
             </Text>
           </View>
 
-          {/* Upload Design */}
+          {/* How to Pay/Checkout */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Upload Your Design</Text>
-            <Text style={styles.uploadInfo}>
-              Upload your design file to proceed with your order
-            </Text>
-            <View style={styles.uploadContainer}>
-              <FileUpload
-                onUploadComplete={(upload) => {
-                  Alert.alert(
-                    "Success!",
-                    "Design uploaded successfully. You can now add this to your cart.",
-                  );
-                }}
-                onUploadError={(error) => {
-                  Alert.alert("Upload Failed", error);
-                }}
-              />
+            <Text style={styles.sectionTitle}>How to Pay & Checkout</Text>
+            <View style={styles.paymentInfo}>
+              <View style={styles.paymentStep}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>1</Text>
+                </View>
+                <View style={styles.stepContent}>
+                  <Text style={styles.stepTitle}>Add to Cart</Text>
+                  <Text style={styles.stepDescription}>
+                    Select quantity and add this item to your cart
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.paymentStep}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>2</Text>
+                </View>
+                <View style={styles.stepContent}>
+                  <Text style={styles.stepTitle}>Review Cart</Text>
+                  <Text style={styles.stepDescription}>
+                    Check your items and proceed to checkout
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.paymentStep}>
+                <View style={styles.stepNumber}>
+                  <Text style={styles.stepNumberText}>3</Text>
+                </View>
+                <View style={styles.stepContent}>
+                  <Text style={styles.stepTitle}>Make Payment</Text>
+                  <Text style={styles.stepDescription}>
+                    Complete payment using your preferred method
+                  </Text>
+                </View>
+              </View>
+            </View>
+            
+            <View style={styles.paymentMethods}>
+              <Text style={styles.paymentMethodsTitle}>We Accept:</Text>
+              <View style={styles.paymentIcons}>
+                <View style={styles.paymentIcon}>
+                  <Ionicons name="card" size={24} color="#FF006E" />
+                  <Text style={styles.paymentIconText}>Credit Card</Text>
+                </View>
+                <View style={styles.paymentIcon}>
+                  <Ionicons name="logo-paypal" size={24} color="#FF006E" />
+                  <Text style={styles.paymentIconText}>PayPal</Text>
+                </View>
+                <View style={styles.paymentIcon}>
+                  <Ionicons name="wallet" size={24} color="#FF006E" />
+                  <Text style={styles.paymentIconText}>E-Wallet</Text>
+                </View>
+              </View>
             </View>
           </View>
 
@@ -428,14 +464,70 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#B8B8D1",
   },
-  uploadInfo: {
+  paymentInfo: {
+    marginBottom: 16,
+  },
+  paymentStep: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 16,
+    gap: 12,
+  },
+  stepNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#FF006E",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  stepNumberText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  stepContent: {
+    flex: 1,
+    paddingTop: 4,
+  },
+  stepTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    marginBottom: 4,
+  },
+  stepDescription: {
     fontSize: 14,
     color: "#B8B8D1",
-    marginBottom: 12,
     lineHeight: 20,
   },
-  uploadContainer: {
-    marginTop: 4,
+  paymentMethods: {
+    backgroundColor: "rgba(255, 0, 110, 0.1)",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 0, 110, 0.2)",
+  },
+  paymentMethodsTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    marginBottom: 12,
+  },
+  paymentIcons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  paymentIcon: {
+    alignItems: "center",
+    gap: 6,
+  },
+  paymentIconText: {
+    fontSize: 12,
+    color: "#B8B8D1",
+    fontWeight: "500",
   },
   infoCard: {
     backgroundColor: "rgba(255, 255, 255, 0.08)",

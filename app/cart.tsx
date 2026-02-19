@@ -3,6 +3,7 @@ import { useCart } from "@/contexts/CartContext";
 import { ordersService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {

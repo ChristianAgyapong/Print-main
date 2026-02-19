@@ -23,7 +23,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "#FF006E",
-        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarInactiveTintColor: "#6B7280",
         headerShown: true,
         headerStyle: {
           backgroundColor: "transparent",
@@ -51,18 +51,18 @@ export default function TabLayout() {
           bottom: 0,
           left: 0,
           right: 0,
-          height: 85,
-          backgroundColor: "rgba(255, 255, 255, 0.92)",
+          height: 88,
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
           borderTopLeftRadius: 32,
           borderTopRightRadius: 32,
-          paddingBottom: 8,
-          paddingTop: 8,
-          paddingHorizontal: 12,
+          paddingBottom: 10,
+          paddingTop: 12,
+          paddingHorizontal: 8,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.08,
-          shadowRadius: 12,
-          elevation: 15,
+          shadowOpacity: 0.1,
+          shadowRadius: 16,
+          elevation: 20,
           borderTopWidth: 1,
           borderLeftWidth: 1,
           borderRightWidth: 1,
@@ -80,14 +80,15 @@ export default function TabLayout() {
             />
           ) : null,
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
+          fontSize: 12,
+          fontWeight: "700",
           marginTop: 4,
-          marginBottom: 0,
+          marginBottom: 2,
+          letterSpacing: 0.3,
         },
         tabBarItemStyle: {
-          paddingVertical: 6,
-          gap: 2,
+          paddingVertical: 8,
+          gap: 4,
           backgroundColor: "transparent",
         },
         headerRight: () => (
@@ -113,23 +114,11 @@ export default function TabLayout() {
           title: "Home",
           headerTitle: "PrintCraft",
           tabBarIcon: ({ color, focused }) => (
-            <View
-              style={[
-                styles.iconContainer,
-                focused
-                  ? styles.iconContainerActive
-                  : styles.iconContainerInactive,
-              ]}
-            >
-              {focused && <View style={styles.iconGlowEffect} />}
-              <View style={styles.iconWrapper}>
-                <Ionicons
-                  name={focused ? "home" : "home-outline"}
-                  size={focused ? 28 : 24}
-                  color={focused ? "#FFFFFF" : "#9CA3AF"}
-                />
-              </View>
-            </View>
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={28}
+              color={focused ? "#FF006E" : "#9CA3AF"}
+            />
           ),
         }}
       />
@@ -139,23 +128,11 @@ export default function TabLayout() {
           title: "Services",
           headerTitle: "Our Services",
           tabBarIcon: ({ color, focused }) => (
-            <View
-              style={[
-                styles.iconContainer,
-                focused
-                  ? styles.iconContainerActive
-                  : styles.iconContainerInactive,
-              ]}
-            >
-              {focused && <View style={styles.iconGlowEffect} />}
-              <View style={styles.iconWrapper}>
-                <Ionicons
-                  name={focused ? "grid" : "grid-outline"}
-                  size={focused ? 28 : 24}
-                  color={focused ? "#FFFFFF" : "#9CA3AF"}
-                />
-              </View>
-            </View>
+            <Ionicons
+              name={focused ? "grid" : "grid-outline"}
+              size={28}
+              color={focused ? "#FF006E" : "#9CA3AF"}
+            />
           ),
         }}
       />
@@ -165,49 +142,25 @@ export default function TabLayout() {
           title: "Orders",
           headerTitle: "My Orders",
           tabBarIcon: ({ color, focused }) => (
-            <View
-              style={[
-                styles.iconContainer,
-                focused
-                  ? styles.iconContainerActive
-                  : styles.iconContainerInactive,
-              ]}
-            >
-              {focused && <View style={styles.iconGlowEffect} />}
-              <View style={styles.iconWrapper}>
-                <Ionicons
-                  name={focused ? "document-text" : "document-text-outline"}
-                  size={focused ? 28 : 24}
-                  color={focused ? "#FFFFFF" : "#9CA3AF"}
-                />
-              </View>
-            </View>
+            <Ionicons
+              name={focused ? "document-text" : "document-text-outline"}
+              size={28}
+              color={focused ? "#FF006E" : "#9CA3AF"}
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
-          headerTitle: "My Profile",
+          title: "Account",
+          headerTitle: "Account",
           tabBarIcon: ({ color, focused }) => (
-            <View
-              style={[
-                styles.iconContainer,
-                focused
-                  ? styles.iconContainerActive
-                  : styles.iconContainerInactive,
-              ]}
-            >
-              {focused && <View style={styles.iconGlowEffect} />}
-              <View style={styles.iconWrapper}>
-                <Ionicons
-                  name={focused ? "person" : "person-outline"}
-                  size={focused ? 28 : 24}
-                  color={focused ? "#FFFFFF" : "#9CA3AF"}
-                />
-              </View>
-            </View>
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={28}
+              color={focused ? "#FF006E" : "#9CA3AF"}
+            />
           ),
         }}
       />
@@ -216,77 +169,45 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  iconContainer: {
-    width: 60,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 30,
-    position: "relative",
-    marginBottom: 0,
-  },
-  iconContainerInactive: {
-    backgroundColor: "transparent",
-  },
-  iconContainerActive: {
-    backgroundColor: "#FF006E",
-    shadowColor: "#FF006E",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  iconGlowEffect: {
-    position: "absolute",
-    width: 55,
-    height: 55,
-    borderRadius: 28,
-    backgroundColor: "#FF006E",
-    opacity: 0.3,
-  },
-  iconWrapper: {
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1,
-  },
   cartButton: {
-    marginRight: 16,
+    marginRight: 12,
   },
   cartIconContainer: {
     position: "relative",
-    padding: 10,
-    backgroundColor: "rgba(255, 0, 110, 0.08)",
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 0, 110, 0.25)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    padding: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#FF006E",
+    shadowColor: "#FF006E",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 5,
   },
   cartBadge: {
     position: "absolute",
-    top: -6,
-    right: -6,
+    top: -8,
+    right: -8,
     backgroundColor: "#FF006E",
-    borderRadius: 12,
-    minWidth: 22,
-    height: 22,
+    borderRadius: 14,
+    minWidth: 24,
+    height: 24,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 6,
-    borderWidth: 2.5,
+    paddingHorizontal: 7,
+    borderWidth: 3,
     borderColor: "#FFFFFF",
-    shadowColor: "#EF4444",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 5,
+    elevation: 6,
   },
   cartBadgeText: {
     color: "#FFFFFF",
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "900",
+    letterSpacing: -0.5,
   },
 });
