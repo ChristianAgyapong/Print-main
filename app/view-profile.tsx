@@ -111,7 +111,7 @@ export default function ViewProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+          <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Personal Information</Text>
         <TouchableOpacity
@@ -360,16 +360,21 @@ export default function ViewProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF8F0",
+    backgroundColor: "#F0F4F8",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "#F9F5F0",
+    backgroundColor: "rgba(255, 255, 255, 0.82)",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.08)",
+    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   backButton: {
     width: 40,
@@ -401,11 +406,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   profileHeader: {
-    backgroundColor: "#F9F5F0",
+    backgroundColor: "rgba(255, 255, 255, 0.82)",
     paddingVertical: 32,
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.08)",
+    borderBottomColor: "rgba(255, 255, 255, 0.6)",
     marginBottom: 20,
   },
   avatar: {
@@ -446,16 +451,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.82)",
     borderRadius: 12,
     overflow: "hidden",
-    shadowColor: "#FF006E",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.08)",
+    borderColor: "rgba(255, 255, 255, 0.95)",
   },
   infoRow: {
     flexDirection: "row",
@@ -463,7 +468,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.08)",
+    borderBottomColor: "#E5E7EB",
   },
   infoRowLast: {
     borderBottomWidth: 0,
@@ -551,7 +556,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(10, 10, 20, 0.92)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -564,12 +569,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     zIndex: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   modalCloseButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(0, 0, 0, 0.12)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.25)",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "flex-end",

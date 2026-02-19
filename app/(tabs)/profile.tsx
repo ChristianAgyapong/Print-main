@@ -5,17 +5,17 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  Image,
-  Modal,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Image,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function ProfileScreen() {
@@ -84,7 +84,7 @@ export default function ProfileScreen() {
           try {
             setLoggingOut(true);
             await signOut();
-            // Navigation handled by auth state
+            // Auth guard in _layout.tsx will redirect to landing page
           } catch (error) {
             console.error("Error during logout:", error);
             setLoggingOut(false);
@@ -410,7 +410,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF8F0",
+    backgroundColor: "#F0F4F8",
   },
   loadingContainer: {
     flex: 1,
@@ -418,13 +418,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#F9F5F0",
+    backgroundColor: "rgba(255, 255, 255, 0.82)",
     paddingTop: 30,
     paddingBottom: 24,
     paddingHorizontal: 20,
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.08)",
+    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   avatarContainer: {
     position: "relative",
@@ -438,8 +443,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 4,
-    borderColor: "rgba(0, 0, 0, 0.12)",
-    shadowColor: "#FF006E",
+    borderColor: "#FFFFFF",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -462,12 +467,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: "rgba(0, 0, 0, 0.12)",
+    borderColor: "#FFFFFF",
   },
   userName: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: "#111827",
     marginBottom: 4,
   },
   userEmail: {
@@ -517,16 +522,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   sectionContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.82)",
     borderRadius: 12,
     overflow: "hidden",
-    shadowColor: "#FF006E",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.08)",
+    borderColor: "rgba(255, 255, 255, 0.95)",
   },
   menuItem: {
     flexDirection: "row",
@@ -534,7 +539,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.08)",
+    borderBottomColor: "#F3F4F6",
   },
   menuItemLast: {
     borderBottomWidth: 0,
@@ -608,7 +613,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(10, 10, 20, 0.92)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -621,12 +626,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     zIndex: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   modalCloseButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(0, 0, 0, 0.12)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.25)",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "flex-end",

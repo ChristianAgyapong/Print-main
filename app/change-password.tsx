@@ -197,7 +197,7 @@ export default function ChangePasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#F0F4F8",
   },
   scrollView: {
     flex: 1,
@@ -207,9 +207,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255, 255, 255, 0.82)",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   backButton: {
     width: 40,

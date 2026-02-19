@@ -1,9 +1,17 @@
-﻿import { View, Text, StyleSheet, Pressable, Dimensions, Platform, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
+﻿import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import {
+    Dimensions,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 const isSmallDevice = width < 375;
 const isMediumDevice = width >= 375 && width < 414;
 
@@ -11,7 +19,7 @@ export default function LandingPage() {
   const router = useRouter();
 
   const handleGetStarted = () => {
-    router.push('/auth');
+    router.push("/auth");
   };
 
   return (
@@ -36,7 +44,11 @@ export default function LandingPage() {
           {/* Logo Section */}
           <View style={styles.logoContainer}>
             <View style={styles.logoWrapper}>
-              <Ionicons name="color-palette" size={isSmallDevice ? 38 : 45} color="#FF006E" />
+              <Ionicons
+                name="color-palette"
+                size={isSmallDevice ? 38 : 45}
+                color="#FF006E"
+              />
             </View>
             <Text style={styles.logoText}>PrintCraft</Text>
             <Text style={styles.tagline}>Design • Print • Perfect</Text>
@@ -48,7 +60,9 @@ export default function LandingPage() {
             <Text style={styles.titleAccent}>Creative Vision</Text>
 
             <Text style={styles.description}>
-              Premium quality printing services for all your design needs. From business cards to large format prints, we bring your ideas to life.
+              Premium quality printing services for all your design needs. From
+              business cards to large format prints, we bring your ideas to
+              life.
             </Text>
           </View>
 
@@ -56,7 +70,11 @@ export default function LandingPage() {
           <View style={styles.featuresContainer}>
             <View style={styles.featureCard}>
               <View style={styles.featureIconContainer}>
-                <Ionicons name="flash" size={isSmallDevice ? 20 : 24} color="#FF006E" />
+                <Ionicons
+                  name="flash"
+                  size={isSmallDevice ? 20 : 24}
+                  color="#FF006E"
+                />
               </View>
               <Text style={styles.featureTitle}>Fast Delivery</Text>
               <Text style={styles.featureDescription}>24-48 hours</Text>
@@ -64,7 +82,11 @@ export default function LandingPage() {
 
             <View style={styles.featureCard}>
               <View style={styles.featureIconContainer}>
-                <Ionicons name="sparkles" size={isSmallDevice ? 20 : 24} color="#FF006E" />
+                <Ionicons
+                  name="sparkles"
+                  size={isSmallDevice ? 20 : 24}
+                  color="#FF006E"
+                />
               </View>
               <Text style={styles.featureTitle}>Top Quality</Text>
               <Text style={styles.featureDescription}>Premium materials</Text>
@@ -72,7 +94,11 @@ export default function LandingPage() {
 
             <View style={styles.featureCard}>
               <View style={styles.featureIconContainer}>
-                <Ionicons name="locate" size={isSmallDevice ? 20 : 24} color="#FF006E" />
+                <Ionicons
+                  name="locate"
+                  size={isSmallDevice ? 20 : 24}
+                  color="#FF006E"
+                />
               </View>
               <Text style={styles.featureTitle}>Custom Design</Text>
               <Text style={styles.featureDescription}>Tailored for you</Text>
@@ -84,18 +110,25 @@ export default function LandingPage() {
             <Pressable
               style={({ pressed }) => [
                 styles.button,
-                pressed && styles.buttonPressed
+                pressed && styles.buttonPressed,
               ]}
               onPress={handleGetStarted}
             >
               <Text style={styles.buttonText}>Get Started Now</Text>
-              <Ionicons name="arrow-forward" size={isSmallDevice ? 18 : 22} color="#FFFFFF" />
+              <Ionicons
+                name="arrow-forward"
+                size={isSmallDevice ? 18 : 22}
+                color="#FFFFFF"
+              />
             </Pressable>
 
             <View style={styles.trustIndicator}>
               <View style={styles.trustRow}>
                 <Ionicons name="star" size={14} color="#F59E0B" />
-                <Text style={styles.trustText}> 4.9 rating • 10,000+ happy customers</Text>
+                <Text style={styles.trustText}>
+                  {" "}
+                  4.9 rating • 10,000+ happy customers
+                </Text>
               </View>
             </View>
           </View>
@@ -108,39 +141,39 @@ export default function LandingPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF8F0',
+    backgroundColor: "#F0F4F8",
   },
   backgroundGradient: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#FFF8F0',
+    backgroundColor: "#F0F4F8",
   },
   circle: {
-    position: 'absolute',
+    position: "absolute",
     borderRadius: 1000,
     opacity: 0.15,
   },
   circle1: {
     width: width * 0.8,
     height: width * 0.8,
-    backgroundColor: '#FF006E',
+    backgroundColor: "#FF006E",
     top: -width * 0.4,
     right: -width * 0.3,
   },
   circle2: {
     width: width * 0.7,
     height: width * 0.7,
-    backgroundColor: '#8338EC',
+    backgroundColor: "#8338EC",
     bottom: -width * 0.3,
     left: -width * 0.2,
   },
   circle3: {
     width: width * 0.5,
     height: width * 0.5,
-    backgroundColor: '#3A86FF',
+    backgroundColor: "#3A86FF",
     top: height * 0.4,
     left: width * 0.6,
   },
@@ -153,123 +186,128 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: isSmallDevice ? 20 : isMediumDevice ? 24 : 32,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
     paddingBottom: 40,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: isSmallDevice ? 10 : 20,
   },
   logoWrapper: {
     width: isSmallDevice ? 70 : 85,
     height: isSmallDevice ? 70 : 85,
     borderRadius: isSmallDevice ? 35 : 42.5,
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.08)",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
+    borderColor: "rgba(0, 0, 0, 0.12)",
   },
 
   logoText: {
     fontSize: isSmallDevice ? 28 : isMediumDevice ? 32 : 36,
-    fontWeight: '800',
-    color: '#1F2937',
+    fontWeight: "800",
+    color: "#1F2937",
     letterSpacing: 1.5,
     marginBottom: 8,
   },
   tagline: {
     fontSize: isSmallDevice ? 13 : 14,
-    color: '#FF006E',
-    fontWeight: '600',
+    color: "#FF006E",
+    fontWeight: "600",
     letterSpacing: 2,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   heroSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: isSmallDevice ? 20 : 30,
   },
   title: {
     fontSize: isSmallDevice ? 32 : isMediumDevice ? 38 : 44,
-    fontWeight: '700',
-    color: '#1F2937',
-    textAlign: 'center',
+    fontWeight: "700",
+    color: "#1F2937",
+    textAlign: "center",
     marginBottom: 8,
     lineHeight: isSmallDevice ? 40 : isMediumDevice ? 46 : 52,
   },
   titleAccent: {
     fontSize: isSmallDevice ? 32 : isMediumDevice ? 38 : 44,
-    fontWeight: '700',
-    color: '#FF006E',
-    textAlign: 'center',
+    fontWeight: "700",
+    color: "#FF006E",
+    textAlign: "center",
     marginBottom: isSmallDevice ? 16 : 24,
     lineHeight: isSmallDevice ? 40 : isMediumDevice ? 46 : 52,
   },
   description: {
     fontSize: isSmallDevice ? 14 : 16,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: "#6B7280",
+    textAlign: "center",
     lineHeight: isSmallDevice ? 22 : 26,
     paddingHorizontal: isSmallDevice ? 0 : 10,
     maxWidth: 480,
   },
   featuresContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginVertical: isSmallDevice ? 30 : 40,
     gap: isSmallDevice ? 8 : 12,
   },
   featureCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "rgba(255, 255, 255, 0.75)",
     borderRadius: 16,
     padding: isSmallDevice ? 14 : 18,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderColor: "rgba(255, 255, 255, 0.9)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   featureIconContainer: {
     width: isSmallDevice ? 44 : 52,
     height: isSmallDevice ? 44 : 52,
     borderRadius: isSmallDevice ? 22 : 26,
-    backgroundColor: 'rgba(255, 0, 110, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(255, 0, 110, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 10,
   },
 
   featureTitle: {
     fontSize: isSmallDevice ? 12 : 14,
-    color: '#1F2937',
-    fontWeight: '700',
-    textAlign: 'center',
+    color: "#1F2937",
+    fontWeight: "700",
+    textAlign: "center",
     marginBottom: 4,
   },
   featureDescription: {
     fontSize: isSmallDevice ? 10 : 11,
-    color: '#6B7280',
-    textAlign: 'center',
-    fontWeight: '500',
+    color: "#6B7280",
+    textAlign: "center",
+    fontWeight: "500",
   },
   ctaContainer: {
-    marginTop: 'auto',
+    marginTop: "auto",
   },
   button: {
-    backgroundColor: '#FF006E',
+    backgroundColor: "#FF006E",
     paddingVertical: isSmallDevice ? 16 : 18,
     paddingHorizontal: 32,
     borderRadius: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#FF006E',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 8,
     },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.15,
     shadowRadius: 16,
     elevation: 12,
   },
@@ -279,22 +317,22 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: isSmallDevice ? 16 : 18,
-    fontWeight: '700',
-    color: '#1F2937',
+    fontWeight: "700",
+    color: "#1F2937",
     marginRight: 10,
     letterSpacing: 0.5,
   },
   trustIndicator: {
     marginTop: isSmallDevice ? 20 : 24,
-    alignItems: 'center',
+    alignItems: "center",
   },
   trustRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   trustText: {
     fontSize: isSmallDevice ? 12 : 13,
-    color: '#6B7280',
-    fontWeight: '500',
+    color: "#6B7280",
+    fontWeight: "500",
   },
 });

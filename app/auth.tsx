@@ -1,28 +1,41 @@
-﻿import { View, Text, StyleSheet, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/contexts/AuthContext';
+﻿import { useAuth } from "@/contexts/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 export default function AuthScreen() {
   const router = useRouter();
-  const { signIn, signUp, signInWithGoogle, signInWithApple, resetPassword } = useAuth();
+  const { signIn, signUp, signInWithGoogle, signInWithApple, resetPassword } =
+    useAuth();
 
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     if (!isLogin && !name) {
-      Alert.alert('Error', 'Please enter your full name');
+      Alert.alert("Error", "Please enter your full name");
       return;
     }
 
@@ -33,24 +46,27 @@ export default function AuthScreen() {
         // Sign in
         const { error } = await signIn(email, password);
         if (error) {
-          Alert.alert('Sign In Failed', error.message || 'Invalid credentials');
+          Alert.alert("Sign In Failed", error.message || "Invalid credentials");
         }
         // Navigation handled automatically by auth state in _layout.tsx
       } else {
         // Sign up
         const { error } = await signUp(email, password, name);
         if (error) {
-          Alert.alert('Sign Up Failed', error.message || 'Could not create account');
+          Alert.alert(
+            "Sign Up Failed",
+            error.message || "Could not create account",
+          );
         } else {
           Alert.alert(
-            'Success',
-            'Account created! Please check your email to verify your account.',
-            [{ text: 'OK', onPress: () => setIsLogin(true) }]
+            "Success",
+            "Account created! Please check your email to verify your account.",
+            [{ text: "OK", onPress: () => setIsLogin(true) }],
           );
         }
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Something went wrong');
+      Alert.alert("Error", error.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -58,7 +74,7 @@ export default function AuthScreen() {
 
   const handleForgotPassword = async () => {
     if (!email) {
-      Alert.alert('Error', 'Please enter your email address');
+      Alert.alert("Error", "Please enter your email address");
       return;
     }
 
@@ -67,9 +83,9 @@ export default function AuthScreen() {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Error', error.message || 'Could not send reset email');
+      Alert.alert("Error", error.message || "Could not send reset email");
     } else {
-      Alert.alert('Success', 'Password reset email sent! Check your inbox.');
+      Alert.alert("Success", "Password reset email sent! Check your inbox.");
     }
   };
 
@@ -79,13 +95,16 @@ export default function AuthScreen() {
       const { error } = await signInWithGoogle();
 
       if (error) {
-        console.error('Google Sign-In Error:', error);
-        Alert.alert('Google Sign-In Error', error.message || 'Could not sign in with Google');
+        console.error("Google Sign-In Error:", error);
+        Alert.alert(
+          "Google Sign-In Error",
+          error.message || "Could not sign in with Google",
+        );
       }
       // Navigation handled automatically by auth state in _layout.tsx
     } catch (err: any) {
-      console.error('Google Sign-In Exception:', err);
-      Alert.alert('Error', err.message || 'An unexpected error occurred');
+      console.error("Google Sign-In Exception:", err);
+      Alert.alert("Error", err.message || "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -97,21 +116,21 @@ export default function AuthScreen() {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Error', error.message || 'Could not sign in with Apple');
+      Alert.alert("Error", error.message || "Could not sign in with Apple");
     }
   };
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
-    setName('');
-    setEmail('');
-    setPassword('');
+    setName("");
+    setEmail("");
+    setPassword("");
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <StatusBar style="dark" />
 
@@ -137,14 +156,14 @@ export default function AuthScreen() {
           </View>
           <Text style={styles.logoText}>PrintCraft</Text>
           <Text style={styles.headerSubtitle}>
-            {isLogin ? 'Welcome back!' : 'Create your account'}
+            {isLogin ? "Welcome back!" : "Create your account"}
           </Text>
         </View>
 
         {/* Auth Form */}
         <View style={styles.formContainer}>
           <Text style={styles.formTitle}>
-            {isLogin ? 'Sign In' : 'Sign Up'}
+            {isLogin ? "Sign In" : "Sign Up"}
           </Text>
 
           {!isLogin && (
@@ -189,7 +208,10 @@ export default function AuthScreen() {
           </View>
 
           {isLogin && (
-            <Pressable style={styles.forgotPassword} onPress={handleForgotPassword}>
+            <Pressable
+              style={styles.forgotPassword}
+              onPress={handleForgotPassword}
+            >
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </Pressable>
           )}
@@ -199,7 +221,7 @@ export default function AuthScreen() {
             style={({ pressed }) => [
               styles.submitButton,
               pressed && styles.buttonPressed,
-              loading && styles.buttonDisabled
+              loading && styles.buttonDisabled,
             ]}
             onPress={handleSubmit}
             disabled={loading}
@@ -208,7 +230,7 @@ export default function AuthScreen() {
               <ActivityIndicator color="#ffffff" />
             ) : (
               <Text style={styles.submitButtonText}>
-                {isLogin ? 'Sign In' : 'Create Account'}
+                {isLogin ? "Sign In" : "Create Account"}
               </Text>
             )}
           </Pressable>
@@ -216,11 +238,13 @@ export default function AuthScreen() {
           {/* Toggle Mode */}
           <View style={styles.toggleContainer}>
             <Text style={styles.toggleText}>
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              {isLogin
+                ? "Don't have an account? "
+                : "Already have an account? "}
             </Text>
             <Pressable onPress={toggleMode}>
               <Text style={styles.toggleLink}>
-                {isLogin ? 'Sign Up' : 'Sign In'}
+                {isLogin ? "Sign Up" : "Sign In"}
               </Text>
             </Pressable>
           </View>
@@ -257,24 +281,24 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   backButtonContainer: {
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingTop: Platform.OS === "ios" ? 50 : 20,
     paddingHorizontal: 20,
     paddingBottom: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 8,
   },
   backButtonText: {
     fontSize: 16,
-    color: '#1F2937',
+    color: "#1F2937",
     marginLeft: 8,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   scrollContent: {
     flexGrow: 1,
@@ -282,7 +306,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 30,
     marginTop: 10,
   },
@@ -290,29 +314,29 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(255, 0, 110, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(255, 0, 110, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 8,
   },
   logoText: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FF006E',
+    fontWeight: "bold",
+    color: "#FF006E",
     letterSpacing: 1,
     marginBottom: 8,
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   formContainer: {
     flex: 1,
   },
   formTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: "bold",
+    color: "#1F2937",
     marginBottom: 24,
   },
   inputContainer: {
@@ -320,41 +344,41 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: "#F9FAFB",
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: '#1F2937',
+    color: "#1F2937",
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
   },
   forgotPassword: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 20,
   },
   forgotPasswordText: {
     fontSize: 14,
-    color: '#FF006E',
-    fontWeight: '600',
+    color: "#FF006E",
+    fontWeight: "600",
   },
   submitButton: {
-    backgroundColor: '#FF006E',
+    backgroundColor: "#FF006E",
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
-    shadowColor: '#FF006E',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.12,
     shadowRadius: 4.65,
     elevation: 8,
   },
@@ -366,52 +390,52 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitButtonText: {
-    color: '#1F2937',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   toggleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 20,
   },
   toggleText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   toggleLink: {
     fontSize: 14,
-    color: '#FF006E',
-    fontWeight: '600',
+    color: "#FF006E",
+    fontWeight: "600",
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 30,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: "#E5E7EB",
   },
   dividerText: {
     marginHorizontal: 16,
     fontSize: 14,
-    color: '#9CA3AF',
-    fontWeight: '500',
+    color: "#9CA3AF",
+    fontWeight: "500",
   },
   socialButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     paddingVertical: 14,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
   },
   socialButtonText: {
-    color: '#1F2937',
+    color: "#1F2937",
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

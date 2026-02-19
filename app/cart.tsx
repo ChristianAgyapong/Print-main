@@ -2,17 +2,18 @@
 import { useCart } from "@/contexts/CartContext";
 import { ordersService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { LinearGradient } from "expo-linear-gradient";
 import {
-  Alert,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function CartScreen() {
@@ -127,14 +128,22 @@ export default function CartScreen() {
           </Text>
           {items.map((item) => (
             <View key={item.product.id} style={styles.cartItem}>
-              <LinearGradient
-                colors={['#EFF6FF', '#DBEAFE', '#BFDBFE']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.itemImageContainer}
-              >
-                <Ionicons name="color-palette" size={36} color="#3B82F6" />
-              </LinearGradient>
+              {item.product.image_url ? (
+                <Image
+                  source={{ uri: item.product.image_url }}
+                  style={styles.itemImageContainer}
+                  resizeMode="cover"
+                />
+              ) : (
+                <LinearGradient
+                  colors={["#EFF6FF", "#DBEAFE", "#BFDBFE"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.itemImageContainer}
+                >
+                  <Ionicons name="color-palette" size={36} color="#3B82F6" />
+                </LinearGradient>
+              )}
               <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.product.title}</Text>
                 <Text style={styles.itemCategory}>{item.product.category}</Text>
@@ -218,7 +227,11 @@ export default function CartScreen() {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={loading ? ['#9CA3AF', '#6B7280'] : ['#FF006E', '#D6005C', '#AD004A']}
+            colors={
+              loading
+                ? ["#9CA3AF", "#6B7280"]
+                : ["#FF006E", "#D6005C", "#AD004A"]
+            }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.checkoutButton}
@@ -237,14 +250,14 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF8F0",
+    backgroundColor: "#F0F4F8",
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#FFF8F0",
+    backgroundColor: "#F9FAFB",
   },
   emptyTitle: {
     fontSize: 24,
@@ -267,7 +280,7 @@ const styles = StyleSheet.create({
   shopButtonText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#1F2937",
+    color: "#FFFFFF",
   },
   scrollView: {
     flex: 1,
@@ -277,9 +290,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "#F9F5F0",
+    backgroundColor: "rgba(255, 255, 255, 0.82)",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.08)",
+    borderBottomColor: "rgba(255, 255, 255, 0.6)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   backButton: {
     width: 40,
@@ -309,17 +327,17 @@ const styles = StyleSheet.create({
   },
   cartItem: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.82)",
     borderRadius: 16,
     padding: 14,
     marginBottom: 14,
-    shadowColor: "#FF006E",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.08)",
+    borderColor: "rgba(255, 255, 255, 0.95)",
   },
   itemImageContainer: {
     width: 85,
@@ -328,11 +346,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 14,
-    shadowColor: "#FF006E",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
+    overflow: "hidden",
   },
   itemDetails: {
     flex: 1,
@@ -389,17 +408,17 @@ const styles = StyleSheet.create({
     borderColor: "#FECACA",
   },
   summarySection: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
     marginHorizontal: 20,
     borderRadius: 16,
     padding: 22,
-    shadowColor: "#FF006E",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.08)",
+    borderColor: "rgba(255, 255, 255, 0.95)",
   },
   summaryTitle: {
     fontSize: 18,
@@ -438,13 +457,13 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     padding: 20,
-    backgroundColor: "#F9F5F0",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderTopWidth: 1,
-    borderTopColor: "rgba(0, 0, 0, 0.08)",
-    shadowColor: "#FF006E",
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    borderTopColor: "rgba(255, 255, 255, 0.6)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
     elevation: 10,
   },
   checkoutButtonWrapper: {
@@ -457,9 +476,9 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 14,
     gap: 10,
-    shadowColor: "#FF006E",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
   },
@@ -469,7 +488,7 @@ const styles = StyleSheet.create({
   checkoutButtonText: {
     fontSize: 17,
     fontWeight: "800",
-    color: "#1F2937",
+    color: "#FFFFFF",
     letterSpacing: 0.5,
   },
 });

@@ -9,13 +9,14 @@ import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    Animated,
+    Image,
     SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
-    Animated,
 } from "react-native";
 
 export default function ProductDetailsScreen() {
@@ -46,7 +47,7 @@ export default function ProductDetailsScreen() {
     if (!product) return;
 
     addItem(product, quantity);
-    
+
     // Animate button
     Animated.sequence([
       Animated.timing(scaleAnim, {
@@ -130,26 +131,59 @@ export default function ProductDetailsScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Product Image */}
-        <LinearGradient colors={gradient} style={styles.imageContainer}>
-          <TouchableOpacity style={styles.backIconButton} onPress={handleBack}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.wishlistIconButton} 
-            onPress={handleToggleWishlist}
-          >
-            <Ionicons 
-              name={isInWishlist(product.id) ? "heart" : "heart-outline"}
-              size={24} 
-              color={isInWishlist(product.id) ? "#EF4444" : "#fff"} 
+        {product.image_url ? (
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: product.image_url }}
+              style={styles.productDetailImage}
+              resizeMode="cover"
             />
-          </TouchableOpacity>
-          <Text style={styles.productEmoji}>🎨</Text>
-          <View style={styles.deliveryBadge}>
-            <Ionicons name="time-outline" size={16} color="#1F2937" />
-            <Text style={styles.deliveryText}>3-5 days</Text>
+            <TouchableOpacity
+              style={styles.backIconButton}
+              onPress={handleBack}
+            >
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.wishlistIconButton}
+              onPress={handleToggleWishlist}
+            >
+              <Ionicons
+                name={isInWishlist(product.id) ? "heart" : "heart-outline"}
+                size={24}
+                color={isInWishlist(product.id) ? "#EF4444" : "#fff"}
+              />
+            </TouchableOpacity>
+            <View style={styles.deliveryBadge}>
+              <Ionicons name="time-outline" size={16} color="#1F2937" />
+              <Text style={styles.deliveryText}>3-5 days</Text>
+            </View>
           </View>
-        </LinearGradient>
+        ) : (
+          <LinearGradient colors={gradient} style={styles.imageContainer}>
+            <TouchableOpacity
+              style={styles.backIconButton}
+              onPress={handleBack}
+            >
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.wishlistIconButton}
+              onPress={handleToggleWishlist}
+            >
+              <Ionicons
+                name={isInWishlist(product.id) ? "heart" : "heart-outline"}
+                size={24}
+                color={isInWishlist(product.id) ? "#EF4444" : "#fff"}
+              />
+            </TouchableOpacity>
+            <Text style={styles.productEmoji}>🎨</Text>
+            <View style={styles.deliveryBadge}>
+              <Ionicons name="time-outline" size={16} color="#1F2937" />
+              <Text style={styles.deliveryText}>3-5 days</Text>
+            </View>
+          </LinearGradient>
+        )}
 
         {/* Product Info */}
         <View style={styles.contentContainer}>
@@ -163,12 +197,7 @@ export default function ProductDetailsScreen() {
             <Text style={styles.price}>€{product.price.toFixed(2)}</Text>
             <View style={styles.ratingContainer}>
               {[1, 2, 3, 4, 5].map((star) => (
-                <Ionicons
-                  key={star}
-                  name="star"
-                  size={16}
-                  color="#F59E0B"
-                />
+                <Ionicons key={star} name="star" size={16} color="#F59E0B" />
               ))}
               <Text style={styles.ratingText}>4.8 (124)</Text>
             </View>
@@ -333,6 +362,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
+    overflow: "hidden",
+  },
+  productDetailImage: {
+    width: "100%",
+    height: "100%",
   },
   backIconButton: {
     position: "absolute",
@@ -341,7 +375,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -355,9 +389,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 0, 110, 0.9)",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#FF006E",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 4,
   },
