@@ -7,10 +7,12 @@ import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    Modal,
     RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -25,6 +27,10 @@ export default function MessagesScreen() {
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(
     null,
   );
+  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeMessage, setComposeMessage] = useState("");
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -104,6 +110,44 @@ export default function MessagesScreen() {
     }
   };
 
+  const handleSendToAdmin = async () => {
+    if (!user) return;
+
+    if (!composeSubject.trim()) {
+      Alert.alert("Error", "Please enter a subject");
+      return;
+    }
+
+    if (!composeMessage.trim()) {
+      Alert.alert("Error", "Please enter a message");
+      return;
+    }
+
+    setSending(true);
+    const success = await messagesService.sendToAdmin(
+      user.id,
+      composeSubject.trim(),
+      composeMessage.trim(),
+    );
+    setSending(false);
+
+    if (success) {
+      Alert.alert("Success", "Your message has been sent to the admin", [
+        {
+          text: "OK",
+          onPress: () => {
+            setShowComposeModal(false);
+            setComposeSubject("");
+            setComposeMessage("");
+            loadMessages(); // Refresh to show the sent message
+          },
+        },
+      ]);
+    } else {
+      Alert.alert("Error", "Failed to send message. Please try again.");
+    }
+  };
+
   const unreadCount = messages.filter((m) => !m.read).length;
 
   if (loading) {
@@ -134,16 +178,13 @@ export default function MessagesScreen() {
           <Text style={styles.headerTitle}>Messages</Text>
           {unreadCount > 0 && (
             <View style={styles.unreadBadge}>
-              <Text style={styles.unreadBadgeText}>{unreadCount}</Text>
+              <Text style={styles.unreadBadgeText}>{unreadCount.toString()}</Text>
             </View>
           )}
         </View>
-        {unreadCount > 0 && (
-          <TouchableOpacity onPress={handleMarkAllAsRead}>
-            <Ionicons name="checkmark-done" size={24} color="#FF006E" />
-          </TouchableOpacity>
-        )}
-        {unreadCount === 0 && <View style={styles.placeholder} />}
+        <TouchableOpacity onPress={() => setShowComposeModal(true)}>
+          <Ionicons name="create-outline" size={24} color="#FF006E" />
+        </TouchableOpacity>
       </View>
 
       {/* Messages List */}
@@ -175,26 +216,49 @@ export default function MessagesScreen() {
                 <View style={styles.messageHeaderLeft}>
                   {!message.read && <View style={styles.unreadDot} />}
                   <View style={styles.messageHeaderText}>
-                    <Text
-                      style={[
-                        styles.messageSubject,
-                        !message.read && styles.messageSubjectUnread,
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {message.subject}
-                    </Text>
+                    <View style={styles.subjectRow}>
+                      <Text
+                        style={[
+                          styles.messageSubject,
+                          !message.read && styles.messageSubjectUnread,
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {message.subject}
+                      </Text>
+                      <View
+                        style={[
+                          styles.directionBadge,
+                          message.from_admin
+                            ? styles.fromAdminBadge
+                            : styles.toAdminBadge,
+                        ]}
+                      >
+                        <Ionicons
+                          name={
+                            message.from_admin ? "arrow-down" : "arrow-up"
+                          }
+                          size={10}
+                          color="#FFFFFF"
+                        />
+                        <Text style={styles.directionBadgeText}>
+                          {message.from_admin ? "From Admin" : "To Admin"}
+                        </Text>
+                      </View>
+                    </View>
                     <Text style={styles.messageDate}>
-                      {new Date(message.created_at).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        },
-                      )}
+                      {message.created_at
+                        ? new Date(message.created_at).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )
+                        : "Date unknown"}
                     </Text>
                   </View>
                 </View>
@@ -235,6 +299,69 @@ export default function MessagesScreen() {
           ))
         )}
       </ScrollView>
+
+      {/* Compose Message Modal */}
+      <Modal
+        visible={showComposeModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowComposeModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowComposeModal(false)}>
+              <Ionicons name="close" size={28} color="#1F2937" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Message Admin</Text>
+            <TouchableOpacity
+              onPress={handleSendToAdmin}
+              disabled={sending}
+            >
+              {sending ? (
+                <ActivityIndicator size="small" color="#FF006E" />
+              ) : (
+                <Ionicons name="send" size={24} color="#FF006E" />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            <View style={styles.composeInfo}>
+              <Ionicons name="information-circle" size={20} color="#3B82F6" />
+              <Text style={styles.composeInfoText}>
+                Send a message to the admin team. You'll receive a response here.
+              </Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Subject *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter subject"
+                placeholderTextColor="#9CA3AF"
+                value={composeSubject}
+                onChangeText={setComposeSubject}
+                editable={!sending}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Message *</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Type your message here..."
+                placeholderTextColor="#9CA3AF"
+                value={composeMessage}
+                onChangeText={setComposeMessage}
+                multiline
+                numberOfLines={8}
+                textAlignVertical="top"
+                editable={!sending}
+              />
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -391,5 +518,91 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#EF4444",
+  },
+  subjectRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4,
+  },
+  directionBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    gap: 4,
+  },
+  fromAdminBadge: {
+    backgroundColor: "#3B82F6",
+  },
+  toAdminBadge: {
+    backgroundColor: "#10B981",
+  },
+  directionBadgeText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  composeInfo: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#EFF6FF",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 20,
+    gap: 10,
+  },
+  composeInfoText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#1E40AF",
+    lineHeight: 18,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: "#1F2937",
+  },
+  textArea: {
+    minHeight: 150,
+    textAlignVertical: "top",
   },
 });

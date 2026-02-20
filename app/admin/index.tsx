@@ -111,7 +111,7 @@ export default function AdminScreen() {
         <View style={styles.welcomeCard}>
           <Ionicons name="shield-checkmark" size={48} color="#FF006E" />
           <Text style={styles.welcomeTitle}>Welcome, Admin</Text>
-          <Text style={styles.welcomeText}>{user.email}</Text>
+          <Text style={styles.welcomeText}>{user.email || "Admin"}</Text>
           <Text style={styles.welcomeSubtext}>
             Manage your print shop operations from here
           </Text>
@@ -141,13 +141,13 @@ export default function AdminScreen() {
                   size={32}
                   color={item.color}
                 />
-                {item.badge && item.badge > 0 && (
+                {item.badge && item.badge > 0 ? (
                   <View style={styles.badge}>
                     <Text style={styles.badgeText}>
-                      {item.badge > 99 ? "99+" : String(item.badge)}
+                      {item.badge > 99 ? "99+" : item.badge.toString()}
                     </Text>
                   </View>
-                )}
+                ) : null}
               </View>
               <View style={styles.menuInfo}>
                 <Text style={styles.menuTitle}>{item.title}</Text>

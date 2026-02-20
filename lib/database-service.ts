@@ -624,11 +624,14 @@ export interface Message {
   subject: string;
   message: string;
   read: boolean;
+  from_admin: boolean;
+  admin_sender_email?: string | null;
   created_at: string;
   updated_at: string;
   user?: {
+    id: string;
     email: string;
-    name: string;
+    full_name: string;
   };
 }
 
@@ -636,6 +639,8 @@ export interface NewMessage {
   user_id: string;
   subject: string;
   message: string;
+  from_admin?: boolean;
+  admin_sender_email?: string;
 }
 
 // ===================================
@@ -732,16 +737,53 @@ export const messagesService = {
       return false;
     }
   },
+
+  // Send message to admin (from user)
+  async sendToAdmin(userId: string, subject: string, message: string): Promise<boolean> {
+    try {
+      console.log("📤 User sending message to admin:", { userId, subject });
+
+      const { error } = await supabase.from("messages").insert([
+        {
+          user_id: userId,
+          subject: subject,
+          message: message,
+          from_admin: false,
+          read: false,
+        },
+      ]);
+
+      if (error) throw error;
+      console.log("✅ Message sent to admin successfully");
+      return true;
+    } catch (error) {
+      console.error("❌ Error sending message to admin:", error);
+      return false;
+    }
+  },
 };
 
 // Admin messaging service
 export const adminMessagesService = {
-  // Send message to user
+  // Send message to user (from admin)
   async sendMessage(newMessage: NewMessage): Promise<boolean> {
     try {
       console.log("📤 Admin sending message:", newMessage);
 
-      const { error } = await supabase.from("messages").insert([newMessage]);
+      // Get current admin user email
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const messageToInsert = {
+        ...newMessage,
+        from_admin: true,
+        admin_sender_email: user?.email || null,
+      };
+
+      const { error } = await supabase
+        .from("messages")
+        .insert([messageToInsert]);
 
       if (error) throw error;
       console.log("✅ Message sent successfully");
@@ -757,37 +799,66 @@ export const adminMessagesService = {
     try {
       console.log("📬 Admin: Fetching all messages...");
 
+      // Fetch messages without foreign key join (to avoid schema cache issues)
       const { data, error } = await supabase
         .from("messages")
-        .select(
-          `
-          *,
-          profiles!messages_user_id_fkey(full_name)
-        `,
-        )
+        .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Admin: Query error:", error);
+        throw error;
+      }
+
+      console.log(`📬 Admin: Fetched ${(data || []).length} messages from database`);
 
       // Map the data to include user information
       const messagesWithUsers = await Promise.all(
         (data || []).map(async (message: any) => {
-          // Get user email from auth
-          const { data: userData } = await supabase.auth.admin.getUserById(
-            message.user_id,
-          );
+          try {
+            // Get user profile info
+            const { data: profile, error: profileError } = await supabase
+              .from("profiles")
+              .select("id, full_name, company, phone")
+              .eq("id", message.user_id)
+              .single();
 
-          return {
-            ...message,
-            user: {
-              email: userData?.user?.email || "N/A",
-              name: message.profiles?.full_name || "Unknown User",
-            },
-          };
+            if (profileError) {
+              console.warn(`⚠️ Could not fetch profile for user ${message.user_id}:`, profileError);
+            }
+
+            // Get user email from auth (requires admin API)
+            const { data: userData, error: userError } = await supabase.auth.admin.getUserById(
+              message.user_id,
+            );
+
+            if (userError) {
+              console.warn(`⚠️ Could not fetch email for user ${message.user_id}:`, userError);
+            }
+
+            return {
+              ...message,
+              user: {
+                id: message.user_id,
+                email: userData?.user?.email || "No email",
+                full_name: profile?.full_name || "Unknown User",
+              },
+            };
+          } catch (err) {
+            console.error(`❌ Error processing message ${message.id}:`, err);
+            return {
+              ...message,
+              user: {
+                id: message.user_id,
+                email: "Error loading",
+                full_name: "Unknown User",
+              },
+            };
+          }
         }),
       );
 
-      console.log(`✅ Admin: Fetched ${messagesWithUsers.length} messages`);
+      console.log(`✅ Admin: Fetched ${messagesWithUsers.length} messages with user info`);
       return messagesWithUsers;
     } catch (error) {
       console.error("❌ Admin: Error fetching messages:", error);
@@ -830,6 +901,23 @@ export const adminMessagesService = {
       return true;
     } catch (error) {
       console.error("❌ Admin: Error deleting message:", error);
+      return false;
+    }
+  },
+
+  // Mark message as read (admin)
+  async markAsRead(messageId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .update({ read: true })
+        .eq("id", messageId);
+
+      if (error) throw error;
+      console.log("✅ Admin: Message marked as read:", messageId);
+      return true;
+    } catch (error) {
+      console.error("❌ Admin: Error marking message as read:", error);
       return false;
     }
   },

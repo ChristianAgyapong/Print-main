@@ -1,6 +1,7 @@
 import {
     adminMessagesService,
     adminService,
+    Message,
     Profile,
 } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,6 +14,7 @@ import {
     KeyboardAvoidingView,
     Modal,
     Platform,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
@@ -26,25 +28,51 @@ type UserWithEmail = Profile & { email: string };
 
 export default function AdminMessagesScreen() {
   const router = useRouter();
+  const [showInbox, setShowInbox] = useState(false);
   const [users, setUsers] = useState<UserWithEmail[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithEmail | null>(null);
   const [showComposeModal, setShowComposeModal] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadUsers();
-  }, []);
+    loadData();
+  }, [showInbox]);
+
+  const loadData = async () => {
+    setLoading(true);
+    if (showInbox) {
+      await loadMessages();
+    } else {
+      await loadUsers();
+    }
+    setLoading(false);
+  };
+
+  const loadMessages = async () => {
+    const data = await adminMessagesService.getAllMessages();
+    console.log(`📬 Admin: Loaded ${data.length} messages`);
+    // Filter to show messages FROM users (to admin)
+    const userMessages = data.filter((msg) => !msg.from_admin);
+    setMessages(userMessages);
+  };
 
   const loadUsers = async () => {
-    setLoading(false);
     const data = await adminService.getAllUsers();
     console.log(`📬 Admin Messages: Loaded ${data.length} users`);
     setUsers(data);
-    setLoading(false);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
   };
 
   const handleSelectUser = (user: UserWithEmail) => {
@@ -70,7 +98,7 @@ export default function AdminMessagesScreen() {
     if (success) {
       Alert.alert(
         "Success",
-        `Message sent to ${selectedUser.full_name || selectedUser.email}`,
+        `Message sent to ${selectedUser.full_name || selectedUser.email || "user"}`,
         [
           {
             text: "OK",
@@ -90,9 +118,9 @@ export default function AdminMessagesScreen() {
 
   const filteredUsers = users.filter(
     (user) =>
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.company?.toLowerCase().includes(searchQuery.toLowerCase()),
+      (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (user.full_name && user.full_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (user.company && user.company.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   if (loading) {
@@ -101,11 +129,15 @@ export default function AdminMessagesScreen() {
         <StatusBar style="dark" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FF006E" />
-          <Text style={styles.loadingText}>Loading users...</Text>
+          <Text style={styles.loadingText}>
+            {showInbox ? "Loading messages..." : "Loading users..."}
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
+
+  const unreadCount = messages.filter((m) => !m.read).length;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -119,43 +151,178 @@ export default function AdminMessagesScreen() {
         >
           <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Send Messages</Text>
-        <View style={styles.placeholder} />
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons
-          name="search"
-          size={20}
-          color="#9CA3AF"
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search users by name, email, or company..."
-          placeholderTextColor="#9CA3AF"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery("")}>
-            <Ionicons name="close-circle" size={20} color="#9CA3AF" />
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Info Banner */}
-      <View style={styles.infoBanner}>
-        <Ionicons name="information-circle" size={20} color="#3B82F6" />
-        <Text style={styles.infoText}>
-          Select a user to send them a message. They'll receive it in their
-          Messages section.
+        <Text style={styles.headerTitle}>
+          {showInbox ? "Inbox" : "Send Message"}
         </Text>
+        <TouchableOpacity
+          onPress={() => {
+            setShowInbox(!showInbox);
+            setSearchQuery("");
+          }}
+          style={styles.toggleButton}
+        >
+          {showInbox ? (
+            <>
+              <Ionicons name="send" size={20} color="#FF006E" />
+              <Text style={styles.toggleButtonText}>Send</Text>
+            </>
+          ) : (
+            <>
+              <Ionicons name="mail" size={20} color="#FF006E" />
+              <Text style={styles.toggleButtonText}>Inbox</Text>
+              {unreadCount > 0 && (
+                <View style={styles.headerBadge}>
+                  <Text style={styles.headerBadgeText}>{String(unreadCount)}</Text>
+                </View>
+              )}
+            </>
+          )}
+        </TouchableOpacity>
       </View>
 
-      {/* Users List */}
-      <ScrollView style={styles.content}>
+      {/* Content based on view */}
+      {showInbox ? (
+        // Inbox View
+        <>
+          <View style={styles.infoBanner}>
+            <Ionicons name="information-circle" size={20} color="#3B82F6" />
+            <Text style={styles.infoText}>
+              Messages received from users will appear here.
+            </Text>
+          </View>
+
+          <ScrollView
+            style={styles.content}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          >
+            {messages.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="mail-open-outline" size={64} color="#D1D5DB" />
+                <Text style={styles.emptyTitle}>No Messages</Text>
+                <Text style={styles.emptyText}>
+                  You haven't received any messages from users yet
+                </Text>
+              </View>
+            ) : (
+              messages.map((msg) => (
+                <TouchableOpacity
+                  key={msg.id}
+                  style={[
+                    styles.messageCard,
+                    !msg.read && styles.unreadMessage,
+                  ]}
+                  onPress={() => {
+                    setExpandedMessageId(
+                      expandedMessageId === msg.id ? null : msg.id
+                    );
+                    if (!msg.read) {
+                      adminMessagesService.markAsRead(msg.id);
+                      loadMessages();
+                    }
+                  }}
+                >
+                  <View style={styles.messageHeader}>
+                    <View style={styles.messageUserInfo}>
+                      <View style={styles.userAvatar}>
+                        <Text style={styles.userAvatarText}>
+                          {(msg.user?.full_name && msg.user.full_name.charAt(0).toUpperCase()) ||
+                            (msg.user?.email && msg.user.email.charAt(0).toUpperCase()) ||
+                            "U"}
+                        </Text>
+                      </View>
+                      <View style={styles.messageUserDetails}>
+                        <Text style={styles.messageUserName}>
+                          {msg.user?.full_name || "Unknown User"}
+                        </Text>
+                        <Text style={styles.messageUserEmail}>
+                          {msg.user?.email || "No email"}
+                        </Text>
+                      </View>
+                    </View>
+                    {!msg.read && <View style={styles.unreadDot} />}
+                  </View>
+
+                  <Text style={styles.messageSubject}>{msg.subject}</Text>
+
+                  {expandedMessageId === msg.id ? (
+                    <Text style={styles.messageBody}>{msg.message}</Text>
+                  ) : (
+                    <Text style={styles.messagePreview} numberOfLines={2}>
+                      {msg.message}
+                    </Text>
+                  )}
+
+                  <View style={styles.messageFooter}>
+                    <Text style={styles.messageDate}>
+                      {new Date(msg.created_at).toLocaleString()}
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.replyButton}
+                      onPress={() => {
+                        if (msg.user && msg.user.id) {
+                          // Find the full user profile from users list
+                          const fullUser = users.find(u => u.id === msg.user!.id);
+                          if (fullUser) {
+                            setSelectedUser(fullUser);
+                            setSubject(`Re: ${msg.subject}`);
+                            setShowInbox(false);
+                            setShowComposeModal(true);
+                          }
+                        }
+                      }}
+                    >
+                      <Ionicons name="arrow-undo" size={16} color="#FF006E" />
+                      <Text style={styles.replyButtonText}>Reply</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+        </>
+      ) : (
+        // Compose View
+        <>
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Ionicons
+              name="search"
+              size={20}
+              color="#9CA3AF"
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search users by name, email, or company..."
+              placeholderTextColor="#9CA3AF"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Info Banner */}
+          <View style={styles.infoBanner}>
+            <Ionicons name="information-circle" size={20} color="#3B82F6" />
+            <Text style={styles.infoText}>
+              Select a user to send them a message. They'll receive it in their
+              Messages section.
+            </Text>
+          </View>
+
+          {/* Users List */}
+          <ScrollView
+            style={styles.content}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          >
         {filteredUsers.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="people-outline" size={64} color="#D1D5DB" />
@@ -175,8 +342,9 @@ export default function AdminMessagesScreen() {
             >
               <View style={styles.userAvatar}>
                 <Text style={styles.userAvatarText}>
-                  {user.full_name?.charAt(0).toUpperCase() ||
-                    user.email.charAt(0).toUpperCase()}
+                  {(user.full_name && user.full_name.charAt(0).toUpperCase()) ||
+                    (user.email && user.email.charAt(0).toUpperCase()) ||
+                    "U"}
                 </Text>
               </View>
 
@@ -184,20 +352,22 @@ export default function AdminMessagesScreen() {
                 <Text style={styles.userName}>
                   {user.full_name || "No Name"}
                 </Text>
-                <Text style={styles.userEmail}>{user.email}</Text>
-                {user.company && (
-                  <Text style={styles.userCompany}>🏢 {user.company}</Text>
-                )}
-                {user.phone && (
-                  <Text style={styles.userPhone}>📱 {user.phone}</Text>
-                )}
+                <Text style={styles.userEmail}>{user.email || "No Email"}</Text>
+                {user.company ? (
+                  <Text style={styles.userCompany}>{`🏢 ${user.company}`}</Text>
+                ) : null}
+                {user.phone ? (
+                  <Text style={styles.userPhone}>{`📱 ${user.phone}`}</Text>
+                ) : null}
               </View>
 
               <Ionicons name="chatbubble-ellipses" size={24} color="#FF006E" />
             </TouchableOpacity>
           ))
         )}
-      </ScrollView>
+          </ScrollView>
+        </>
+      )}
 
       {/* Compose Message Modal */}
       <Modal
@@ -232,7 +402,7 @@ export default function AdminMessagesScreen() {
                 <Text style={styles.recipientName}>
                   {selectedUser?.full_name || "Unknown"}
                 </Text>
-                <Text style={styles.recipientEmail}>{selectedUser?.email}</Text>
+                <Text style={styles.recipientEmail}>{selectedUser?.email || "No Email"}</Text>
               </View>
 
               {/* Subject Input */}
@@ -323,6 +493,35 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 32,
+  },
+  toggleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#FFF1F7",
+    borderRadius: 8,
+  },
+  toggleButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FF006E",
+  },
+  headerBadge: {
+    backgroundColor: "#FF006E",
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    marginLeft: 4,
+  },
+  headerBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700",
   },
   searchContainer: {
     flexDirection: "row",
@@ -526,5 +725,92 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#FFFFFF",
+  },
+  messageCard: {
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  unreadMessage: {
+    borderLeftWidth: 4,
+    borderLeftColor: "#FF006E",
+  },
+  messageHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  messageUserInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  messageUserDetails: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  messageUserName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1F2937",
+  },
+  messageUserEmail: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#FF006E",
+  },
+  messageSubject: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginBottom: 8,
+  },
+  messagePreview: {
+    fontSize: 14,
+    color: "#6B7280",
+    lineHeight: 20,
+  },
+  messageBody: {
+    fontSize: 14,
+    color: "#374151",
+    lineHeight: 20,
+  },
+  messageFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+  },
+  messageDate: {
+    fontSize: 12,
+    color: "#9CA3AF",
+  },
+  replyButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "#FFF1F7",
+    borderRadius: 8,
+  },
+  replyButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#FF006E",
   },
 });
