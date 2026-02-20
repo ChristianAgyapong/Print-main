@@ -153,46 +153,48 @@ export default function AdminOrdersScreen() {
                 <View style={styles.orderMainInfo}>
                   <View style={styles.orderTitleRow}>
                     <Text style={styles.orderNumber}>
-                      Order #{order.id.substring(0, 8)}
+                      {order.id ? `Order #${order.id.substring(0, 8)}` : "Order"}
                     </Text>
                     <View
                       style={[
                         styles.statusBadge,
                         {
-                          backgroundColor: `${getStatusColor(order.status)}20`,
+                          backgroundColor: `${getStatusColor(order.status || "pending")}20`,
                         },
                       ]}
                     >
                       <Text
                         style={[
                           styles.statusText,
-                          { color: getStatusColor(order.status) },
+                          { color: getStatusColor(order.status || "pending") },
                         ]}
                       >
-                        {order.status.toUpperCase()}
+                        {(order.status || "pending").toUpperCase()}
                       </Text>
                     </View>
                   </View>
                   <Text style={styles.orderCustomer}>
-                    Customer: {order.user?.name || "Unknown Customer"}
+                    {`Customer: ${order.user?.name || "Unknown Customer"}`}
                   </Text>
                   <Text style={styles.orderEmail}>
-                    Email: {order.user?.email || "N/A"}
+                    {`Email: ${order.user?.email || "N/A"}`}
                   </Text>
-                  {order.user?.phone && (
+                  {order.user?.phone ? (
                     <Text style={styles.orderPhone}>
-                      Phone: {order.user.phone}
+                      {`Phone: ${order.user.phone}`}
                     </Text>
-                  )}
+                  ) : null}
                   <Text style={styles.orderDate}>
-                    {new Date(order.created_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
+                    {order.created_at
+                      ? new Date(order.created_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "Date N/A"}
                   </Text>
                   <Text style={styles.orderTotal}>
-                    €{order.total_amount.toFixed(2)}
+                    {`€${(order.total_amount || 0).toFixed(2)}`}
                   </Text>
                 </View>
                 <Ionicons
@@ -208,21 +210,27 @@ export default function AdminOrdersScreen() {
               {expandedOrderId === order.id && (
                 <View style={styles.orderDetails}>
                   <Text style={styles.detailsTitle}>Order Items:</Text>
-                  {order.items?.map((item) => (
-                    <View key={item.id} style={styles.itemRow}>
-                      <Text style={styles.itemName}>
-                        {item.product?.title || "Product"}
-                      </Text>
-                      <Text style={styles.itemQty}>Qty: {item.quantity}</Text>
-                      <Text style={styles.itemPrice}>
-                        €{item.price.toFixed(2)}
-                      </Text>
-                    </View>
-                  ))}
+                  {order.items && order.items.length > 0 ? (
+                    order.items.map((item) => (
+                      <View key={item.id} style={styles.itemRow}>
+                        <Text style={styles.itemName}>
+                          {item.product?.title || "Product"}
+                        </Text>
+                        <Text style={styles.itemQty}>
+                          {`Qty: ${item.quantity || 0}`}
+                        </Text>
+                        <Text style={styles.itemPrice}>
+                          {`€${(item.price || 0).toFixed(2)}`}
+                        </Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>No items found</Text>
+                  )}
 
                   <TouchableOpacity
                     style={styles.updateButton}
-                    onPress={() => handleUpdateStatus(order.id, order.status)}
+                    onPress={() => handleUpdateStatus(order.id, order.status || "pending")}
                   >
                     <Ionicons name="refresh" size={20} color="#FFFFFF" />
                     <Text style={styles.updateButtonText}>Update Status</Text>

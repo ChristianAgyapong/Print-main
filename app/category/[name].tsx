@@ -9,13 +9,13 @@ import {
     ActivityIndicator,
     Dimensions,
     Image,
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 const productCardWidth = (width - 60) / 2; // 2 columns with padding

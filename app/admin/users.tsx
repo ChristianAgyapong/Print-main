@@ -160,7 +160,7 @@ export default function AdminUsersScreen() {
                 ) : (
                   <View style={styles.avatarPlaceholder}>
                     <Text style={styles.avatarText}>
-                      {user.full_name?.charAt(0).toUpperCase() || "U"}
+                      {(user.full_name && user.full_name.charAt(0).toUpperCase()) || "U"}
                     </Text>
                   </View>
                 )}
@@ -170,33 +170,34 @@ export default function AdminUsersScreen() {
                 <Text style={styles.userName}>
                   {user.full_name || "No Name"}
                 </Text>
-                {user.company && (
+                {user.company ? (
                   <View style={styles.companyRow}>
                     <Ionicons name="business" size={14} color="#6B7280" />
                     <Text style={styles.companyText}>{user.company}</Text>
                   </View>
-                )}
-                {user.phone && (
+                ) : null}
+                {user.phone ? (
                   <View style={styles.infoRow}>
                     <Ionicons name="call" size={14} color="#6B7280" />
                     <Text style={styles.infoText}>{user.phone}</Text>
                   </View>
-                )}
-                {user.address_city && user.address_country && (
+                ) : null}
+                {user.address_city && user.address_country ? (
                   <View style={styles.infoRow}>
                     <Ionicons name="location" size={14} color="#6B7280" />
                     <Text style={styles.infoText}>
-                      {user.address_city}, {user.address_country}
+                      {`${user.address_city}, ${user.address_country}`}
                     </Text>
                   </View>
-                )}
+                ) : null}
                 <Text style={styles.joinDate}>
-                  Joined{" "}
-                  {new Date(user.created_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {user.created_at
+                    ? `Joined ${new Date(user.created_at).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}`
+                    : "Join date unknown"}
                 </Text>
               </View>
             </View>

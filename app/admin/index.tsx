@@ -144,7 +144,7 @@ export default function AdminScreen() {
                 {item.badge && item.badge > 0 && (
                   <View style={styles.badge}>
                     <Text style={styles.badgeText}>
-                      {item.badge > 99 ? "99+" : item.badge}
+                      {item.badge > 99 ? "99+" : String(item.badge)}
                     </Text>
                   </View>
                 )}

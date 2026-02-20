@@ -2,17 +2,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { storageService, Upload } from "@/lib/storage-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
     FlatList,
-    SafeAreaView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SavedDesignsScreen() {
   const { user } = useAuth();
