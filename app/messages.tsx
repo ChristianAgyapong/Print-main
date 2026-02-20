@@ -178,7 +178,9 @@ export default function MessagesScreen() {
           <Text style={styles.headerTitle}>Messages</Text>
           {unreadCount > 0 && (
             <View style={styles.unreadBadge}>
-              <Text style={styles.unreadBadgeText}>{unreadCount.toString()}</Text>
+              <Text style={styles.unreadBadgeText}>
+                {unreadCount.toString()}
+              </Text>
             </View>
           )}
         </View>
@@ -235,9 +237,7 @@ export default function MessagesScreen() {
                         ]}
                       >
                         <Ionicons
-                          name={
-                            message.from_admin ? "arrow-down" : "arrow-up"
-                          }
+                          name={message.from_admin ? "arrow-down" : "arrow-up"}
                           size={10}
                           color="#FFFFFF"
                         />
@@ -313,10 +313,7 @@ export default function MessagesScreen() {
               <Ionicons name="close" size={28} color="#1F2937" />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Message Admin</Text>
-            <TouchableOpacity
-              onPress={handleSendToAdmin}
-              disabled={sending}
-            >
+            <TouchableOpacity onPress={handleSendToAdmin} disabled={sending}>
               {sending ? (
                 <ActivityIndicator size="small" color="#FF006E" />
               ) : (
@@ -329,7 +326,8 @@ export default function MessagesScreen() {
             <View style={styles.composeInfo}>
               <Ionicons name="information-circle" size={20} color="#3B82F6" />
               <Text style={styles.composeInfoText}>
-                Send a message to the admin team. You'll receive a response here.
+                Send a message to the admin team. You'll receive a response
+                here.
               </Text>
             </View>
 

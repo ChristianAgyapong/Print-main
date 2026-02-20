@@ -160,7 +160,9 @@ export default function AdminUsersScreen() {
                 ) : (
                   <View style={styles.avatarPlaceholder}>
                     <Text style={styles.avatarText}>
-                      {(user.full_name && user.full_name.charAt(0).toUpperCase()) || "U"}
+                      {(user.full_name &&
+                        user.full_name.charAt(0).toUpperCase()) ||
+                        "U"}
                     </Text>
                   </View>
                 )}
@@ -192,11 +194,14 @@ export default function AdminUsersScreen() {
                 ) : null}
                 <Text style={styles.joinDate}>
                   {user.created_at
-                    ? `Joined ${new Date(user.created_at).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}`
+                    ? `Joined ${new Date(user.created_at).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        },
+                      )}`
                     : "Join date unknown"}
                 </Text>
               </View>

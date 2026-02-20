@@ -1,26 +1,26 @@
 import {
-    adminMessagesService,
-    adminService,
-    Message,
-    Profile,
+  adminMessagesService,
+  adminService,
+  Message,
+  Profile,
 } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -39,7 +39,9 @@ export default function AdminMessagesScreen() {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
+  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     loadData();
@@ -118,9 +120,12 @@ export default function AdminMessagesScreen() {
 
   const filteredUsers = users.filter(
     (user) =>
-      (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (user.full_name && user.full_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (user.company && user.company.toLowerCase().includes(searchQuery.toLowerCase())),
+      (user.email &&
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (user.full_name &&
+        user.full_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (user.company &&
+        user.company.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   if (loading) {
@@ -172,7 +177,9 @@ export default function AdminMessagesScreen() {
               <Text style={styles.toggleButtonText}>Inbox</Text>
               {unreadCount > 0 && (
                 <View style={styles.headerBadge}>
-                  <Text style={styles.headerBadgeText}>{String(unreadCount)}</Text>
+                  <Text style={styles.headerBadgeText}>
+                    {String(unreadCount)}
+                  </Text>
                 </View>
               )}
             </>
@@ -215,7 +222,7 @@ export default function AdminMessagesScreen() {
                   ]}
                   onPress={() => {
                     setExpandedMessageId(
-                      expandedMessageId === msg.id ? null : msg.id
+                      expandedMessageId === msg.id ? null : msg.id,
                     );
                     if (!msg.read) {
                       adminMessagesService.markAsRead(msg.id);
@@ -227,8 +234,10 @@ export default function AdminMessagesScreen() {
                     <View style={styles.messageUserInfo}>
                       <View style={styles.userAvatar}>
                         <Text style={styles.userAvatarText}>
-                          {(msg.user?.full_name && msg.user.full_name.charAt(0).toUpperCase()) ||
-                            (msg.user?.email && msg.user.email.charAt(0).toUpperCase()) ||
+                          {(msg.user?.full_name &&
+                            msg.user.full_name.charAt(0).toUpperCase()) ||
+                            (msg.user?.email &&
+                              msg.user.email.charAt(0).toUpperCase()) ||
                             "U"}
                         </Text>
                       </View>
@@ -263,7 +272,9 @@ export default function AdminMessagesScreen() {
                       onPress={() => {
                         if (msg.user && msg.user.id) {
                           // Find the full user profile from users list
-                          const fullUser = users.find(u => u.id === msg.user!.id);
+                          const fullUser = users.find(
+                            (u) => u.id === msg.user!.id,
+                          );
                           if (fullUser) {
                             setSelectedUser(fullUser);
                             setSubject(`Re: ${msg.subject}`);
@@ -323,48 +334,57 @@ export default function AdminMessagesScreen() {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
           >
-        {filteredUsers.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="people-outline" size={64} color="#D1D5DB" />
-            <Text style={styles.emptyTitle}>No Users Found</Text>
-            <Text style={styles.emptyText}>
-              {searchQuery
-                ? "Try a different search term"
-                : "No registered users yet"}
-            </Text>
-          </View>
-        ) : (
-          filteredUsers.map((user) => (
-            <TouchableOpacity
-              key={user.id}
-              style={styles.userCard}
-              onPress={() => handleSelectUser(user)}
-            >
-              <View style={styles.userAvatar}>
-                <Text style={styles.userAvatarText}>
-                  {(user.full_name && user.full_name.charAt(0).toUpperCase()) ||
-                    (user.email && user.email.charAt(0).toUpperCase()) ||
-                    "U"}
+            {filteredUsers.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="people-outline" size={64} color="#D1D5DB" />
+                <Text style={styles.emptyTitle}>No Users Found</Text>
+                <Text style={styles.emptyText}>
+                  {searchQuery
+                    ? "Try a different search term"
+                    : "No registered users yet"}
                 </Text>
               </View>
+            ) : (
+              filteredUsers.map((user) => (
+                <TouchableOpacity
+                  key={user.id}
+                  style={styles.userCard}
+                  onPress={() => handleSelectUser(user)}
+                >
+                  <View style={styles.userAvatar}>
+                    <Text style={styles.userAvatarText}>
+                      {(user.full_name &&
+                        user.full_name.charAt(0).toUpperCase()) ||
+                        (user.email && user.email.charAt(0).toUpperCase()) ||
+                        "U"}
+                    </Text>
+                  </View>
 
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>
-                  {user.full_name || "No Name"}
-                </Text>
-                <Text style={styles.userEmail}>{user.email || "No Email"}</Text>
-                {user.company ? (
-                  <Text style={styles.userCompany}>{`🏢 ${user.company}`}</Text>
-                ) : null}
-                {user.phone ? (
-                  <Text style={styles.userPhone}>{`📱 ${user.phone}`}</Text>
-                ) : null}
-              </View>
+                  <View style={styles.userInfo}>
+                    <Text style={styles.userName}>
+                      {user.full_name || "No Name"}
+                    </Text>
+                    <Text style={styles.userEmail}>
+                      {user.email || "No Email"}
+                    </Text>
+                    {user.company ? (
+                      <Text
+                        style={styles.userCompany}
+                      >{`🏢 ${user.company}`}</Text>
+                    ) : null}
+                    {user.phone ? (
+                      <Text style={styles.userPhone}>{`📱 ${user.phone}`}</Text>
+                    ) : null}
+                  </View>
 
-              <Ionicons name="chatbubble-ellipses" size={24} color="#FF006E" />
-            </TouchableOpacity>
-          ))
-        )}
+                  <Ionicons
+                    name="chatbubble-ellipses"
+                    size={24}
+                    color="#FF006E"
+                  />
+                </TouchableOpacity>
+              ))
+            )}
           </ScrollView>
         </>
       )}
@@ -402,7 +422,9 @@ export default function AdminMessagesScreen() {
                 <Text style={styles.recipientName}>
                   {selectedUser?.full_name || "Unknown"}
                 </Text>
-                <Text style={styles.recipientEmail}>{selectedUser?.email || "No Email"}</Text>
+                <Text style={styles.recipientEmail}>
+                  {selectedUser?.email || "No Email"}
+                </Text>
               </View>
 
               {/* Subject Input */}

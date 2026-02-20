@@ -1,10 +1,13 @@
 # Admin Messages Setup Guide
 
 ## Overview
+
 This guide will help you set up the admin messaging system that allows admins to send messages to users in your Print App.
 
 ## Problem
+
 When trying to send a message as an admin, you get this error:
+
 ```
 Error: new row violates row-level security policy for table "messages"
 ```
@@ -64,18 +67,22 @@ messages
 ## RLS Policies Explained
 
 ### 1. Admins Can Insert Messages
+
 - **Purpose**: Allows admins to send messages to any user
 - **Condition**: User's email must be in the admin list
 
 ### 2. Users Can Read Their Own Messages
+
 - **Purpose**: Users can only see messages sent to them
 - **Condition**: `auth.uid() = user_id`
 
 ### 3. Users Can Update Their Own Messages
+
 - **Purpose**: Users can mark messages as read
 - **Condition**: `auth.uid() = user_id`
 
 ### 4. Admins Can Read All Messages
+
 - **Purpose**: Admins can view all messages in the system
 - **Condition**: User's email must be in the admin list
 
@@ -117,21 +124,25 @@ USING (
 ## Troubleshooting
 
 ### Error: "new row violates row-level security policy"
+
 - **Cause**: The RLS policy doesn't recognize you as an admin
-- **Solution**: 
+- **Solution**:
   1. Check that your email matches exactly in the policies
   2. Emails are case-sensitive
   3. Make sure you're logged in with the admin account
 
 ### Messages not appearing for users
+
 - **Cause**: The SELECT policy might not be set correctly
 - **Solution**: Verify the "Users can read their own messages" policy exists
 
 ### Can't mark messages as read
+
 - **Cause**: UPDATE policy is missing or incorrect
 - **Solution**: Check the "Users can update their own messages" policy
 
 ### Foreign key violation
+
 - **Cause**: The user_id doesn't exist in auth.users
 - **Solution**: Make sure you're sending messages to valid user IDs
 
@@ -148,17 +159,19 @@ USING (
 ## API Usage
 
 ### Send Message (Admin Only)
+
 ```typescript
 import { adminMessagesService } from "@/lib/database-service";
 
 await adminMessagesService.sendMessage({
   user_id: "user-uuid-here",
   subject: "Welcome!",
-  message: "Thanks for signing up!"
+  message: "Thanks for signing up!",
 });
 ```
 
 ### Get User Messages
+
 ```typescript
 import { messagesService } from "@/lib/database-service";
 
@@ -166,6 +179,7 @@ const messages = await messagesService.getUserMessages(userId);
 ```
 
 ### Mark Message as Read
+
 ```typescript
 await messagesService.markAsRead(messageId);
 ```
@@ -181,6 +195,7 @@ await messagesService.markAsRead(messageId);
 ## Next Steps
 
 After setup, you can enhance the system with:
+
 - Email notifications when users receive messages
 - Push notifications for mobile apps
 - Message categories (announcements, promotions, support)

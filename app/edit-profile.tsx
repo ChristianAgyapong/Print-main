@@ -321,7 +321,9 @@ export default function EditProfileScreen() {
                 >
                   <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>Edit Profile</Text>
+                <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>
+                  Edit Profile
+                </Text>
                 <View style={{ width: 40 }} />
               </View>
 
@@ -362,7 +364,9 @@ export default function EditProfileScreen() {
               {/* Form */}
               <View style={styles.form}>
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, dynamicStyles.label]}>Full Name *</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>
+                    Full Name *
+                  </Text>
                   <TextInput
                     style={[styles.input, dynamicStyles.input]}
                     value={fullName}
@@ -375,7 +379,11 @@ export default function EditProfileScreen() {
                 <View style={styles.inputGroup}>
                   <Text style={[styles.label, dynamicStyles.label]}>Email</Text>
                   <TextInput
-                    style={[styles.input, dynamicStyles.input, styles.inputDisabled]}
+                    style={[
+                      styles.input,
+                      dynamicStyles.input,
+                      styles.inputDisabled,
+                    ]}
                     value={user?.email || ""}
                     editable={false}
                     placeholderTextColor={colors.textSecondary}
@@ -384,7 +392,9 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, dynamicStyles.label]}>Phone Number</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>
+                    Phone Number
+                  </Text>
                   <TextInput
                     style={[styles.input, dynamicStyles.input]}
                     value={phone}
@@ -396,7 +406,11 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.sectionDivider}>
-                  <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>About</Text>
+                  <Text
+                    style={[styles.sectionTitle, dynamicStyles.sectionTitle]}
+                  >
+                    About
+                  </Text>
                 </View>
 
                 <View style={styles.inputGroup}>
@@ -414,7 +428,9 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, dynamicStyles.label]}>Company</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>
+                    Company
+                  </Text>
                   <TextInput
                     style={[styles.input, dynamicStyles.input]}
                     value={company}
@@ -425,7 +441,9 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, dynamicStyles.label]}>Job Title</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>
+                    Job Title
+                  </Text>
                   <TextInput
                     style={[styles.input, dynamicStyles.input]}
                     value={jobTitle}
@@ -436,11 +454,17 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.sectionDivider}>
-                  <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Personal Information</Text>
+                  <Text
+                    style={[styles.sectionTitle, dynamicStyles.sectionTitle]}
+                  >
+                    Personal Information
+                  </Text>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, dynamicStyles.label]}>Date of Birth</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>
+                    Date of Birth
+                  </Text>
                   <TextInput
                     style={[styles.input, dynamicStyles.input]}
                     value={dateOfBirth}
@@ -456,7 +480,9 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, dynamicStyles.label]}>Gender</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>
+                    Gender
+                  </Text>
                   <View style={styles.genderContainer}>
                     {["Male", "Female", "Other", "Prefer not to say"].map(
                       (option) => (
@@ -484,11 +510,17 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.sectionDivider}>
-                  <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Address</Text>
+                  <Text
+                    style={[styles.sectionTitle, dynamicStyles.sectionTitle]}
+                  >
+                    Address
+                  </Text>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, dynamicStyles.label]}>Street Address</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>
+                    Street Address
+                  </Text>
                   <TextInput
                     style={[styles.input, dynamicStyles.input]}
                     value={addressStreet}
@@ -500,7 +532,9 @@ export default function EditProfileScreen() {
 
                 <View style={styles.row}>
                   <View style={[styles.inputGroup, styles.halfWidth]}>
-                    <Text style={[styles.label, dynamicStyles.label]}>City</Text>
+                    <Text style={[styles.label, dynamicStyles.label]}>
+                      City
+                    </Text>
                     <TextInput
                       style={[styles.input, dynamicStyles.input]}
                       value={addressCity}
@@ -510,7 +544,9 @@ export default function EditProfileScreen() {
                     />
                   </View>
                   <View style={[styles.inputGroup, styles.halfWidth]}>
-                    <Text style={[styles.label, dynamicStyles.label]}>State/Province</Text>
+                    <Text style={[styles.label, dynamicStyles.label]}>
+                      State/Province
+                    </Text>
                     <TextInput
                       style={[styles.input, dynamicStyles.input]}
                       value={addressState}
@@ -523,7 +559,9 @@ export default function EditProfileScreen() {
 
                 <View style={styles.row}>
                   <View style={[styles.inputGroup, styles.halfWidth]}>
-                    <Text style={[styles.label, dynamicStyles.label]}>ZIP/Postal Code</Text>
+                    <Text style={[styles.label, dynamicStyles.label]}>
+                      ZIP/Postal Code
+                    </Text>
                     <TextInput
                       style={[styles.input, dynamicStyles.input]}
                       value={addressZip}
@@ -534,7 +572,9 @@ export default function EditProfileScreen() {
                     />
                   </View>
                   <View style={[styles.inputGroup, styles.halfWidth]}>
-                    <Text style={[styles.label, dynamicStyles.label]}>Country</Text>
+                    <Text style={[styles.label, dynamicStyles.label]}>
+                      Country
+                    </Text>
                     <TextInput
                       style={[styles.input, dynamicStyles.input]}
                       value={addressCountry}

@@ -1,8 +1,9 @@
 import { EmptyState } from "@/components/empty-state";
 import { OrderStatusTracker } from "@/components/order-status-tracker";
-import { OrderCardSkeleton } from  "@/components/skeleton-loader";
+import { OrderCardSkeleton } from "@/components/skeleton-loader";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Order, ordersService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -18,7 +19,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useThemeColors } from "@/hooks/use-theme-colors";
 
 const { width } = Dimensions.get("window");
 
@@ -160,7 +160,9 @@ export default function OrdersScreen() {
       >
         {/* Header */}
         <View style={[styles.header, dynamicStyles.header]}>
-          <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>My Orders</Text>
+          <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>
+            My Orders
+          </Text>
           <Text style={[styles.headerSubtitle, dynamicStyles.headerSubtitle]}>
             Track and manage your orders
           </Text>
@@ -169,7 +171,9 @@ export default function OrdersScreen() {
         {/* Orders Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Order History</Text>
+            <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
+              Order History
+            </Text>
             {orders.length > 0 && (
               <Text style={[styles.orderCount, dynamicStyles.orderCount]}>
                 {orders.length} {orders.length === 1 ? "order" : "orders"}
@@ -211,7 +215,9 @@ export default function OrdersScreen() {
                 >
                   <View style={styles.orderHeader}>
                     <View>
-                      <Text style={[styles.orderNumber, dynamicStyles.orderNumber]}>
+                      <Text
+                        style={[styles.orderNumber, dynamicStyles.orderNumber]}
+                      >
                         Order #{order.id.slice(0, 8).toUpperCase()}
                       </Text>
                       <Text style={[styles.orderDate, dynamicStyles.orderDate]}>
@@ -241,14 +247,24 @@ export default function OrdersScreen() {
                   <View style={styles.orderDetails}>
                     <View style={styles.orderRow}>
                       <Ionicons name="cube-outline" size={16} color="#6B7280" />
-                      <Text style={[styles.orderDetailText, dynamicStyles.orderDetailText]}>
+                      <Text
+                        style={[
+                          styles.orderDetailText,
+                          dynamicStyles.orderDetailText,
+                        ]}
+                      >
                         {order.items?.length || 0}{" "}
                         {order.items?.length === 1 ? "item" : "items"}
                       </Text>
                     </View>
                     <View style={styles.orderRow}>
                       <Ionicons name="cash-outline" size={16} color="#6B7280" />
-                      <Text style={[styles.orderDetailText, dynamicStyles.orderDetailText]}>
+                      <Text
+                        style={[
+                          styles.orderDetailText,
+                          dynamicStyles.orderDetailText,
+                        ]}
+                      >
                         €{order.total_amount.toFixed(2)}
                       </Text>
                     </View>
@@ -261,27 +277,52 @@ export default function OrdersScreen() {
                       {/* Order Items Details */}
                       {order.items && order.items.length > 0 && (
                         <View style={styles.orderItemsSection}>
-                          <Text style={[styles.orderItemsTitle, dynamicStyles.sectionTitle]}>
+                          <Text
+                            style={[
+                              styles.orderItemsTitle,
+                              dynamicStyles.sectionTitle,
+                            ]}
+                          >
                             Order Items ({order.items.length})
                           </Text>
                           {order.items.map((item, index) => (
                             <View key={index} style={styles.orderItemCard}>
                               <View style={styles.orderItemHeader}>
                                 <View style={styles.orderItemInfo}>
-                                  <Text style={[styles.orderItemName, dynamicStyles.itemTitle]}>
+                                  <Text
+                                    style={[
+                                      styles.orderItemName,
+                                      dynamicStyles.itemTitle,
+                                    ]}
+                                  >
                                     {item.product?.title || "Product"}
                                   </Text>
                                   {item.product?.category && (
-                                    <Text style={[styles.orderItemCategory, dynamicStyles.itemQuantity]}>
+                                    <Text
+                                      style={[
+                                        styles.orderItemCategory,
+                                        dynamicStyles.itemQuantity,
+                                      ]}
+                                    >
                                       {item.product.category}
                                     </Text>
                                   )}
                                 </View>
                                 <View style={styles.orderItemPricing}>
-                                  <Text style={[styles.orderItemPrice, dynamicStyles.totalAmount]}>
+                                  <Text
+                                    style={[
+                                      styles.orderItemPrice,
+                                      dynamicStyles.totalAmount,
+                                    ]}
+                                  >
                                     €{item.price.toFixed(2)}
                                   </Text>
-                                  <Text style={[styles.orderItemPriceLabel, dynamicStyles.totalLabel]}>
+                                  <Text
+                                    style={[
+                                      styles.orderItemPriceLabel,
+                                      dynamicStyles.totalLabel,
+                                    ]}
+                                  >
                                     per item
                                   </Text>
                                 </View>
@@ -293,15 +334,30 @@ export default function OrdersScreen() {
                                     size={14}
                                     color="#6B7280"
                                   />
-                                  <Text style={[styles.orderItemQuantityText, dynamicStyles.itemQuantity]}>
+                                  <Text
+                                    style={[
+                                      styles.orderItemQuantityText,
+                                      dynamicStyles.itemQuantity,
+                                    ]}
+                                  >
                                     Quantity: {item.quantity}
                                   </Text>
                                 </View>
                                 <View style={styles.orderItemSubtotal}>
-                                  <Text style={[styles.orderItemSubtotalLabel, dynamicStyles.totalLabel]}>
+                                  <Text
+                                    style={[
+                                      styles.orderItemSubtotalLabel,
+                                      dynamicStyles.totalLabel,
+                                    ]}
+                                  >
                                     Subtotal:
                                   </Text>
-                                  <Text style={[styles.orderItemSubtotalAmount, dynamicStyles.totalAmount]}>
+                                  <Text
+                                    style={[
+                                      styles.orderItemSubtotalAmount,
+                                      dynamicStyles.totalAmount,
+                                    ]}
+                                  >
                                     €{(item.price * item.quantity).toFixed(2)}
                                   </Text>
                                 </View>

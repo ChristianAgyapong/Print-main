@@ -1,3 +1,4 @@
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -8,13 +9,12 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useThemeColors } from "@/hooks/use-theme-colors";
 
 const { width } = Dimensions.get("window");
 
 export default function ServicesScreen() {
   const colors = useThemeColors();
-  
+
   const services = [
     {
       id: "1",
@@ -141,10 +141,15 @@ export default function ServicesScreen() {
   return (
     <>
       <StatusBar style={colors.statusBarStyle} />
-      <ScrollView style={[styles.container, dynamicStyles.container]} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={[styles.container, dynamicStyles.container]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={[styles.header, dynamicStyles.header]}>
-          <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>Our Services</Text>
+          <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>
+            Our Services
+          </Text>
           <Text style={[styles.headerSubtitle, dynamicStyles.headerSubtitle]}>
             Professional printing solutions for every need
           </Text>
@@ -152,7 +157,9 @@ export default function ServicesScreen() {
 
         {/* Services Grid */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>What We Offer</Text>
+          <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
+            What We Offer
+          </Text>
           {services.map((service) => (
             <TouchableOpacity
               key={service.id}
@@ -172,8 +179,15 @@ export default function ServicesScreen() {
                 />
               </View>
               <View style={styles.serviceContent}>
-                <Text style={[styles.serviceTitle, dynamicStyles.serviceTitle]}>{service.title}</Text>
-                <Text style={[styles.serviceDescription, dynamicStyles.serviceDescription]}>
+                <Text style={[styles.serviceTitle, dynamicStyles.serviceTitle]}>
+                  {service.title}
+                </Text>
+                <Text
+                  style={[
+                    styles.serviceDescription,
+                    dynamicStyles.serviceDescription,
+                  ]}
+                >
                   {service.description}
                 </Text>
                 <View style={styles.serviceItems}>
@@ -191,10 +205,15 @@ export default function ServicesScreen() {
 
         {/* Features Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Why Choose Us</Text>
+          <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
+            Why Choose Us
+          </Text>
           <View style={styles.featuresGrid}>
             {features.map((feature, index) => (
-              <View key={index} style={[styles.featureCard, dynamicStyles.featureCard]}>
+              <View
+                key={index}
+                style={[styles.featureCard, dynamicStyles.featureCard]}
+              >
                 <View style={styles.featureIconContainer}>
                   <Ionicons
                     name={feature.icon as any}
@@ -202,8 +221,15 @@ export default function ServicesScreen() {
                     color="#FF006E"
                   />
                 </View>
-                <Text style={[styles.featureTitle, dynamicStyles.featureTitle]}>{feature.title}</Text>
-                <Text style={[styles.featureDescription, dynamicStyles.featureDescription]}>
+                <Text style={[styles.featureTitle, dynamicStyles.featureTitle]}>
+                  {feature.title}
+                </Text>
+                <Text
+                  style={[
+                    styles.featureDescription,
+                    dynamicStyles.featureDescription,
+                  ]}
+                >
                   {feature.description}
                 </Text>
               </View>
@@ -215,7 +241,9 @@ export default function ServicesScreen() {
         <View style={styles.ctaSection}>
           <View style={[styles.ctaCard, dynamicStyles.ctaCard]}>
             <Ionicons name="help-circle" size={48} color="#FF006E" />
-            <Text style={[styles.ctaTitle, dynamicStyles.ctaTitle]}>Need Help Choosing?</Text>
+            <Text style={[styles.ctaTitle, dynamicStyles.ctaTitle]}>
+              Need Help Choosing?
+            </Text>
             <Text style={[styles.ctaDescription, dynamicStyles.ctaDescription]}>
               Our print experts are here to help you find the perfect solution
             </Text>

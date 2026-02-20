@@ -1,10 +1,5 @@
 import { messagesService } from "@/lib/database-service";
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 
 interface MessagesContextType {

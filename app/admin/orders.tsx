@@ -153,7 +153,9 @@ export default function AdminOrdersScreen() {
                 <View style={styles.orderMainInfo}>
                   <View style={styles.orderTitleRow}>
                     <Text style={styles.orderNumber}>
-                      {order.id ? `Order #${order.id.substring(0, 8)}` : "Order"}
+                      {order.id
+                        ? `Order #${order.id.substring(0, 8)}`
+                        : "Order"}
                     </Text>
                     <View
                       style={[
@@ -230,7 +232,9 @@ export default function AdminOrdersScreen() {
 
                   <TouchableOpacity
                     style={styles.updateButton}
-                    onPress={() => handleUpdateStatus(order.id, order.status || "pending")}
+                    onPress={() =>
+                      handleUpdateStatus(order.id, order.status || "pending")
+                    }
                   >
                     <Ionicons name="refresh" size={20} color="#FFFFFF" />
                     <Text style={styles.updateButtonText}>Update Status</Text>

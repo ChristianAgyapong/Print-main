@@ -1,16 +1,16 @@
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
-  Linking,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Linking,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { useThemeColors } from "@/hooks/use-theme-colors";
 
 export default function HelpCenterScreen() {
   const colors = useThemeColors();
@@ -141,7 +141,9 @@ export default function HelpCenterScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>Help Center</Text>
+        <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>
+          Help Center
+        </Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -155,7 +157,9 @@ export default function HelpCenterScreen() {
           <View style={styles.iconContainer}>
             <Ionicons name="help-circle" size={48} color="#FF006E" />
           </View>
-          <Text style={[styles.welcomeTitle, dynamicStyles.welcomeTitle]}>How can we help you?</Text>
+          <Text style={[styles.welcomeTitle, dynamicStyles.welcomeTitle]}>
+            How can we help you?
+          </Text>
           <Text style={[styles.welcomeSubtitle, dynamicStyles.welcomeSubtitle]}>
             Find answers to common questions or contact our support team
           </Text>
@@ -163,7 +167,9 @@ export default function HelpCenterScreen() {
 
         {/* Quick Links */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Quick Links</Text>
+          <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
+            Quick Links
+          </Text>
           <View style={styles.quickLinksContainer}>
             {quickLinks.map((link, index) => (
               <TouchableOpacity
@@ -176,8 +182,22 @@ export default function HelpCenterScreen() {
                   <Ionicons name={link.icon as any} size={24} color="#FF006E" />
                 </View>
                 <View style={styles.quickLinkText}>
-                  <Text style={[styles.quickLinkTitle, dynamicStyles.quickLinkTitle]}>{link.title}</Text>
-                  <Text style={[styles.quickLinkSubtitle, dynamicStyles.quickLinkSubtitle]}>{link.subtitle}</Text>
+                  <Text
+                    style={[
+                      styles.quickLinkTitle,
+                      dynamicStyles.quickLinkTitle,
+                    ]}
+                  >
+                    {link.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.quickLinkSubtitle,
+                      dynamicStyles.quickLinkSubtitle,
+                    ]}
+                  >
+                    {link.subtitle}
+                  </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
               </TouchableOpacity>
@@ -200,18 +220,30 @@ export default function HelpCenterScreen() {
                   }
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.faqQuestionText, dynamicStyles.faqQuestionText]}>{faq.question}</Text>
+                  <Text
+                    style={[
+                      styles.faqQuestionText,
+                      dynamicStyles.faqQuestionText,
+                    ]}
+                  >
+                    {faq.question}
+                  </Text>
                   <Ionicons
-                    name={
-                      expandedFaq === index ? "chevron-up" : "chevron-down"
-                    }
+                    name={expandedFaq === index ? "chevron-up" : "chevron-down"}
                     size={20}
                     color="#6B7280"
                   />
                 </TouchableOpacity>
                 {expandedFaq === index && (
                   <View style={styles.faqAnswer}>
-                    <Text style={[styles.faqAnswerText, dynamicStyles.faqAnswerText]}>{faq.answer}</Text>
+                    <Text
+                      style={[
+                        styles.faqAnswerText,
+                        dynamicStyles.faqAnswerText,
+                      ]}
+                    >
+                      {faq.answer}
+                    </Text>
                   </View>
                 )}
               </View>

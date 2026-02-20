@@ -1,12 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
 } from "react";
-import { Appearance, ColorSchemeName } from "react-native";
+import { Appearance } from "react-native";
 
 interface PreferencesContextType {
   notificationsEnabled: boolean;

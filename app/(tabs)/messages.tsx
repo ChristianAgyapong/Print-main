@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useMessages } from "@/contexts/MessagesContext";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Message, messagesService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -18,7 +19,6 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useThemeColors } from "@/hooks/use-theme-colors";
 
 export default function MessagesScreen() {
   const colors = useThemeColors();
@@ -34,7 +34,9 @@ export default function MessagesScreen() {
   const [composeSubject, setComposeSubject] = useState("");
   const [composeMessage, setComposeMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<"all" | "from_admin" | "sent">("all");
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "from_admin" | "sent"
+  >("all");
 
   useEffect(() => {
     if (user) {
@@ -237,7 +239,9 @@ export default function MessagesScreen() {
         <StatusBar style={colors.statusBarStyle} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FF006E" />
-          <Text style={[styles.loadingText, dynamicStyles.loadingText]}>Loading messages...</Text>
+          <Text style={[styles.loadingText, dynamicStyles.loadingText]}>
+            Loading messages...
+          </Text>
         </View>
       </View>
     );
@@ -283,22 +287,34 @@ export default function MessagesScreen() {
             <View style={[styles.statCard, dynamicStyles.statCard]}>
               <Ionicons name="mail-unread" size={16} color="#FF006E" />
               <View style={styles.statInfo}>
-                <Text style={[styles.statNumber, dynamicStyles.statNumber]}>{unreadCount}</Text>
-                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Unread</Text>
+                <Text style={[styles.statNumber, dynamicStyles.statNumber]}>
+                  {unreadCount}
+                </Text>
+                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>
+                  Unread
+                </Text>
               </View>
             </View>
             <View style={[styles.statCard, dynamicStyles.statCard]}>
               <Ionicons name="arrow-down-circle" size={16} color="#8B5CF6" />
               <View style={styles.statInfo}>
-                <Text style={[styles.statNumber, dynamicStyles.statNumber]}>{fromAdminCount}</Text>
-                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Received</Text>
+                <Text style={[styles.statNumber, dynamicStyles.statNumber]}>
+                  {fromAdminCount}
+                </Text>
+                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>
+                  Received
+                </Text>
               </View>
             </View>
             <View style={[styles.statCard, dynamicStyles.statCard]}>
               <Ionicons name="arrow-up-circle" size={16} color="#10B981" />
               <View style={styles.statInfo}>
-                <Text style={[styles.statNumber, dynamicStyles.statNumber]}>{sentCount}</Text>
-                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Sent</Text>
+                <Text style={[styles.statNumber, dynamicStyles.statNumber]}>
+                  {sentCount}
+                </Text>
+                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>
+                  Sent
+                </Text>
               </View>
             </View>
           </View>
@@ -376,126 +392,135 @@ export default function MessagesScreen() {
 
         {/* Messages List */}
         <View style={styles.messagesContainer}>
-        {filteredMessages.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="mail-outline" size={56} color="#D1D5DB" />
-            <Text style={[styles.emptyTitle, dynamicStyles.emptyTitle]}>
-              {activeFilter === "all" && "No Messages"}
-              {activeFilter === "from_admin" && "No Messages from Admin"}
-              {activeFilter === "sent" && "No Sent Messages"}
-            </Text>
-            <Text style={[styles.emptyText, dynamicStyles.emptyText]}>
-              {activeFilter === "all" &&
-                "You don't have any messages yet. Check back later!"}
-              {activeFilter === "from_admin" &&
-                "You haven't received any messages from the admin yet."}
-              {activeFilter === "sent" &&
-                "You haven't sent any messages to the admin yet."}
-            </Text>
-            <TouchableOpacity
-              style={styles.emptyButton}
-              onPress={() => setShowComposeModal(true)}
-            >
-              <Text style={styles.emptyButtonText}>
-                {activeFilter === "sent"
-                  ? "Send Your First Message"
-                  : "Send Message to Admin"}
+          {filteredMessages.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="mail-outline" size={56} color="#D1D5DB" />
+              <Text style={[styles.emptyTitle, dynamicStyles.emptyTitle]}>
+                {activeFilter === "all" && "No Messages"}
+                {activeFilter === "from_admin" && "No Messages from Admin"}
+                {activeFilter === "sent" && "No Sent Messages"}
               </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          filteredMessages.map((message) => (
-            <View key={message.id} style={[styles.messageCard, dynamicStyles.messageCard]}>
+              <Text style={[styles.emptyText, dynamicStyles.emptyText]}>
+                {activeFilter === "all" &&
+                  "You don't have any messages yet. Check back later!"}
+                {activeFilter === "from_admin" &&
+                  "You haven't received any messages from the admin yet."}
+                {activeFilter === "sent" &&
+                  "You haven't sent any messages to the admin yet."}
+              </Text>
               <TouchableOpacity
-                style={styles.messageHeader}
-                onPress={() => handleMessagePress(message)}
+                style={styles.emptyButton}
+                onPress={() => setShowComposeModal(true)}
               >
-                <View style={styles.messageHeaderLeft}>
-                  {!message.read && <View style={styles.unreadDot} />}
-                  <View style={styles.messageHeaderText}>
-                    <View style={styles.subjectRow}>
+                <Text style={styles.emptyButtonText}>
+                  {activeFilter === "sent"
+                    ? "Send Your First Message"
+                    : "Send Message to Admin"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            filteredMessages.map((message) => (
+              <View
+                key={message.id}
+                style={[styles.messageCard, dynamicStyles.messageCard]}
+              >
+                <TouchableOpacity
+                  style={styles.messageHeader}
+                  onPress={() => handleMessagePress(message)}
+                >
+                  <View style={styles.messageHeaderLeft}>
+                    {!message.read && <View style={styles.unreadDot} />}
+                    <View style={styles.messageHeaderText}>
+                      <View style={styles.subjectRow}>
+                        <Text
+                          style={[
+                            styles.messageSubject,
+                            dynamicStyles.messageSubject,
+                            !message.read && styles.messageSubjectUnread,
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {message.subject}
+                        </Text>
+                        <View
+                          style={[
+                            styles.directionBadge,
+                            message.from_admin
+                              ? styles.fromAdminBadge
+                              : styles.toAdminBadge,
+                          ]}
+                        >
+                          <Ionicons
+                            name={
+                              message.from_admin ? "arrow-down" : "arrow-up"
+                            }
+                            size={10}
+                            color="#FFFFFF"
+                          />
+                          <Text style={styles.directionBadgeText}>
+                            {message.from_admin ? "Admin" : "Sent"}
+                          </Text>
+                        </View>
+                      </View>
                       <Text
-                        style={[
-                          styles.messageSubject,
-                          dynamicStyles.messageSubject,
-                          !message.read && styles.messageSubjectUnread,
-                        ]}
-                        numberOfLines={1}
+                        style={[styles.messageDate, dynamicStyles.messageDate]}
                       >
-                        {message.subject}
+                        {message.created_at
+                          ? new Date(message.created_at).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )
+                          : "Date unknown"}
                       </Text>
-                      <View
-                        style={[
-                          styles.directionBadge,
-                          message.from_admin
-                            ? styles.fromAdminBadge
-                            : styles.toAdminBadge,
-                        ]}
+                    </View>
+                  </View>
+                  <Ionicons
+                    name={
+                      expandedMessageId === message.id
+                        ? "chevron-up"
+                        : "chevron-down"
+                    }
+                    size={20}
+                    color="#9CA3AF"
+                  />
+                </TouchableOpacity>
+
+                {/* Expanded Message Content */}
+                {expandedMessageId === message.id && (
+                  <View style={styles.messageBody}>
+                    <View style={styles.messageContent}>
+                      <Text
+                        style={[styles.messageText, dynamicStyles.messageText]}
+                      >
+                        {message.message}
+                      </Text>
+                    </View>
+
+                    <View style={styles.messageActions}>
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={() => handleDeleteMessage(message.id)}
                       >
                         <Ionicons
-                          name={
-                            message.from_admin ? "arrow-down" : "arrow-up"
-                          }
-                          size={10}
-                          color="#FFFFFF"
+                          name="trash-outline"
+                          size={16}
+                          color="#EF4444"
                         />
-                        <Text style={styles.directionBadgeText}>
-                          {message.from_admin ? "Admin" : "Sent"}
-                        </Text>
-                      </View>
+                        <Text style={styles.deleteButtonText}>Delete</Text>
+                      </TouchableOpacity>
                     </View>
-                    <Text style={[styles.messageDate, dynamicStyles.messageDate]}>
-                      {message.created_at
-                        ? new Date(message.created_at).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          )
-                        : "Date unknown"}
-                    </Text>
                   </View>
-                </View>
-                <Ionicons
-                  name={
-                    expandedMessageId === message.id
-                      ? "chevron-up"
-                      : "chevron-down"
-                  }
-                  size={20}
-                  color="#9CA3AF"
-                />
-              </TouchableOpacity>
-
-              {/* Expanded Message Content */}
-              {expandedMessageId === message.id && (
-                <View style={styles.messageBody}>
-                  <View style={styles.messageContent}>
-                    <Text style={[styles.messageText, dynamicStyles.messageText]}>{message.message}</Text>
-                  </View>
-
-                  <View style={styles.messageActions}>
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => handleDeleteMessage(message.id)}
-                    >
-                      <Ionicons
-                        name="trash-outline"
-                        size={16}
-                        color="#EF4444"
-                      />
-                      <Text style={styles.deleteButtonText}>Delete</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-            </View>
-          ))
-        )}
+                )}
+              </View>
+            ))
+          )}
         </View>
       </ScrollView>
 
@@ -506,12 +531,16 @@ export default function MessagesScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowComposeModal(false)}
       >
-        <SafeAreaView style={[styles.modalContainer, dynamicStyles.modalContainer]}>
+        <SafeAreaView
+          style={[styles.modalContainer, dynamicStyles.modalContainer]}
+        >
           <View style={[styles.modalHeader, dynamicStyles.modalHeader]}>
             <TouchableOpacity onPress={() => setShowComposeModal(false)}>
               <Ionicons name="close" size={28} color={colors.text} />
             </TouchableOpacity>
-            <Text style={[styles.modalTitle, dynamicStyles.modalTitle]}>Message Admin</Text>
+            <Text style={[styles.modalTitle, dynamicStyles.modalTitle]}>
+              Message Admin
+            </Text>
             <TouchableOpacity onPress={handleSendToAdmin} disabled={sending}>
               {sending ? (
                 <ActivityIndicator size="small" color="#FF006E" />
@@ -524,14 +553,18 @@ export default function MessagesScreen() {
           <ScrollView style={styles.modalContent}>
             <View style={styles.composeInfo}>
               <Ionicons name="information-circle" size={20} color="#3B82F6" />
-              <Text style={[styles.composeInfoText, dynamicStyles.composeInfoText]}>
+              <Text
+                style={[styles.composeInfoText, dynamicStyles.composeInfoText]}
+              >
                 Send a message to the admin team. You'll receive a response
                 here.
               </Text>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>Subject *</Text>
+              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>
+                Subject *
+              </Text>
               <TextInput
                 style={[styles.input, dynamicStyles.input]}
                 placeholder="Enter subject"
@@ -543,7 +576,9 @@ export default function MessagesScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>Message *</Text>
+              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>
+                Message *
+              </Text>
               <TextInput
                 style={[styles.input, styles.textArea, dynamicStyles.input]}
                 placeholder="Type your message here..."

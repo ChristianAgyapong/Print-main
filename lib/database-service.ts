@@ -739,7 +739,11 @@ export const messagesService = {
   },
 
   // Send message to admin (from user)
-  async sendToAdmin(userId: string, subject: string, message: string): Promise<boolean> {
+  async sendToAdmin(
+    userId: string,
+    subject: string,
+    message: string,
+  ): Promise<boolean> {
     try {
       console.log("📤 User sending message to admin:", { userId, subject });
 
@@ -810,7 +814,9 @@ export const adminMessagesService = {
         throw error;
       }
 
-      console.log(`📬 Admin: Fetched ${(data || []).length} messages from database`);
+      console.log(
+        `📬 Admin: Fetched ${(data || []).length} messages from database`,
+      );
 
       // Map the data to include user information
       const messagesWithUsers = await Promise.all(
@@ -824,16 +830,21 @@ export const adminMessagesService = {
               .single();
 
             if (profileError) {
-              console.warn(`⚠️ Could not fetch profile for user ${message.user_id}:`, profileError);
+              console.warn(
+                `⚠️ Could not fetch profile for user ${message.user_id}:`,
+                profileError,
+              );
             }
 
             // Get user email from auth (requires admin API)
-            const { data: userData, error: userError } = await supabase.auth.admin.getUserById(
-              message.user_id,
-            );
+            const { data: userData, error: userError } =
+              await supabase.auth.admin.getUserById(message.user_id);
 
             if (userError) {
-              console.warn(`⚠️ Could not fetch email for user ${message.user_id}:`, userError);
+              console.warn(
+                `⚠️ Could not fetch email for user ${message.user_id}:`,
+                userError,
+              );
             }
 
             return {
@@ -858,7 +869,9 @@ export const adminMessagesService = {
         }),
       );
 
-      console.log(`✅ Admin: Fetched ${messagesWithUsers.length} messages with user info`);
+      console.log(
+        `✅ Admin: Fetched ${messagesWithUsers.length} messages with user info`,
+      );
       return messagesWithUsers;
     } catch (error) {
       console.error("❌ Admin: Error fetching messages:", error);

@@ -9,26 +9,33 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  Image,
-  Linking,
-  Modal,
-  Platform,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Image,
+    Linking,
+    Modal,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function ProfileScreen() {
   const { user, signOut, loading } = useAuth();
   const { isAdmin } = useAdmin();
-  const { notificationsEnabled, darkMode, language, toggleNotifications, toggleDarkMode, setLanguage } = usePreferences();
+  const {
+    notificationsEnabled,
+    darkMode,
+    language,
+    toggleNotifications,
+    toggleDarkMode,
+    setLanguage,
+  } = usePreferences();
   const colors = useThemeColors();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
@@ -415,21 +422,35 @@ export default function ProfileScreen() {
           <Text style={[styles.userName, dynamicStyles.userName]}>
             {profile?.full_name || user?.user_metadata?.full_name || "User"}
           </Text>
-          <Text style={[styles.userEmail, dynamicStyles.userEmail]}>{user?.email}</Text>
+          <Text style={[styles.userEmail, dynamicStyles.userEmail]}>
+            {user?.email}
+          </Text>
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, dynamicStyles.statValue]}>{stats.ordersCount}</Text>
-              <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Orders</Text>
+              <Text style={[styles.statValue, dynamicStyles.statValue]}>
+                {stats.ordersCount}
+              </Text>
+              <Text style={[styles.statLabel, dynamicStyles.statLabel]}>
+                Orders
+              </Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, dynamicStyles.statValue]}>{stats.designsCount}</Text>
-              <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Designs</Text>
+              <Text style={[styles.statValue, dynamicStyles.statValue]}>
+                {stats.designsCount}
+              </Text>
+              <Text style={[styles.statLabel, dynamicStyles.statLabel]}>
+                Designs
+              </Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, dynamicStyles.statValue]}>{stats.inProgressCount}</Text>
-              <Text style={[styles.statLabel, dynamicStyles.statLabel]}>In Progress</Text>
+              <Text style={[styles.statValue, dynamicStyles.statValue]}>
+                {stats.inProgressCount}
+              </Text>
+              <Text style={[styles.statLabel, dynamicStyles.statLabel]}>
+                In Progress
+              </Text>
             </View>
           </View>
         </View>
@@ -445,8 +466,20 @@ export default function ProfileScreen() {
                 <Ionicons name="shield-checkmark" size={24} color="#FF006E" />
               </View>
               <View style={styles.adminTextContainer}>
-                <Text style={[styles.adminPanelTitle, dynamicStyles.adminPanelTitle]}>Admin Panel</Text>
-                <Text style={[styles.adminPanelSubtitle, dynamicStyles.adminPanelSubtitle]}>
+                <Text
+                  style={[
+                    styles.adminPanelTitle,
+                    dynamicStyles.adminPanelTitle,
+                  ]}
+                >
+                  Admin Panel
+                </Text>
+                <Text
+                  style={[
+                    styles.adminPanelSubtitle,
+                    dynamicStyles.adminPanelSubtitle,
+                  ]}
+                >
                   Manage orders, users & products
                 </Text>
               </View>
@@ -458,7 +491,9 @@ export default function ProfileScreen() {
         {/* Profile Sections */}
         {profileSections.map((section, sectionIndex) => (
           <View key={sectionIndex} style={styles.section}>
-            <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>{section.title}</Text>
+            <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
+              {section.title}
+            </Text>
             <View style={[styles.sectionContent, dynamicStyles.sectionContent]}>
               {section.items.map((item: any, itemIndex) => (
                 <TouchableOpacity
@@ -474,7 +509,12 @@ export default function ProfileScreen() {
                   disabled={item.hasToggle}
                 >
                   <View style={styles.menuItemLeft}>
-                    <View style={[styles.menuIconContainer, dynamicStyles.menuIconContainer]}>
+                    <View
+                      style={[
+                        styles.menuIconContainer,
+                        dynamicStyles.menuIconContainer,
+                      ]}
+                    >
                       <Ionicons
                         name={item.icon as any}
                         size={22}
@@ -482,7 +522,14 @@ export default function ProfileScreen() {
                       />
                     </View>
                     <View style={styles.menuItemText}>
-                      <Text style={[styles.menuItemLabel, dynamicStyles.menuItemLabel]}>{item.label}</Text>
+                      <Text
+                        style={[
+                          styles.menuItemLabel,
+                          dynamicStyles.menuItemLabel,
+                        ]}
+                      >
+                        {item.label}
+                      </Text>
                       {item.value && !item.hasToggle ? (
                         <Text style={styles.menuItemValue}>{item.value}</Text>
                       ) : null}
@@ -497,7 +544,11 @@ export default function ProfileScreen() {
                       ios_backgroundColor="#D1D5DB"
                     />
                   ) : (
-                    <Ionicons name="chevron-forward" size={20} color="#B8B8D1" />
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color="#B8B8D1"
+                    />
                   )}
                 </TouchableOpacity>
               ))}
@@ -513,17 +564,28 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
           >
             <Ionicons name="log-out-outline" size={22} color="#EF4444" />
-            <Text style={[styles.logoutButtonText, dynamicStyles.logoutButtonText]}>Sign Out</Text>
+            <Text
+              style={[styles.logoutButtonText, dynamicStyles.logoutButtonText]}
+            >
+              Sign Out
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* App Version */}
         <View style={styles.versionContainer}>
-          <Text style={[styles.versionText, dynamicStyles.versionText]}>PrintCraft v1.0.0</Text>
+          <Text style={[styles.versionText, dynamicStyles.versionText]}>
+            PrintCraft v1.0.0
+          </Text>
           <View style={styles.versionSubtextRow}>
-            <Text style={[styles.versionSubtext, dynamicStyles.versionSubtext]}>Made with </Text>
+            <Text style={[styles.versionSubtext, dynamicStyles.versionSubtext]}>
+              Made with{" "}
+            </Text>
             <Ionicons name="heart" size={12} color="#F87171" />
-            <Text style={[styles.versionSubtext, dynamicStyles.versionSubtext]}> for print lovers</Text>
+            <Text style={[styles.versionSubtext, dynamicStyles.versionSubtext]}>
+              {" "}
+              for print lovers
+            </Text>
           </View>
         </View>
 
@@ -571,9 +633,26 @@ export default function ProfileScreen() {
             activeOpacity={1}
             onPress={() => setShowLanguageModal(false)}
           >
-            <View style={[styles.languageModalContent, dynamicStyles.languageModalContent]}>
-              <View style={[styles.languageModalHeader, dynamicStyles.languageModalHeader]}>
-                <Text style={[styles.languageModalTitle, dynamicStyles.languageModalTitle]}>Select Language</Text>
+            <View
+              style={[
+                styles.languageModalContent,
+                dynamicStyles.languageModalContent,
+              ]}
+            >
+              <View
+                style={[
+                  styles.languageModalHeader,
+                  dynamicStyles.languageModalHeader,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.languageModalTitle,
+                    dynamicStyles.languageModalTitle,
+                  ]}
+                >
+                  Select Language
+                </Text>
                 <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
                   <Ionicons name="close" size={24} color={colors.text} />
                 </TouchableOpacity>
@@ -586,10 +665,20 @@ export default function ProfileScreen() {
                     onPress={() => {
                       setLanguage(lang.code);
                       setShowLanguageModal(false);
-                      Alert.alert("Language Changed", `Language set to ${lang.name}`);
+                      Alert.alert(
+                        "Language Changed",
+                        `Language set to ${lang.name}`,
+                      );
                     }}
                   >
-                    <Text style={[styles.languageItemText, dynamicStyles.languageItemText]}>{lang.name}</Text>
+                    <Text
+                      style={[
+                        styles.languageItemText,
+                        dynamicStyles.languageItemText,
+                      ]}
+                    >
+                      {lang.name}
+                    </Text>
                     {language === lang.code && (
                       <Ionicons name="checkmark" size={24} color="#FF006E" />
                     )}

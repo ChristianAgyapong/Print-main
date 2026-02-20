@@ -3,11 +3,13 @@
 ## ⚡ Quick Steps
 
 ### 1. Run Database Migration
+
 Open Supabase SQL Editor and run **[MESSAGES_BIDIRECTIONAL_UPDATE.sql](MESSAGES_BIDIRECTIONAL_UPDATE.sql)**
 
 **IMPORTANT**: Replace admin emails in the SQL file before running!
 
 ### 2. That's It!
+
 The code changes are already done. Just run the SQL and it works!
 
 ---
@@ -25,6 +27,7 @@ The code changes are already done. Just run the SQL and it works!
 ## 🧪 Quick Test
 
 ### As User:
+
 ```
 1. Login as regular user
 2. Go to Messages
@@ -36,6 +39,7 @@ The code changes are already done. Just run the SQL and it works!
 ```
 
 ### As Admin:
+
 ```
 1. Login as admin
 2. Go to Admin → Messages
@@ -49,20 +53,24 @@ The code changes are already done. Just run the SQL and it works!
 ## 📁 Files Modified
 
 ✅ [lib/database-service.ts](lib/database-service.ts)
+
 - Updated `Message` interface
 - Added `sendToAdmin()` method
 - Updated `adminMessagesService.sendMessage()`
 
 ✅ [app/messages.tsx](app/messages.tsx)
+
 - Added compose button
 - Added compose modal
 - Added direction badges
 - Added send to admin functionality
 
 ✅ NEW: [MESSAGES_BIDIRECTIONAL_UPDATE.sql](MESSAGES_BIDIRECTIONAL_UPDATE.sql)
+
 - Database migration for bidirectional messaging
 
 ✅ NEW: [BIDIRECTIONAL_MESSAGING_GUIDE.md](BIDIRECTIONAL_MESSAGING_GUIDE.md)
+
 - Complete documentation
 
 ---
@@ -70,10 +78,12 @@ The code changes are already done. Just run the SQL and it works!
 ## 🎨 Visual Changes
 
 ### Message List Shows:
+
 - **Blue badge "From Admin"** with ↓ arrow = Admin sent to you
 - **Green badge "To Admin"** with ↑ arrow = You sent to admin
 
 ### Compose Modal:
+
 - Clean, simple interface
 - Subject and message fields
 - Info box explaining the feature
@@ -93,6 +103,7 @@ The code changes are already done. Just run the SQL and it works!
 ## Need More Info?
 
 See **[BIDIRECTIONAL_MESSAGING_GUIDE.md](BIDIRECTIONAL_MESSAGING_GUIDE.md)** for:
+
 - Detailed explanations
 - Troubleshooting guide
 - API documentation

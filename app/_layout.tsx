@@ -13,7 +13,10 @@ import { AdminNotificationsProvider } from "@/contexts/AdminNotificationsContext
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { MessagesProvider } from "@/contexts/MessagesContext";
-import { PreferencesProvider, usePreferences } from "@/contexts/PreferencesContext";
+import {
+    PreferencesProvider,
+    usePreferences,
+} from "@/contexts/PreferencesContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 

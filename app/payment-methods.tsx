@@ -1,19 +1,19 @@
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
-  Alert,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useThemeColors } from "@/hooks/use-theme-colors";
 
 interface PaymentCard {
   id: string;
@@ -153,18 +153,31 @@ export default function PaymentMethodsScreen() {
 
   const dynamicStyles = {
     container: { backgroundColor: colors.background },
-    header: { backgroundColor: colors.backgroundSecondary, borderBottomColor: colors.border },
+    header: {
+      backgroundColor: colors.backgroundSecondary,
+      borderBottomColor: colors.border,
+    },
     headerTitle: { color: colors.text },
-    cardContainer: { backgroundColor: colors.card, borderColor: colors.cardBorder },
+    cardContainer: {
+      backgroundColor: colors.card,
+      borderColor: colors.cardBorder,
+    },
     cardHolderName: { color: colors.text },
     cardDetails: { color: colors.textSecondary },
     sectionTitle: { color: colors.text },
     addButtonText: { color: colors.text },
     modalContainer: { backgroundColor: colors.background },
-    modalHeader: { backgroundColor: colors.card, borderBottomColor: colors.border },
+    modalHeader: {
+      backgroundColor: colors.card,
+      borderBottomColor: colors.border,
+    },
     modalTitle: { color: colors.text },
     inputLabel: { color: colors.text },
-    input: { backgroundColor: colors.backgroundSecondary, borderColor: colors.border, color: colors.text },
+    input: {
+      backgroundColor: colors.backgroundSecondary,
+      borderColor: colors.border,
+      color: colors.text,
+    },
   };
 
   const formatCardNumber = (text: string) => {
@@ -193,7 +206,9 @@ export default function PaymentMethodsScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>Payment Methods</Text>
+        <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>
+          Payment Methods
+        </Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -212,7 +227,9 @@ export default function PaymentMethodsScreen() {
 
         {/* Saved Cards */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Saved Cards</Text>
+          <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
+            Saved Cards
+          </Text>
           {cards.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="card-outline" size={48} color="#D1D5DB" />
@@ -221,7 +238,10 @@ export default function PaymentMethodsScreen() {
           ) : (
             <View style={styles.cardsContainer}>
               {cards.map((card) => (
-                <View key={card.id} style={[styles.cardItem, dynamicStyles.cardContainer]}>
+                <View
+                  key={card.id}
+                  style={[styles.cardItem, dynamicStyles.cardContainer]}
+                >
                   <View style={styles.cardInfo}>
                     <View
                       style={[
@@ -237,7 +257,12 @@ export default function PaymentMethodsScreen() {
                     </View>
                     <View style={styles.cardDetails}>
                       <View style={styles.cardRow}>
-                        <Text style={[styles.cardType, dynamicStyles.cardHolderName]}>
+                        <Text
+                          style={[
+                            styles.cardType,
+                            dynamicStyles.cardHolderName,
+                          ]}
+                        >
                           {card.type.toUpperCase()}
                         </Text>
                         {card.isDefault && (
@@ -246,8 +271,17 @@ export default function PaymentMethodsScreen() {
                           </View>
                         )}
                       </View>
-                      <Text style={[styles.cardNumber, dynamicStyles.cardHolderName]}>•••• {card.last4}</Text>
-                      <Text style={[styles.cardExpiry, dynamicStyles.cardDetails]}>
+                      <Text
+                        style={[
+                          styles.cardNumber,
+                          dynamicStyles.cardHolderName,
+                        ]}
+                      >
+                        •••• {card.last4}
+                      </Text>
+                      <Text
+                        style={[styles.cardExpiry, dynamicStyles.cardDetails]}
+                      >
                         Expires {card.expiryMonth}/{card.expiryYear.slice(2)}
                       </Text>
                     </View>
@@ -265,7 +299,11 @@ export default function PaymentMethodsScreen() {
                       style={[styles.actionButton, styles.deleteButton]}
                       onPress={() => handleDeleteCard(card.id)}
                     >
-                      <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                      <Ionicons
+                        name="trash-outline"
+                        size={18}
+                        color="#EF4444"
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -280,7 +318,9 @@ export default function PaymentMethodsScreen() {
           onPress={() => setShowAddCard(true)}
         >
           <Ionicons name="add-circle-outline" size={24} color="#FF006E" />
-          <Text style={[styles.addCardButtonText, dynamicStyles.addButtonText]}>Add New Card</Text>
+          <Text style={[styles.addCardButtonText, dynamicStyles.addButtonText]}>
+            Add New Card
+          </Text>
         </TouchableOpacity>
 
         <View style={{ height: 40 }} />
@@ -293,12 +333,16 @@ export default function PaymentMethodsScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowAddCard(false)}
       >
-        <SafeAreaView style={[styles.modalContainer, dynamicStyles.modalContainer]}>
+        <SafeAreaView
+          style={[styles.modalContainer, dynamicStyles.modalContainer]}
+        >
           <View style={[styles.modalHeader, dynamicStyles.modalHeader]}>
             <TouchableOpacity onPress={() => setShowAddCard(false)}>
               <Ionicons name="close" size={28} color={colors.text} />
             </TouchableOpacity>
-            <Text style={[styles.modalTitle, dynamicStyles.modalTitle]}>Add Payment Method</Text>
+            <Text style={[styles.modalTitle, dynamicStyles.modalTitle]}>
+              Add Payment Method
+            </Text>
             <TouchableOpacity onPress={handleAddCard}>
               <Text style={styles.saveButton}>Save</Text>
             </TouchableOpacity>
@@ -306,7 +350,9 @@ export default function PaymentMethodsScreen() {
 
           <ScrollView style={styles.modalContent}>
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>Card Number *</Text>
+              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>
+                Card Number *
+              </Text>
               <TextInput
                 style={[styles.input, dynamicStyles.input]}
                 placeholder="1234 5678 9012 3456"
@@ -319,7 +365,9 @@ export default function PaymentMethodsScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>Cardholder Name *</Text>
+              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>
+                Cardholder Name *
+              </Text>
               <TextInput
                 style={[styles.input, dynamicStyles.input]}
                 placeholder="John Doe"
@@ -332,7 +380,9 @@ export default function PaymentMethodsScreen() {
 
             <View style={styles.row}>
               <View style={[styles.inputGroup, { flex: 1, marginRight: 12 }]}>
-                <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>Expiry Date *</Text>
+                <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>
+                  Expiry Date *
+                </Text>
                 <TextInput
                   style={[styles.input, dynamicStyles.input]}
                   placeholder="MM/YY"
@@ -344,7 +394,9 @@ export default function PaymentMethodsScreen() {
                 />
               </View>
               <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>CVV *</Text>
+                <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>
+                  CVV *
+                </Text>
                 <TextInput
                   style={[styles.input, dynamicStyles.input]}
                   placeholder="123"

@@ -13,8 +13,8 @@ import {
 import { HapticTab } from "@/components/haptic-tab";
 import { useCart } from "@/contexts/CartContext";
 import { useMessages } from "@/contexts/MessagesContext";
-import { useThemeColors } from "@/hooks/use-theme-colors";
 import { usePreferences } from "@/contexts/PreferencesContext";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 
 export default function TabLayout() {
   const colors = useThemeColors();
@@ -36,7 +36,10 @@ export default function TabLayout() {
           <BlurView
             intensity={80}
             tint={darkMode ? "dark" : "light"}
-            style={[StyleSheet.absoluteFill, { backgroundColor: colors.backgroundSecondary }]}
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: colors.backgroundSecondary },
+            ]}
           />
         ),
         headerTintColor: colors.text,
@@ -53,7 +56,9 @@ export default function TabLayout() {
           left: 0,
           right: 0,
           height: 88,
-          backgroundColor: darkMode ? "rgba(31, 41, 55, 0.95)" : "rgba(255, 255, 255, 0.95)",
+          backgroundColor: darkMode
+            ? "rgba(31, 41, 55, 0.95)"
+            : "rgba(255, 255, 255, 0.95)",
           borderTopLeftRadius: 32,
           borderTopRightRadius: 32,
           paddingBottom: 10,
@@ -97,7 +102,12 @@ export default function TabLayout() {
             style={styles.cartButton}
             onPress={() => router.push("/cart")}
           >
-            <View style={[styles.cartIconContainer, { backgroundColor: colors.card, borderColor: "#FF006E" }]}>
+            <View
+              style={[
+                styles.cartIconContainer,
+                { backgroundColor: colors.card, borderColor: "#FF006E" },
+              ]}
+            >
               <Ionicons name="cart" size={22} color="#FF006E" />
               {itemCount > 0 && (
                 <View style={[styles.cartBadge, { borderColor: colors.card }]}>
