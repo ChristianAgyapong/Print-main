@@ -25,11 +25,13 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 
 const { width } = Dimensions.get("window");
 const PRODUCT_CARD_WIDTH = (width - 42) / 2;
 
 export default function HomeScreen() {
+  const colors = useThemeColors();
   const { user } = useAuth();
   const router = useRouter();
   const { addItem } = useCart();
@@ -198,11 +200,63 @@ export default function HomeScreen() {
     return icons[category || ""] || "color-palette";
   };
 
+  const dynamicStyles = {
+    container: {
+      backgroundColor: colors.background,
+    },
+    sectionHeader: {
+      backgroundColor: colors.backgroundSecondary,
+      borderBottomColor: colors.border,
+    },
+    sectionTitle: {
+      color: colors.text,
+    },
+    seeAllText: {
+      color: colors.primary,
+    },
+    categoryCard: {
+      backgroundColor: colors.card,
+      borderColor: colors.cardBorder,
+    },
+    categoryLabel: {
+      color: colors.text,
+    },
+    productCard: {
+      backgroundColor: colors.card,
+      borderColor: colors.cardBorder,
+    },
+    productTitle: {
+      color: colors.text,
+    },
+    productDescription: {
+      color: colors.textSecondary,
+    },
+    productPrice: {
+      color: colors.text,
+    },
+    stepCard: {
+      backgroundColor: colors.card,
+      borderColor: colors.cardBorder,
+    },
+    stepTitle: {
+      color: colors.text,
+    },
+    stepDescription: {
+      color: colors.textSecondary,
+    },
+    shopLabel: {
+      color: colors.textSecondary,
+    },
+    statLabel: {
+      color: colors.textSecondary,
+    },
+  };
+
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={colors.statusBarStyle} />
       <ScrollView
-        style={styles.container}
+        style={[styles.container, dynamicStyles.container]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -309,7 +363,7 @@ export default function HomeScreen() {
 
         {/* Shop By Category Label */}
         <View style={styles.shopLabelContainer}>
-          <Text style={styles.shopLabel}>SHOP BY CATEGORY</Text>
+          <Text style={[styles.shopLabel, dynamicStyles.shopLabel]}>SHOP BY CATEGORY</Text>
         </View>
 
         {/* Products by Category */}
@@ -350,7 +404,7 @@ export default function HomeScreen() {
             return (
               <View key={categoryLayout.name} style={styles.categorySection}>
                 {/* Category Header */}
-                <View style={styles.categoryHeader}>
+                <View style={[styles.categoryHeader, dynamicStyles.sectionHeader]}>
                   <View style={styles.categoryHeaderLeft}>
                     <View
                       style={[
@@ -364,7 +418,7 @@ export default function HomeScreen() {
                         color={categoryLayout.color}
                       />
                     </View>
-                    <Text style={styles.categoryTitle}>
+                    <Text style={[styles.categoryTitle, dynamicStyles.sectionTitle]}>
                       {categoryLayout.name}
                     </Text>
                   </View>
@@ -374,7 +428,7 @@ export default function HomeScreen() {
                       router.push(`/category/${categoryLayout.name}`)
                     }
                   >
-                    <Text style={styles.viewAllText}>View All</Text>
+                    <Text style={[styles.viewAllText, dynamicStyles.seeAllText]}>View All</Text>
                     <Ionicons name="arrow-forward" size={14} color="#FF006E" />
                   </TouchableOpacity>
                 </View>
@@ -388,7 +442,7 @@ export default function HomeScreen() {
                   {categoryProducts.map((product) => (
                     <TouchableOpacity
                       key={product.id}
-                      style={styles.productCard}
+                      style={[styles.productCard, dynamicStyles.productCard]}
                       activeOpacity={0.9}
                       onPress={() => router.push(`/product/${product.id}`)}
                     >
@@ -423,11 +477,11 @@ export default function HomeScreen() {
                         <Text style={styles.productCategory}>
                           {product.category?.toUpperCase() || "PRODUCT"}
                         </Text>
-                        <Text style={styles.productTitle} numberOfLines={2}>
+                        <Text style={[styles.productTitle, dynamicStyles.productTitle]} numberOfLines={2}>
                           {product.title}
                         </Text>
                         <View style={styles.productFooter}>
-                          <Text style={styles.productPrice}>
+                          <Text style={[styles.productPrice, dynamicStyles.productPrice]}>
                             €{product.price.toFixed(2)}
                           </Text>
                           <TouchableOpacity
@@ -451,35 +505,35 @@ export default function HomeScreen() {
 
         {/* How It Works */}
         <View style={styles.howItWorksSection}>
-          <Text style={styles.sectionTitle}>HOW IT WORKS</Text>
+          <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>HOW IT WORKS</Text>
           <View style={styles.stepsContainer}>
-            <View style={styles.stepCard}>
+            <View style={[styles.stepCard, dynamicStyles.stepCard]}>
               <View style={styles.stepNumber}>
                 <Text style={styles.stepNumberText}>1</Text>
               </View>
               <Ionicons name="search" size={24} color="#FF006E" />
-              <Text style={styles.stepTitle}>Choose</Text>
-              <Text style={styles.stepDescription}>
+              <Text style={[styles.stepTitle, dynamicStyles.stepTitle]}>Choose</Text>
+              <Text style={[styles.stepDescription, dynamicStyles.stepDescription]}>
                 Browse & select products
               </Text>
             </View>
 
-            <View style={styles.stepCard}>
+            <View style={[styles.stepCard, dynamicStyles.stepCard]}>
               <View style={styles.stepNumber}>
                 <Text style={styles.stepNumberText}>2</Text>
               </View>
               <Ionicons name="cloud-upload" size={24} color="#FF006E" />
-              <Text style={styles.stepTitle}>Upload</Text>
-              <Text style={styles.stepDescription}>Add your design files</Text>
+              <Text style={[styles.stepTitle, dynamicStyles.stepTitle]}>Upload</Text>
+              <Text style={[styles.stepDescription, dynamicStyles.stepDescription]}>Add your design files</Text>
             </View>
 
-            <View style={styles.stepCard}>
+            <View style={[styles.stepCard, dynamicStyles.stepCard]}>
               <View style={styles.stepNumber}>
                 <Text style={styles.stepNumberText}>3</Text>
               </View>
               <Ionicons name="checkmark-done" size={24} color="#FF006E" />
-              <Text style={styles.stepTitle}>Receive</Text>
-              <Text style={styles.stepDescription}>Fast delivery to you</Text>
+              <Text style={[styles.stepTitle, dynamicStyles.stepTitle]}>Receive</Text>
+              <Text style={[styles.stepDescription, dynamicStyles.stepDescription]}>Fast delivery to you</Text>
             </View>
           </View>
         </View>
@@ -493,17 +547,17 @@ export default function HomeScreen() {
             <View style={styles.statsGrid}>
               <View style={styles.statItem}>
                 <Text style={styles.statNumber}>10K+</Text>
-                <Text style={styles.statLabel}>Happy Customers</Text>
+                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Happy Customers</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statNumber}>50K+</Text>
-                <Text style={styles.statLabel}>Orders Completed</Text>
+                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Orders Completed</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={styles.statNumber}>4.9★</Text>
-                <Text style={styles.statLabel}>Average Rating</Text>
+                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Average Rating</Text>
               </View>
             </View>
           </LinearGradient>

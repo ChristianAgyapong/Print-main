@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Profile, profileService } from "@/lib/database-service";
 import { storageService } from "@/lib/storage-service";
 import { supabase } from "@/lib/supabase";
@@ -27,6 +28,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function EditProfileScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const colors = useThemeColors();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -249,9 +251,50 @@ export default function EditProfileScreen() {
     }
   };
 
+  const dynamicStyles = {
+    container: {
+      backgroundColor: colors.background,
+    },
+    header: {
+      backgroundColor: colors.backgroundSecondary,
+      borderBottomColor: colors.border,
+    },
+    headerTitle: {
+      color: colors.text,
+    },
+    sectionCard: {
+      backgroundColor: colors.card,
+      borderColor: colors.cardBorder,
+    },
+    sectionTitle: {
+      color: colors.text,
+    },
+    label: {
+      color: colors.text,
+    },
+    input: {
+      backgroundColor: colors.backgroundSecondary,
+      borderColor: colors.border,
+      color: colors.text,
+    },
+    inputText: {
+      color: colors.textSecondary,
+    },
+    modalContainer: {
+      backgroundColor: colors.background,
+    },
+    modalHeader: {
+      backgroundColor: colors.card,
+      borderBottomColor: colors.border,
+    },
+    modalTitle: {
+      color: colors.text,
+    },
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
+    <SafeAreaView style={[styles.container, dynamicStyles.container]}>
+      <StatusBar style={colors.statusBarStyle} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -271,14 +314,14 @@ export default function EditProfileScreen() {
               keyboardShouldPersistTaps="handled"
             >
               {/* Header */}
-              <View style={styles.header}>
+              <View style={[styles.header, dynamicStyles.header]}>
                 <TouchableOpacity
                   onPress={handleBack}
                   style={styles.backButton}
                 >
-                  <Ionicons name="arrow-back" size={24} color="#1F2937" />
+                  <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Edit Profile</Text>
+                <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>Edit Profile</Text>
                 <View style={{ width: 40 }} />
               </View>
 
@@ -319,51 +362,51 @@ export default function EditProfileScreen() {
               {/* Form */}
               <View style={styles.form}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Full Name *</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>Full Name *</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, dynamicStyles.input]}
                     value={fullName}
                     onChangeText={setFullName}
                     placeholder="Enter your full name"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={colors.textSecondary}
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Email</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>Email</Text>
                   <TextInput
-                    style={[styles.input, styles.inputDisabled]}
+                    style={[styles.input, dynamicStyles.input, styles.inputDisabled]}
                     value={user?.email || ""}
                     editable={false}
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={colors.textSecondary}
                   />
                   <Text style={styles.helperText}>Email cannot be changed</Text>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Phone Number</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>Phone Number</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, dynamicStyles.input]}
                     value={phone}
                     onChangeText={setPhone}
                     placeholder="Enter your phone number"
                     keyboardType="phone-pad"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={colors.textSecondary}
                   />
                 </View>
 
                 <View style={styles.sectionDivider}>
-                  <Text style={styles.sectionTitle}>About</Text>
+                  <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>About</Text>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Bio</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>Bio</Text>
                   <TextInput
-                    style={[styles.input, styles.textArea]}
+                    style={[styles.input, dynamicStyles.input, styles.textArea]}
                     value={bio}
                     onChangeText={setBio}
                     placeholder="Tell us about yourself"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={colors.textSecondary}
                     multiline
                     numberOfLines={4}
                     textAlignVertical="top"
@@ -371,39 +414,39 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Company</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>Company</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, dynamicStyles.input]}
                     value={company}
                     onChangeText={setCompany}
                     placeholder="Your company name"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={colors.textSecondary}
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Job Title</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>Job Title</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, dynamicStyles.input]}
                     value={jobTitle}
                     onChangeText={setJobTitle}
                     placeholder="Your job title"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={colors.textSecondary}
                   />
                 </View>
 
                 <View style={styles.sectionDivider}>
-                  <Text style={styles.sectionTitle}>Personal Information</Text>
+                  <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Personal Information</Text>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Date of Birth</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>Date of Birth</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, dynamicStyles.input]}
                     value={dateOfBirth}
                     onChangeText={setDateOfBirth}
                     placeholder="YYYY-MM-DD (e.g., 1990-01-15)"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={colors.textSecondary}
                     autoCapitalize="none"
                     keyboardType="numbers-and-punctuation"
                   />
@@ -413,7 +456,7 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Gender</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>Gender</Text>
                   <View style={styles.genderContainer}>
                     {["Male", "Female", "Other", "Prefer not to say"].map(
                       (option) => (
@@ -441,63 +484,63 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.sectionDivider}>
-                  <Text style={styles.sectionTitle}>Address</Text>
+                  <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>Address</Text>
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Street Address</Text>
+                  <Text style={[styles.label, dynamicStyles.label]}>Street Address</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, dynamicStyles.input]}
                     value={addressStreet}
                     onChangeText={setAddressStreet}
                     placeholder="123 Main Street"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={colors.textSecondary}
                   />
                 </View>
 
                 <View style={styles.row}>
                   <View style={[styles.inputGroup, styles.halfWidth]}>
-                    <Text style={styles.label}>City</Text>
+                    <Text style={[styles.label, dynamicStyles.label]}>City</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, dynamicStyles.input]}
                       value={addressCity}
                       onChangeText={setAddressCity}
                       placeholder="City"
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor={colors.textSecondary}
                     />
                   </View>
                   <View style={[styles.inputGroup, styles.halfWidth]}>
-                    <Text style={styles.label}>State/Province</Text>
+                    <Text style={[styles.label, dynamicStyles.label]}>State/Province</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, dynamicStyles.input]}
                       value={addressState}
                       onChangeText={setAddressState}
                       placeholder="State"
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor={colors.textSecondary}
                     />
                   </View>
                 </View>
 
                 <View style={styles.row}>
                   <View style={[styles.inputGroup, styles.halfWidth]}>
-                    <Text style={styles.label}>ZIP/Postal Code</Text>
+                    <Text style={[styles.label, dynamicStyles.label]}>ZIP/Postal Code</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, dynamicStyles.input]}
                       value={addressZip}
                       onChangeText={setAddressZip}
                       placeholder="12345"
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor={colors.textSecondary}
                       keyboardType="number-pad"
                     />
                   </View>
                   <View style={[styles.inputGroup, styles.halfWidth]}>
-                    <Text style={styles.label}>Country</Text>
+                    <Text style={[styles.label, dynamicStyles.label]}>Country</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, dynamicStyles.input]}
                       value={addressCountry}
                       onChangeText={setAddressCountry}
                       placeholder="Country"
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor={colors.textSecondary}
                     />
                   </View>
                 </View>
@@ -544,11 +587,11 @@ export default function EditProfileScreen() {
           onRequestClose={() => setShowAvatarModal(false)}
         >
           <TouchableOpacity
-            style={styles.modalContainer}
+            style={[styles.modalContainer, dynamicStyles.modalContainer]}
             activeOpacity={1}
             onPress={() => setShowAvatarModal(false)}
           >
-            <View style={styles.modalHeader}>
+            <View style={[styles.modalHeader, dynamicStyles.modalHeader]}>
               <TouchableOpacity
                 style={styles.modalCloseButton}
                 onPress={() => setShowAvatarModal(false)}

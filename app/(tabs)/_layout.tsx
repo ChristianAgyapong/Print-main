@@ -12,18 +12,22 @@ import {
 
 import { HapticTab } from "@/components/haptic-tab";
 import { useCart } from "@/contexts/CartContext";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useMessages } from "@/contexts/MessagesContext";
+import { useThemeColors } from "@/hooks/use-theme-colors";
+import { usePreferences } from "@/contexts/PreferencesContext";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const colors = useThemeColors();
+  const { darkMode } = usePreferences();
   const router = useRouter();
   const { itemCount } = useCart();
+  const { unreadCount } = useMessages();
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "#FF006E",
-        tabBarInactiveTintColor: "#6B7280",
+        tabBarInactiveTintColor: colors.textSecondary,
         headerShown: true,
         headerStyle: {
           backgroundColor: "transparent",
@@ -31,11 +35,11 @@ export default function TabLayout() {
         headerBackground: () => (
           <BlurView
             intensity={80}
-            tint="light"
-            style={[StyleSheet.absoluteFill, { backgroundColor: "#FFFFFF" }]}
+            tint={darkMode ? "dark" : "light"}
+            style={[StyleSheet.absoluteFill, { backgroundColor: colors.backgroundSecondary }]}
           />
         ),
-        headerTintColor: "#1F2937",
+        headerTintColor: colors.text,
         headerTitleStyle: {
           fontWeight: "700",
           fontSize: 20,
@@ -49,7 +53,7 @@ export default function TabLayout() {
           left: 0,
           right: 0,
           height: 88,
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          backgroundColor: darkMode ? "rgba(31, 41, 55, 0.95)" : "rgba(255, 255, 255, 0.95)",
           borderTopLeftRadius: 32,
           borderTopRightRadius: 32,
           paddingBottom: 10,
@@ -57,19 +61,19 @@ export default function TabLayout() {
           paddingHorizontal: 8,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.1,
+          shadowOpacity: darkMode ? 0.3 : 0.1,
           shadowRadius: 16,
           elevation: 20,
           borderTopWidth: 1,
           borderLeftWidth: 1,
           borderRightWidth: 1,
-          borderColor: "#E5E7EB",
+          borderColor: colors.border,
         },
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
             <BlurView
               intensity={100}
-              tint="light"
+              tint={darkMode ? "dark" : "light"}
               style={[
                 StyleSheet.absoluteFill,
                 { borderTopLeftRadius: 32, borderTopRightRadius: 32 },
@@ -93,10 +97,10 @@ export default function TabLayout() {
             style={styles.cartButton}
             onPress={() => router.push("/cart")}
           >
-            <View style={styles.cartIconContainer}>
+            <View style={[styles.cartIconContainer, { backgroundColor: colors.card, borderColor: "#FF006E" }]}>
               <Ionicons name="cart" size={22} color="#FF006E" />
               {itemCount > 0 && (
-                <View style={styles.cartBadge}>
+                <View style={[styles.cartBadge, { borderColor: colors.card }]}>
                   <Text style={styles.cartBadgeText}>{itemCount}</Text>
                 </View>
               )}
@@ -148,6 +152,51 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="messages"
+        options={{
+          title: "Inbox",
+          headerTitle: "Inbox",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={{ position: "relative" }}>
+              <Ionicons
+                name={focused ? "chatbubbles" : "chatbubbles-outline"}
+                size={28}
+                color={focused ? "#FF006E" : "#9CA3AF"}
+              />
+              {unreadCount > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -4,
+                    right: -8,
+                    backgroundColor: "#FF006E",
+                    borderRadius: 10,
+                    minWidth: 18,
+                    height: 18,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingHorizontal: 5,
+                    borderWidth: 2,
+                    borderColor: colors.backgroundSecondary,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: 10,
+                      fontWeight: "900",
+                      letterSpacing: -0.3,
+                    }}
+                  >
+                    {unreadCount > 99 ? "99+" : unreadCount.toString()}
+                  </Text>
+                </View>
+              )}
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Account",
@@ -172,10 +221,8 @@ const styles = StyleSheet.create({
   cartIconContainer: {
     position: "relative",
     padding: 12,
-    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: "#FF006E",
     shadowColor: "#FF006E",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
@@ -194,7 +241,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 7,
     borderWidth: 3,
-    borderColor: "#FFFFFF",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.35,

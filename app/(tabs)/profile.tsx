@@ -1,5 +1,7 @@
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePreferences } from "@/contexts/PreferencesContext";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Profile, profileService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -11,10 +13,13 @@ import {
   Alert,
   Dimensions,
   Image,
+  Linking,
   Modal,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -23,10 +28,13 @@ import {
 export default function ProfileScreen() {
   const { user, signOut, loading } = useAuth();
   const { isAdmin } = useAdmin();
+  const { notificationsEnabled, darkMode, language, toggleNotifications, toggleDarkMode, setLanguage } = usePreferences();
+  const colors = useThemeColors();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [stats, setStats] = useState({
     ordersCount: 0,
@@ -98,6 +106,38 @@ export default function ProfileScreen() {
     ]);
   };
 
+  const languages = [
+    { code: "en", name: "English" },
+    { code: "es", name: "Español" },
+    { code: "fr", name: "Français" },
+    { code: "de", name: "Deutsch" },
+    { code: "zh", name: "中文" },
+  ];
+
+  const getLanguageName = (code: string) => {
+    return languages.find((l) => l.code === code)?.name || "English";
+  };
+
+  const handleRateApp = () => {
+    const storeUrl = Platform.select({
+      ios: "https://apps.apple.com/app/idXXXXXXXXXX",
+      android: "https://play.google.com/store/apps/details?id=com.printcraft",
+      default: "https://www.printcraft.com",
+    });
+
+    Alert.alert(
+      "Rate PrintCraft",
+      "Would you like to rate our app? Your feedback helps us improve!",
+      [
+        { text: "Not Now", style: "cancel" },
+        {
+          text: "Rate App",
+          onPress: () => Linking.openURL(storeUrl),
+        },
+      ],
+    );
+  };
+
   const profileSections = [
     {
       title: "Account",
@@ -116,9 +156,9 @@ export default function ProfileScreen() {
         },
         {
           icon: "chatbubble-ellipses-outline",
-          label: "Messages",
+          label: "Inbox",
           value: "",
-          route: "/messages",
+          route: "/(tabs)/messages",
         },
         {
           icon: "lock-closed-outline",
@@ -172,21 +212,33 @@ export default function ProfileScreen() {
         {
           icon: "notifications-outline",
           label: "Notifications",
-          value: "Enabled",
+          value: notificationsEnabled ? "Enabled" : "Disabled",
           route: null,
+          hasToggle: true,
+          toggleValue: notificationsEnabled,
+          onToggle: toggleNotifications,
         },
-        { icon: "moon-outline", label: "Dark Mode", value: "Off", route: null },
+        {
+          icon: "moon-outline",
+          label: "Dark Mode",
+          value: darkMode ? "On" : "Off",
+          route: null,
+          hasToggle: true,
+          toggleValue: darkMode,
+          onToggle: toggleDarkMode,
+        },
         {
           icon: "language-outline",
           label: "Language",
-          value: "English",
+          value: getLanguageName(language),
           route: null,
+          action: "language",
         },
         {
           icon: "card-outline",
           label: "Payment Methods",
           value: "2 cards",
-          route: null,
+          route: "/payment-methods",
         },
       ],
     },
@@ -197,20 +249,26 @@ export default function ProfileScreen() {
           icon: "help-circle-outline",
           label: "Help Center",
           value: "",
-          route: null,
+          route: "/help-center",
         },
         {
           icon: "chatbubble-outline",
           label: "Contact Support",
           value: "",
-          route: null,
+          route: "/(tabs)/messages",
         },
-        { icon: "star-outline", label: "Rate App", value: "", route: null },
+        {
+          icon: "star-outline",
+          label: "Rate App",
+          value: "",
+          route: null,
+          action: "rate",
+        },
         {
           icon: "document-text-outline",
           label: "Terms & Privacy",
           value: "",
-          route: null,
+          route: "/terms-privacy",
         },
       ],
     },
@@ -219,43 +277,19 @@ export default function ProfileScreen() {
   const handleMenuItemPress = (item: any) => {
     if (item.route) {
       router.push(item.route);
-    } else if (
-      item.label === "Notifications" ||
-      item.label === "Dark Mode" ||
-      item.label === "Language" ||
-      item.label === "Payment Methods"
-    ) {
-      Alert.alert(
-        "Coming Soon",
-        `${item.label} settings will be available in a future update.`,
-      );
-    } else if (
-      item.label === "Help Center" ||
-      item.label === "Contact Support"
-    ) {
-      Alert.alert(
-        item.label,
-        "Please email support@printcraft.com for assistance.",
-      );
-    } else if (item.label === "Rate App") {
-      Alert.alert(
-        "Rate App",
-        "Thank you for your feedback! We appreciate your support.",
-      );
-    } else if (item.label === "Terms & Privacy") {
-      Alert.alert(
-        "Terms & Privacy",
-        "Please visit our website for terms of service and privacy policy.",
-      );
+    } else if (item.action === "language") {
+      setShowLanguageModal(true);
+    } else if (item.action === "rate") {
+      handleRateApp();
     }
   };
 
   // Show loading while auth is loading or logging out
   if (loading || loggingOut) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3B82F6" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </View>
     );
@@ -266,18 +300,94 @@ export default function ProfileScreen() {
     return null;
   }
 
+  const dynamicStyles = {
+    container: {
+      backgroundColor: colors.background,
+    },
+    header: {
+      backgroundColor: colors.backgroundSecondary,
+      borderBottomColor: colors.border,
+    },
+    userName: {
+      color: colors.text,
+    },
+    userEmail: {
+      color: colors.textSecondary,
+    },
+    statValue: {
+      color: colors.text,
+    },
+    statLabel: {
+      color: colors.textSecondary,
+    },
+    sectionTitle: {
+      color: colors.text,
+    },
+    sectionContent: {
+      backgroundColor: colors.card,
+      borderColor: colors.cardBorder,
+    },
+    menuItem: {
+      borderBottomColor: colors.borderLight,
+    },
+    menuIconContainer: {
+      backgroundColor: colors.primaryLight,
+    },
+    menuItemLabel: {
+      color: colors.text,
+    },
+    adminPanelButton: {
+      backgroundColor: colors.card,
+      borderColor: colors.primaryLight,
+    },
+    adminPanelTitle: {
+      color: colors.text,
+    },
+    adminPanelSubtitle: {
+      color: colors.textSecondary,
+    },
+    logoutButton: {
+      backgroundColor: colors.card,
+      borderColor: colors.borderLight,
+    },
+    logoutButtonText: {
+      color: colors.textSecondary,
+    },
+    versionText: {
+      color: colors.textSecondary,
+    },
+    versionSubtext: {
+      color: colors.textSecondary,
+    },
+    languageModalContent: {
+      backgroundColor: colors.backgroundSecondary,
+    },
+    languageModalHeader: {
+      borderBottomColor: colors.borderLight,
+    },
+    languageModalTitle: {
+      color: colors.text,
+    },
+    languageItem: {
+      borderBottomColor: colors.borderLight,
+    },
+    languageItemText: {
+      color: colors.text,
+    },
+  };
+
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={colors.statusBarStyle} />
       <ScrollView
-        style={styles.container}
+        style={[styles.container, dynamicStyles.container]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
         {/* Profile Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, dynamicStyles.header]}>
           <View style={styles.avatarContainer}>
             <TouchableOpacity
               style={styles.avatar}
@@ -302,24 +412,24 @@ export default function ProfileScreen() {
               <Ionicons name="camera" size={18} color="#fff" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.userName}>
+          <Text style={[styles.userName, dynamicStyles.userName]}>
             {profile?.full_name || user?.user_metadata?.full_name || "User"}
           </Text>
-          <Text style={styles.userEmail}>{user?.email}</Text>
+          <Text style={[styles.userEmail, dynamicStyles.userEmail]}>{user?.email}</Text>
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{stats.ordersCount}</Text>
-              <Text style={styles.statLabel}>Orders</Text>
+              <Text style={[styles.statValue, dynamicStyles.statValue]}>{stats.ordersCount}</Text>
+              <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Orders</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{stats.designsCount}</Text>
-              <Text style={styles.statLabel}>Designs</Text>
+              <Text style={[styles.statValue, dynamicStyles.statValue]}>{stats.designsCount}</Text>
+              <Text style={[styles.statLabel, dynamicStyles.statLabel]}>Designs</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{stats.inProgressCount}</Text>
-              <Text style={styles.statLabel}>In Progress</Text>
+              <Text style={[styles.statValue, dynamicStyles.statValue]}>{stats.inProgressCount}</Text>
+              <Text style={[styles.statLabel, dynamicStyles.statLabel]}>In Progress</Text>
             </View>
           </View>
         </View>
@@ -327,7 +437,7 @@ export default function ProfileScreen() {
         {/* Admin Panel Button */}
         {isAdmin && (
           <TouchableOpacity
-            style={styles.adminPanelButton}
+            style={[styles.adminPanelButton, dynamicStyles.adminPanelButton]}
             onPress={() => router.push("/admin" as any)}
           >
             <View style={styles.adminPanelContent}>
@@ -335,8 +445,8 @@ export default function ProfileScreen() {
                 <Ionicons name="shield-checkmark" size={24} color="#FF006E" />
               </View>
               <View style={styles.adminTextContainer}>
-                <Text style={styles.adminPanelTitle}>Admin Panel</Text>
-                <Text style={styles.adminPanelSubtitle}>
+                <Text style={[styles.adminPanelTitle, dynamicStyles.adminPanelTitle]}>Admin Panel</Text>
+                <Text style={[styles.adminPanelSubtitle, dynamicStyles.adminPanelSubtitle]}>
                   Manage orders, users & products
                 </Text>
               </View>
@@ -348,21 +458,23 @@ export default function ProfileScreen() {
         {/* Profile Sections */}
         {profileSections.map((section, sectionIndex) => (
           <View key={sectionIndex} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
-            <View style={styles.sectionContent}>
-              {section.items.map((item, itemIndex) => (
+            <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>{section.title}</Text>
+            <View style={[styles.sectionContent, dynamicStyles.sectionContent]}>
+              {section.items.map((item: any, itemIndex) => (
                 <TouchableOpacity
                   key={itemIndex}
                   style={[
                     styles.menuItem,
+                    dynamicStyles.menuItem,
                     itemIndex === section.items.length - 1 &&
                       styles.menuItemLast,
                   ]}
-                  activeOpacity={0.7}
-                  onPress={() => handleMenuItemPress(item)}
+                  activeOpacity={item.hasToggle ? 1 : 0.7}
+                  onPress={() => !item.hasToggle && handleMenuItemPress(item)}
+                  disabled={item.hasToggle}
                 >
                   <View style={styles.menuItemLeft}>
-                    <View style={styles.menuIconContainer}>
+                    <View style={[styles.menuIconContainer, dynamicStyles.menuIconContainer]}>
                       <Ionicons
                         name={item.icon as any}
                         size={22}
@@ -370,13 +482,23 @@ export default function ProfileScreen() {
                       />
                     </View>
                     <View style={styles.menuItemText}>
-                      <Text style={styles.menuItemLabel}>{item.label}</Text>
-                      {item.value ? (
+                      <Text style={[styles.menuItemLabel, dynamicStyles.menuItemLabel]}>{item.label}</Text>
+                      {item.value && !item.hasToggle ? (
                         <Text style={styles.menuItemValue}>{item.value}</Text>
                       ) : null}
                     </View>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color="#B8B8D1" />
+                  {item.hasToggle ? (
+                    <Switch
+                      value={item.toggleValue}
+                      onValueChange={item.onToggle}
+                      trackColor={{ false: "#D1D5DB", true: "#FFC5DD" }}
+                      thumbColor={item.toggleValue ? "#FF006E" : "#F3F4F6"}
+                      ios_backgroundColor="#D1D5DB"
+                    />
+                  ) : (
+                    <Ionicons name="chevron-forward" size={20} color="#B8B8D1" />
+                  )}
                 </TouchableOpacity>
               ))}
             </View>
@@ -386,22 +508,22 @@ export default function ProfileScreen() {
         {/* Logout Button */}
         <View style={styles.section}>
           <TouchableOpacity
-            style={styles.logoutButton}
+            style={[styles.logoutButton, dynamicStyles.logoutButton]}
             onPress={handleLogout}
             activeOpacity={0.7}
           >
             <Ionicons name="log-out-outline" size={22} color="#EF4444" />
-            <Text style={styles.logoutButtonText}>Sign Out</Text>
+            <Text style={[styles.logoutButtonText, dynamicStyles.logoutButtonText]}>Sign Out</Text>
           </TouchableOpacity>
         </View>
 
         {/* App Version */}
         <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>PrintCraft v1.0.0</Text>
+          <Text style={[styles.versionText, dynamicStyles.versionText]}>PrintCraft v1.0.0</Text>
           <View style={styles.versionSubtextRow}>
-            <Text style={styles.versionSubtext}>Made with </Text>
+            <Text style={[styles.versionSubtext, dynamicStyles.versionSubtext]}>Made with </Text>
             <Ionicons name="heart" size={12} color="#F87171" />
-            <Text style={styles.versionSubtext}> for print lovers</Text>
+            <Text style={[styles.versionSubtext, dynamicStyles.versionSubtext]}> for print lovers</Text>
           </View>
         </View>
 
@@ -434,6 +556,47 @@ export default function ProfileScreen() {
                 resizeMode="contain"
               />
             )}
+          </TouchableOpacity>
+        </Modal>
+
+        {/* Language Selector Modal */}
+        <Modal
+          visible={showLanguageModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowLanguageModal(false)}
+        >
+          <TouchableOpacity
+            style={styles.languageModalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowLanguageModal(false)}
+          >
+            <View style={[styles.languageModalContent, dynamicStyles.languageModalContent]}>
+              <View style={[styles.languageModalHeader, dynamicStyles.languageModalHeader]}>
+                <Text style={[styles.languageModalTitle, dynamicStyles.languageModalTitle]}>Select Language</Text>
+                <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={styles.languageList}>
+                {languages.map((lang) => (
+                  <TouchableOpacity
+                    key={lang.code}
+                    style={[styles.languageItem, dynamicStyles.languageItem]}
+                    onPress={() => {
+                      setLanguage(lang.code);
+                      setShowLanguageModal(false);
+                      Alert.alert("Language Changed", `Language set to ${lang.name}`);
+                    }}
+                  >
+                    <Text style={[styles.languageItemText, dynamicStyles.languageItemText]}>{lang.name}</Text>
+                    {language === lang.code && (
+                      <Ionicons name="checkmark" size={24} color="#FF006E" />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           </TouchableOpacity>
         </Modal>
       </ScrollView>
@@ -723,5 +886,47 @@ const styles = StyleSheet.create({
   modalImage: {
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height * 0.7,
+  },
+  languageModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  languageModalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "70%",
+  },
+  languageModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  languageModalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  languageList: {
+    maxHeight: 400,
+  },
+  languageItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  languageItemText: {
+    fontSize: 16,
+    color: "#1F2937",
+    fontWeight: "500",
   },
 });

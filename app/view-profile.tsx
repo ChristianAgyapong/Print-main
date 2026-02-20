@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Profile, profileService } from "@/lib/database-service";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
@@ -22,6 +23,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ViewProfileScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const colors = useThemeColors();
   const [loading, setLoading] = useState(true);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -79,13 +81,25 @@ export default function ViewProfileScreen() {
     }
   };
 
+  const dynamicStyles = {
+    container: { backgroundColor: colors.background },
+    header: { backgroundColor: colors.backgroundSecondary, borderBottomColor: colors.border },
+    headerTitle: { color: colors.text },
+    profileCard: { backgroundColor: colors.card, borderColor: colors.cardBorder },
+    userName: { color: colors.text },
+    userEmail: { color: colors.textSecondary },
+    bioText: { color: colors.textSecondary },
+    infoLabel: { color: colors.textSecondary },
+    infoValue: { color: colors.text },
+  };
+
   const renderInfoSection = (
     title: string,
     items: { label: string; value: string | null; icon: string }[],
   ) => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.sectionContent}>
+      <Text style={[styles.sectionTitle, dynamicStyles.infoLabel]}>{title}</Text>
+      <View style={[styles.sectionContent, dynamicStyles.profileCard]}>
         {items.map((item, index) => (
           <View
             key={index}
@@ -98,9 +112,9 @@ export default function ViewProfileScreen() {
               <View style={styles.iconContainer}>
                 <Ionicons name={item.icon as any} size={20} color="#FF006E" />
               </View>
-              <Text style={styles.infoLabel}>{item.label}</Text>
+              <Text style={[styles.infoLabel, dynamicStyles.infoLabel]}>{item.label}</Text>
             </View>
-            <Text style={styles.infoValue}>{item.value || "Not set"}</Text>
+            <Text style={[styles.infoValue, dynamicStyles.infoValue]}>{item.value || "Not set"}</Text>
           </View>
         ))}
       </View>
@@ -108,14 +122,14 @@ export default function ViewProfileScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
+    <SafeAreaView style={[styles.container, dynamicStyles.container]}>
+      <StatusBar style={colors.statusBarStyle} />
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, dynamicStyles.header]}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Personal Information</Text>
+        <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>Personal Information</Text>
         <TouchableOpacity
           onPress={() => router.push("/edit-profile")}
           style={styles.editButton}
@@ -135,7 +149,7 @@ export default function ViewProfileScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Profile Header */}
-          <View style={styles.profileHeader}>
+          <View style={[styles.profileHeader, dynamicStyles.profileCard]}>
             <TouchableOpacity
               style={styles.avatar}
               onPress={() => profile?.avatar_url && setShowAvatarModal(true)}
@@ -152,8 +166,8 @@ export default function ViewProfileScreen() {
                 <Ionicons name="person" size={48} color="#fff" />
               )}
             </TouchableOpacity>
-            <Text style={styles.userName}>{profile?.full_name ?? "User"}</Text>
-            <Text style={styles.userEmail}>{user?.email}</Text>
+            <Text style={[styles.userName, dynamicStyles.userName]}>{profile?.full_name ?? "User"}</Text>
+            <Text style={[styles.userEmail, dynamicStyles.userEmail]}>{user?.email}</Text>
           </View>
 
           {/* Basic Information */}
@@ -178,8 +192,8 @@ export default function ViewProfileScreen() {
           {/* About */}
           {(profile?.bio || profile?.company || profile?.job_title) && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>About</Text>
-              <View style={styles.sectionContent}>
+              <Text style={[styles.sectionTitle, dynamicStyles.infoLabel]}>About</Text>
+              <View style={[styles.sectionContent, dynamicStyles.profileCard]}>
                 {profile?.bio && (
                   <View style={[styles.infoRow, styles.bioRow]}>
                     <View style={styles.infoLeft}>
@@ -190,9 +204,9 @@ export default function ViewProfileScreen() {
                           color="#3B82F6"
                         />
                       </View>
-                      <Text style={styles.infoLabel}>Bio</Text>
+                      <Text style={[styles.infoLabel, dynamicStyles.infoLabel]}>Bio</Text>
                     </View>
-                    <Text style={[styles.infoValue, styles.bioText]}>
+                    <Text style={[styles.infoValue, styles.bioText, dynamicStyles.bioText]}>
                       {profile.bio}
                     </Text>
                   </View>
@@ -207,9 +221,9 @@ export default function ViewProfileScreen() {
                           color="#FF006E"
                         />
                       </View>
-                      <Text style={styles.infoLabel}>Company</Text>
+                      <Text style={[styles.infoLabel, dynamicStyles.infoLabel]}>Company</Text>
                     </View>
-                    <Text style={styles.infoValue}>{profile.company}</Text>
+                    <Text style={[styles.infoValue, dynamicStyles.infoValue]}>{profile.company}</Text>
                   </View>
                 )}
                 {profile?.job_title && (
@@ -222,9 +236,9 @@ export default function ViewProfileScreen() {
                           color="#FF006E"
                         />
                       </View>
-                      <Text style={styles.infoLabel}>Job Title</Text>
+                      <Text style={[styles.infoLabel, dynamicStyles.infoLabel]}>Job Title</Text>
                     </View>
-                    <Text style={styles.infoValue}>{profile.job_title}</Text>
+                    <Text style={[styles.infoValue, dynamicStyles.infoValue]}>{profile.job_title}</Text>
                   </View>
                 )}
               </View>
@@ -251,8 +265,8 @@ export default function ViewProfileScreen() {
           {/* Address */}
           {(profile?.address_street || profile?.address_city) && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Address</Text>
-              <View style={styles.sectionContent}>
+              <Text style={[styles.sectionTitle, dynamicStyles.infoLabel]}>Address</Text>
+              <View style={[styles.sectionContent, dynamicStyles.profileCard]}>
                 <View style={styles.addressContainer}>
                   <View style={styles.iconContainer}>
                     <Ionicons
@@ -263,14 +277,14 @@ export default function ViewProfileScreen() {
                   </View>
                   <View style={styles.addressText}>
                     {profile?.address_street && (
-                      <Text style={styles.addressLine}>
+                      <Text style={[styles.addressLine, dynamicStyles.infoValue]}>
                         {profile.address_street}
                       </Text>
                     )}
                     {(profile?.address_city ||
                       profile?.address_state ||
                       profile?.address_zip) && (
-                      <Text style={styles.addressLine}>
+                      <Text style={[styles.addressLine, dynamicStyles.infoValue]}>
                         {[
                           profile?.address_city,
                           profile?.address_state,
@@ -281,7 +295,7 @@ export default function ViewProfileScreen() {
                       </Text>
                     )}
                     {profile?.address_country && (
-                      <Text style={styles.addressLine}>
+                      <Text style={[styles.addressLine, dynamicStyles.infoValue]}>
                         {profile.address_country}
                       </Text>
                     )}
@@ -305,10 +319,10 @@ export default function ViewProfileScreen() {
                   size={64}
                   color="#B8B8D1"
                 />
-                <Text style={styles.emptyStateTitle}>
+                <Text style={[styles.emptyStateTitle, dynamicStyles.userName]}>
                   Complete Your Profile
                 </Text>
-                <Text style={styles.emptyStateText}>
+                <Text style={[styles.emptyStateText, dynamicStyles.userEmail]}>
                   Add more information to personalize your experience
                 </Text>
                 <TouchableOpacity

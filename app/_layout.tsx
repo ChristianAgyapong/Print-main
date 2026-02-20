@@ -12,12 +12,15 @@ import { AdminProvider } from "@/contexts/AdminContext";
 import { AdminNotificationsProvider } from "@/contexts/AdminNotificationsContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { MessagesProvider } from "@/contexts/MessagesContext";
+import { PreferencesProvider, usePreferences } from "@/contexts/PreferencesContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { user, loading } = useAuth();
+  const { darkMode, loading: prefsLoading } = usePreferences();
   const segments = useSegments();
   const router = useRouter();
 
@@ -63,8 +66,11 @@ function RootLayoutNav() {
     }
   }, [user, loading]);
 
+  // Use darkMode from preferences instead of system color scheme
+  const theme = darkMode ? DarkTheme : DefaultTheme;
+
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={theme}>
       <Stack>
         <Stack.Screen
           name="index"
@@ -161,6 +167,30 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="help-center"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="terms-privacy"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="payment-methods"
+          options={{
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
           name="modal"
           options={{
             presentation: "modal",
@@ -176,15 +206,19 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <AdminProvider>
-        <AdminNotificationsProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <RootLayoutNav />
-            </WishlistProvider>
-          </CartProvider>
-        </AdminNotificationsProvider>
-      </AdminProvider>
+      <PreferencesProvider>
+        <AdminProvider>
+          <AdminNotificationsProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <MessagesProvider>
+                  <RootLayoutNav />
+                </MessagesProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </AdminNotificationsProvider>
+        </AdminProvider>
+      </PreferencesProvider>
     </AuthProvider>
   );
 }
