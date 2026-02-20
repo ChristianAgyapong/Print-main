@@ -1,16 +1,17 @@
 import { useAdmin } from "@/contexts/AdminContext";
+import { useAdminNotifications } from "@/contexts/AdminNotificationsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,6 +19,14 @@ export default function AdminScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { isAdmin, isLoading } = useAdmin();
+  const { newOrdersCount, clearNotifications } = useAdminNotifications();
+
+  useEffect(() => {
+    // Refresh notifications when admin panel opens
+    return () => {
+      // Could optionally clear notifications when leaving
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -59,6 +68,7 @@ export default function AdminScreen() {
       subtitle: "Manage all orders",
       color: "#3B82F6",
       route: "/admin/orders",
+      badge: newOrdersCount,
     },
     {
       icon: "people",
@@ -73,6 +83,13 @@ export default function AdminScreen() {
       subtitle: "Add, edit, delete products",
       color: "#10B981",
       route: "/admin/products",
+    },
+    {
+      icon: "chatbubble-ellipses",
+      title: "Messages",
+      subtitle: "Send messages to users",
+      color: "#FF006E",
+      route: "/admin/messages",
     },
   ];
 
@@ -94,9 +111,7 @@ export default function AdminScreen() {
         <View style={styles.welcomeCard}>
           <Ionicons name="shield-checkmark" size={48} color="#FF006E" />
           <Text style={styles.welcomeTitle}>Welcome, Admin</Text>
-          <Text style={styles.welcomeText}>
-            {user.email}
-          </Text>
+          <Text style={styles.welcomeText}>{user.email}</Text>
           <Text style={styles.welcomeSubtext}>
             Manage your print shop operations from here
           </Text>
@@ -108,10 +123,31 @@ export default function AdminScreen() {
             <TouchableOpacity
               key={index}
               style={styles.menuCard}
-              onPress={() => router.push(item.route as any)}
+              onPress={() => {
+                if (item.route === "/admin/orders" && newOrdersCount > 0) {
+                  clearNotifications();
+                }
+                router.push(item.route as any);
+              }}
             >
-              <View style={[styles.iconContainer, { backgroundColor: `${item.color}15` }]}>
-                <Ionicons name={item.icon as any} size={32} color={item.color} />
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: `${item.color}15` },
+                ]}
+              >
+                <Ionicons
+                  name={item.icon as any}
+                  size={32}
+                  color={item.color}
+                />
+                {item.badge && item.badge > 0 && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </Text>
+                  </View>
+                )}
               </View>
               <View style={styles.menuInfo}>
                 <Text style={styles.menuTitle}>{item.title}</Text>
@@ -245,6 +281,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
+    position: "relative",
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    backgroundColor: "#FF006E",
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 6,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
   menuInfo: {
     flex: 1,

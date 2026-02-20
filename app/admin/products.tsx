@@ -1,22 +1,22 @@
 import { adminService, Product, productsService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -27,7 +27,7 @@ export default function AdminProductsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  
+
   // Form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -36,7 +36,13 @@ export default function AdminProductsScreen() {
   const [imageUrl, setImageUrl] = useState("");
   const [stockQuantity, setStockQuantity] = useState("");
 
-  const categories = ["Stationery", "Large Format", "Commercial", "Digital", "Packaging"];
+  const categories = [
+    "Stationery",
+    "Large Format",
+    "Commercial",
+    "Digital",
+    "Packaging",
+  ];
 
   useEffect(() => {
     loadProducts();
@@ -107,7 +113,10 @@ export default function AdminProductsScreen() {
 
     let success = false;
     if (editingProduct) {
-      success = await adminService.updateProduct(editingProduct.id, productData);
+      success = await adminService.updateProduct(
+        editingProduct.id,
+        productData,
+      );
     } else {
       const newProduct = await adminService.addProduct(productData);
       success = !!newProduct;
@@ -116,12 +125,15 @@ export default function AdminProductsScreen() {
     if (success) {
       Alert.alert(
         "Success",
-        `Product ${editingProduct ? "updated" : "added"} successfully`
+        `Product ${editingProduct ? "updated" : "added"} successfully`,
       );
       setModalVisible(false);
       await loadProducts();
     } else {
-      Alert.alert("Error", `Failed to ${editingProduct ? "update" : "add"} product`);
+      Alert.alert(
+        "Error",
+        `Failed to ${editingProduct ? "update" : "add"} product`,
+      );
     }
   };
 
@@ -144,7 +156,7 @@ export default function AdminProductsScreen() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -215,7 +227,9 @@ export default function AdminProductsScreen() {
               <View style={styles.productInfo}>
                 <Text style={styles.productTitle}>{product.title}</Text>
                 <Text style={styles.productCategory}>{product.category}</Text>
-                <Text style={styles.productPrice}>€{product.price.toFixed(2)}</Text>
+                <Text style={styles.productPrice}>
+                  €{product.price.toFixed(2)}
+                </Text>
                 <Text style={styles.productStock}>
                   Stock: {product.stock_quantity}
                 </Text>
@@ -251,7 +265,7 @@ export default function AdminProductsScreen() {
       >
         <SafeAreaView style={styles.modalContainer}>
           <StatusBar style="dark" />
-          
+
           {/* Modal Header */}
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -267,7 +281,10 @@ export default function AdminProductsScreen() {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
           >
-            <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+            <ScrollView
+              style={styles.modalContent}
+              showsVerticalScrollIndicator={false}
+            >
               {/* Title */}
               <Text style={styles.label}>
                 Product Title <Text style={styles.required}>*</Text>
@@ -306,7 +323,11 @@ export default function AdminProductsScreen() {
               <Text style={styles.label}>
                 Category <Text style={styles.required}>*</Text>
               </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categoryScroll}
+              >
                 {categories.map((cat) => (
                   <TouchableOpacity
                     key={cat}

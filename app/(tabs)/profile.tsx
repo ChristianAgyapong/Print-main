@@ -1,5 +1,5 @@
-import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/contexts/AdminContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Profile, profileService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -7,17 +7,17 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Image,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function ProfileScreen() {
@@ -113,6 +113,12 @@ export default function ProfileScreen() {
           label: "Email",
           value: user?.email || "Not set",
           route: null,
+        },
+        {
+          icon: "chatbubble-ellipses-outline",
+          label: "Messages",
+          value: "",
+          route: "/messages",
         },
         {
           icon: "lock-closed-outline",
@@ -330,7 +336,9 @@ export default function ProfileScreen() {
               </View>
               <View style={styles.adminTextContainer}>
                 <Text style={styles.adminPanelTitle}>Admin Panel</Text>
-                <Text style={styles.adminPanelSubtitle}>Manage orders, users & products</Text>
+                <Text style={styles.adminPanelSubtitle}>
+                  Manage orders, users & products
+                </Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={24} color="#FF006E" />

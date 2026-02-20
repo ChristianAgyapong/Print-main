@@ -161,7 +161,7 @@ export const ordersService = {
   async create(
     userId: string,
     items: { product_id: string; quantity: number; price: number }[],
-    userDetails?: { name?: string; email?: string; phone?: string }
+    userDetails?: { name?: string; email?: string; phone?: string },
   ): Promise<Order | null> {
     try {
       console.log("📦 Creating order with user details:", userDetails);
@@ -361,12 +361,15 @@ export const adminService = {
   },
 
   // Get all orders with user details
-  async getAllOrders(): Promise<(Order & { user?: { email: string; name: string; phone: string | null } })[]> {
+  async getAllOrders(): Promise<
+    (Order & { user?: { email: string; name: string; phone: string | null } })[]
+  > {
     try {
       console.log("📦 Admin: Fetching all orders from backend...");
       const { data, error } = await supabase
         .from("orders")
-        .select(`
+        .select(
+          `
           *,
           items:order_items(
             id,
@@ -376,7 +379,8 @@ export const adminService = {
             price,
             product:products(*)
           )
-        `)
+        `,
+        )
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -398,21 +402,22 @@ export const adminService = {
         },
       }));
 
-      console.log(`✅ Admin: Loaded ${ordersWithUsers.length} orders with user details`);
+      console.log(
+        `✅ Admin: Loaded ${ordersWithUsers.length} orders with user details`,
+      );
       return ordersWithUsers;
     } catch (error) {
       console.error("❌ Admin: Error fetching all orders:", error);
       console.error("This might be a Row Level Security (RLS) policy issue.");
-      console.error("Check ADMIN_PANEL_GUIDE.md for Supabase setup instructions.");
+      console.error(
+        "Check ADMIN_PANEL_GUIDE.md for Supabase setup instructions.",
+      );
       return [];
     }
   },
 
   // Update order status
-  async updateOrderStatus(
-    orderId: string,
-    status: string
-  ): Promise<boolean> {
+  async updateOrderStatus(orderId: string, status: string): Promise<boolean> {
     try {
       const { error } = await supabase
         .from("orders")
@@ -427,8 +432,8 @@ export const adminService = {
     }
   },
 
-  // Get all users (profiles)
-  async getAllUsers(): Promise<Profile[]> {
+  // Get all users (profiles with email)
+  async getAllUsers(): Promise<(Profile & { email: string })[]> {
     try {
       console.log("👥 Admin: Fetching all users from backend...");
       const { data, error } = await supabase
@@ -439,22 +444,47 @@ export const adminService = {
       if (error) {
         console.error("❌ Admin: Error fetching users:", error);
         console.error("Error details:", JSON.stringify(error, null, 2));
-        console.error("\n⚠️  COMMON ISSUE: Row Level Security (RLS) policies may be blocking admin access.");
-        console.error("\n📖 SOLUTION: You need to add RLS policies for admin access.");
+        console.error(
+          "\n⚠️  COMMON ISSUE: Row Level Security (RLS) policies may be blocking admin access.",
+        );
+        console.error(
+          "\n📖 SOLUTION: You need to add RLS policies for admin access.",
+        );
         console.error("Run this SQL in your Supabase SQL Editor:");
         console.error("\n-- Allow admins to read all profiles");
-        console.error("CREATE POLICY \"Admin can read all profiles\"");
+        console.error('CREATE POLICY "Admin can read all profiles"');
         console.error("ON profiles FOR SELECT");
-        console.error("USING (auth.jwt() ->> 'email' IN ('admin@printcraft.com', 'owner@printcraft.com'));");
-        console.error("\nOr temporarily disable RLS on profiles table for testing.");
+        console.error(
+          "USING (auth.jwt() ->> 'email' IN ('admin@printcraft.com', 'owner@printcraft.com'));",
+        );
+        console.error(
+          "\nOr temporarily disable RLS on profiles table for testing.",
+        );
         throw error;
       }
 
-      console.log(`✅ Admin: Fetched ${data?.length || 0} users from backend`);
-      return data || [];
+      // Fetch emails for all users
+      const usersWithEmails = await Promise.all(
+        (data || []).map(async (profile) => {
+          const { data: userData } = await supabase.auth.admin.getUserById(
+            profile.id,
+          );
+          return {
+            ...profile,
+            email: userData?.user?.email || "N/A",
+          };
+        }),
+      );
+
+      console.log(
+        `✅ Admin: Fetched ${usersWithEmails.length} users with emails`,
+      );
+      return usersWithEmails;
     } catch (error) {
       console.error("❌ Admin: Failed to load users. Returning empty array.");
-      console.error("Check the console logs above for detailed error information.");
+      console.error(
+        "Check the console logs above for detailed error information.",
+      );
       return [];
     }
   },
@@ -468,7 +498,7 @@ export const adminService = {
   }> {
     try {
       console.log("📊 Admin: Fetching platform statistics...");
-      
+
       const { count: usersCount, error: usersError } = await supabase
         .from("profiles")
         .select("*", { count: "exact", head: true });
@@ -507,7 +537,9 @@ export const adminService = {
       if (productsError) {
         console.error("❌ Admin: Error counting products:", productsError);
       } else {
-        console.log(`✅ Admin: Found ${productsCount || 0} products in backend`);
+        console.log(
+          `✅ Admin: Found ${productsCount || 0} products in backend`,
+        );
       }
 
       const stats = {
@@ -531,7 +563,9 @@ export const adminService = {
   },
 
   // Add new product
-  async addProduct(product: Omit<Product, "id" | "created_at" | "updated_at">): Promise<Product | null> {
+  async addProduct(
+    product: Omit<Product, "id" | "created_at" | "updated_at">,
+  ): Promise<Product | null> {
     try {
       const { data, error } = await supabase
         .from("products")
@@ -550,7 +584,7 @@ export const adminService = {
   // Update product
   async updateProduct(
     id: string,
-    updates: Partial<Omit<Product, "id" | "created_at" | "updated_at">>
+    updates: Partial<Omit<Product, "id" | "created_at" | "updated_at">>,
   ): Promise<boolean> {
     try {
       const { error } = await supabase
@@ -569,15 +603,233 @@ export const adminService = {
   // Delete product
   async deleteProduct(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from("products")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("products").delete().eq("id", id);
 
       if (error) throw error;
       return true;
     } catch (error) {
       console.error("Error deleting product:", error);
+      return false;
+    }
+  },
+};
+
+// ===================================
+// MESSAGE TYPES & INTERFACES
+// ===================================
+
+export interface Message {
+  id: string;
+  user_id: string;
+  subject: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+  updated_at: string;
+  user?: {
+    email: string;
+    name: string;
+  };
+}
+
+export interface NewMessage {
+  user_id: string;
+  subject: string;
+  message: string;
+}
+
+// ===================================
+// MESSAGING SERVICE
+// ===================================
+
+export const messagesService = {
+  // Get all messages for current user
+  async getUserMessages(userId: string): Promise<Message[]> {
+    try {
+      console.log("📬 Fetching messages for user:", userId);
+
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      console.log(`📬 Found ${data?.length || 0} messages for user`);
+      return data || [];
+    } catch (error) {
+      console.error("❌ Error fetching user messages:", error);
+      return [];
+    }
+  },
+
+  // Get unread message count for user
+  async getUnreadCount(userId: string): Promise<number> {
+    try {
+      const { count, error } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("read", false);
+
+      if (error) throw error;
+      return count || 0;
+    } catch (error) {
+      console.error("❌ Error getting unread count:", error);
+      return 0;
+    }
+  },
+
+  // Mark message as read
+  async markAsRead(messageId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .update({ read: true })
+        .eq("id", messageId);
+
+      if (error) throw error;
+      console.log("✅ Message marked as read:", messageId);
+      return true;
+    } catch (error) {
+      console.error("❌ Error marking message as read:", error);
+      return false;
+    }
+  },
+
+  // Mark all messages as read for user
+  async markAllAsRead(userId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .update({ read: true })
+        .eq("user_id", userId)
+        .eq("read", false);
+
+      if (error) throw error;
+      console.log("✅ All messages marked as read for user:", userId);
+      return true;
+    } catch (error) {
+      console.error("❌ Error marking all messages as read:", error);
+      return false;
+    }
+  },
+
+  // Delete message
+  async deleteMessage(messageId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .delete()
+        .eq("id", messageId);
+
+      if (error) throw error;
+      console.log("🗑️ Message deleted:", messageId);
+      return true;
+    } catch (error) {
+      console.error("❌ Error deleting message:", error);
+      return false;
+    }
+  },
+};
+
+// Admin messaging service
+export const adminMessagesService = {
+  // Send message to user
+  async sendMessage(newMessage: NewMessage): Promise<boolean> {
+    try {
+      console.log("📤 Admin sending message:", newMessage);
+
+      const { error } = await supabase.from("messages").insert([newMessage]);
+
+      if (error) throw error;
+      console.log("✅ Message sent successfully");
+      return true;
+    } catch (error) {
+      console.error("❌ Error sending message:", error);
+      return false;
+    }
+  },
+
+  // Get all messages (admin view)
+  async getAllMessages(): Promise<Message[]> {
+    try {
+      console.log("📬 Admin: Fetching all messages...");
+
+      const { data, error } = await supabase
+        .from("messages")
+        .select(
+          `
+          *,
+          profiles!messages_user_id_fkey(full_name)
+        `,
+        )
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Map the data to include user information
+      const messagesWithUsers = await Promise.all(
+        (data || []).map(async (message: any) => {
+          // Get user email from auth
+          const { data: userData } = await supabase.auth.admin.getUserById(
+            message.user_id,
+          );
+
+          return {
+            ...message,
+            user: {
+              email: userData?.user?.email || "N/A",
+              name: message.profiles?.full_name || "Unknown User",
+            },
+          };
+        }),
+      );
+
+      console.log(`✅ Admin: Fetched ${messagesWithUsers.length} messages`);
+      return messagesWithUsers;
+    } catch (error) {
+      console.error("❌ Admin: Error fetching messages:", error);
+      return [];
+    }
+  },
+
+  // Get message statistics
+  async getMessageStats(): Promise<{
+    total: number;
+    unread: number;
+    read: number;
+  }> {
+    try {
+      const { data, error } = await supabase.from("messages").select("read");
+
+      if (error) throw error;
+
+      const total = data?.length || 0;
+      const unread = data?.filter((m) => !m.read).length || 0;
+      const read = total - unread;
+
+      return { total, unread, read };
+    } catch (error) {
+      console.error("❌ Error getting message stats:", error);
+      return { total: 0, unread: 0, read: 0 };
+    }
+  },
+
+  // Delete message (admin)
+  async deleteMessage(messageId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .delete()
+        .eq("id", messageId);
+
+      if (error) throw error;
+      console.log("🗑️ Admin: Message deleted:", messageId);
+      return true;
+    } catch (error) {
+      console.error("❌ Admin: Error deleting message:", error);
       return false;
     }
   },

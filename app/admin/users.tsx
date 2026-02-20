@@ -1,19 +1,19 @@
 import { adminService, Profile } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -59,7 +59,7 @@ export default function AdminUsersScreen() {
       (user) =>
         user.full_name?.toLowerCase().includes(query) ||
         user.phone?.toLowerCase().includes(query) ||
-        user.company?.toLowerCase().includes(query)
+        user.company?.toLowerCase().includes(query),
     );
     setFilteredUsers(filtered);
   };
@@ -139,7 +139,7 @@ export default function AdminUsersScreen() {
                   Alert.alert(
                     "Admin Setup Required",
                     "To view all users, you need to add Row Level Security (RLS) policies in Supabase.\n\n1. Open your Supabase project\n2. Go to SQL Editor\n3. Run the SQL from SUPABASE_ADMIN_RLS_POLICIES.sql file\n4. Replace the email addresses with your admin email\n5. Refresh this page\n\nThe console should show detailed error messages.",
-                    [{ text: "OK" }]
+                    [{ text: "OK" }],
                   );
                 }}
               >
@@ -153,7 +153,10 @@ export default function AdminUsersScreen() {
             <View key={user.id} style={styles.userCard}>
               <View style={styles.avatarContainer}>
                 {user.avatar_url ? (
-                  <Image source={{ uri: user.avatar_url }} style={styles.avatar} />
+                  <Image
+                    source={{ uri: user.avatar_url }}
+                    style={styles.avatar}
+                  />
                 ) : (
                   <View style={styles.avatarPlaceholder}>
                     <Text style={styles.avatarText}>
@@ -164,7 +167,9 @@ export default function AdminUsersScreen() {
               </View>
 
               <View style={styles.userInfo}>
-                <Text style={styles.userName}>{user.full_name || "No Name"}</Text>
+                <Text style={styles.userName}>
+                  {user.full_name || "No Name"}
+                </Text>
                 {user.company && (
                   <View style={styles.companyRow}>
                     <Ionicons name="business" size={14} color="#6B7280" />

@@ -1,9 +1,11 @@
 # 🚨 ADMIN PANEL SETUP - QUICK FIX FOR "0 USERS" ISSUE
 
 ## Problem
+
 You're seeing **0 users** in the admin panel even though 4 users exist in your Supabase database.
 
 ## Cause
+
 **Supabase Row Level Security (RLS)** policies are blocking your admin account from reading other users' data.
 
 ## Solution (Choose ONE)
@@ -13,10 +15,12 @@ You're seeing **0 users** in the admin panel even though 4 users exist in your S
 ### ✅ Option 1: Add RLS Policies (RECOMMENDED)
 
 **Step 1:** Open your Supabase project dashboard
+
 - Go to https://supabase.com/dashboard
 - Select your project
 
 **Step 2:** Open SQL Editor
+
 - Click "SQL Editor" in the left sidebar
 - Click "New query"
 
@@ -82,6 +86,7 @@ Then add proper policies using Option 1.
 ## How to Verify It's Working
 
 ### 1. Check Console Logs
+
 Open your browser console or React Native debugger. You should see:
 
 ```
@@ -91,6 +96,7 @@ Open your browser console or React Native debugger. You should see:
 ```
 
 ### 2. Check Admin Panel
+
 - Open app
 - Go to Account tab
 - Tap "Admin Panel"
@@ -102,17 +108,22 @@ Open your browser console or React Native debugger. You should see:
 ## Common Issues
 
 ### Issue: "auth.jwt() is null"
+
 **Solution:** You're not signed in. Sign in with your admin email first.
 
 ### Issue: Still showing 0 users
+
 **Solution:** Check that:
+
 1. Your email in the SQL matches EXACTLY the email in `lib/database-service.ts`
 2. You're signed in with that email
 3. You ran the SQL in the correct Supabase project
 4. You refreshed the app after running SQL
 
 ### Issue: Console shows "RLS policy violation"
-**Solution:** 
+
+**Solution:**
+
 1. Double-check the email spelling in the SQL
 2. Make sure you clicked "Run" in Supabase SQL Editor
 3. Try signing out and signing back in
@@ -128,6 +139,7 @@ const adminEmails = ["admin@printcraft.com", "owner@printcraft.com"];
 ```
 
 **Make sure:**
+
 1. Your email is in this array
 2. The same email is used in the SQL policy
 3. You're signed into the app with this email

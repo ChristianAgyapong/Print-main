@@ -1,23 +1,25 @@
 import { adminService, Order } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AdminOrdersScreen() {
   const router = useRouter();
-  const [orders, setOrders] = useState<(Order & { user?: { email: string; name: string; phone: string | null } })[]>([]);
+  const [orders, setOrders] = useState<
+    (Order & { user?: { email: string; name: string; phone: string | null } })[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
@@ -42,27 +44,27 @@ export default function AdminOrdersScreen() {
 
   const handleUpdateStatus = (orderId: string, currentStatus: string) => {
     const statusOptions = ["pending", "delivered"];
-    const otherStatus = statusOptions.find((s) => s !== currentStatus) || "delivered";
+    const otherStatus =
+      statusOptions.find((s) => s !== currentStatus) || "delivered";
 
-    Alert.alert(
-      "Update Order Status",
-      `Change status to "${otherStatus}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Update",
-          onPress: async () => {
-            const success = await adminService.updateOrderStatus(orderId, otherStatus);
-            if (success) {
-              Alert.alert("Success", "Order status updated successfully");
-              await loadOrders();
-            } else {
-              Alert.alert("Error", "Failed to update order status");
-            }
-          },
+    Alert.alert("Update Order Status", `Change status to "${otherStatus}"?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Update",
+        onPress: async () => {
+          const success = await adminService.updateOrderStatus(
+            orderId,
+            otherStatus,
+          );
+          if (success) {
+            Alert.alert("Success", "Order status updated successfully");
+            await loadOrders();
+          } else {
+            Alert.alert("Error", "Failed to update order status");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const getStatusColor = (status: string) => {
@@ -150,15 +152,22 @@ export default function AdminOrdersScreen() {
               >
                 <View style={styles.orderMainInfo}>
                   <View style={styles.orderTitleRow}>
-                    <Text style={styles.orderNumber}>Order #{order.id.substring(0, 8)}</Text>
+                    <Text style={styles.orderNumber}>
+                      Order #{order.id.substring(0, 8)}
+                    </Text>
                     <View
                       style={[
                         styles.statusBadge,
-                        { backgroundColor: `${getStatusColor(order.status)}20` },
+                        {
+                          backgroundColor: `${getStatusColor(order.status)}20`,
+                        },
                       ]}
                     >
                       <Text
-                        style={[styles.statusText, { color: getStatusColor(order.status) }]}
+                        style={[
+                          styles.statusText,
+                          { color: getStatusColor(order.status) },
+                        ]}
                       >
                         {order.status.toUpperCase()}
                       </Text>
@@ -182,10 +191,14 @@ export default function AdminOrdersScreen() {
                       day: "numeric",
                     })}
                   </Text>
-                  <Text style={styles.orderTotal}>€{order.total_amount.toFixed(2)}</Text>
+                  <Text style={styles.orderTotal}>
+                    €{order.total_amount.toFixed(2)}
+                  </Text>
                 </View>
                 <Ionicons
-                  name={expandedOrderId === order.id ? "chevron-up" : "chevron-down"}
+                  name={
+                    expandedOrderId === order.id ? "chevron-up" : "chevron-down"
+                  }
                   size={24}
                   color="#9CA3AF"
                 />
@@ -197,9 +210,13 @@ export default function AdminOrdersScreen() {
                   <Text style={styles.detailsTitle}>Order Items:</Text>
                   {order.items?.map((item) => (
                     <View key={item.id} style={styles.itemRow}>
-                      <Text style={styles.itemName}>{item.product?.title || "Product"}</Text>
+                      <Text style={styles.itemName}>
+                        {item.product?.title || "Product"}
+                      </Text>
                       <Text style={styles.itemQty}>Qty: {item.quantity}</Text>
-                      <Text style={styles.itemPrice}>€{item.price.toFixed(2)}</Text>
+                      <Text style={styles.itemPrice}>
+                        €{item.price.toFixed(2)}
+                      </Text>
                     </View>
                   ))}
 

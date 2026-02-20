@@ -60,7 +60,7 @@ export default function CartScreen() {
     try {
       // Fetch user profile for order details
       const profile = await profileService.get(user.id);
-      
+
       const orderItems = items.map((item) => ({
         product_id: item.product.id,
         quantity: item.quantity,
@@ -69,14 +69,25 @@ export default function CartScreen() {
 
       // Create order with user details
       const userDetails = {
-        name: profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Customer',
-        email: user.email || 'no-email@provided.com',
+        name:
+          profile?.full_name ||
+          user.user_metadata?.full_name ||
+          user.email?.split("@")[0] ||
+          "Customer",
+        email: user.email || "no-email@provided.com",
         phone: profile?.phone || null,
       };
 
-      console.log("📦 Checkout: Creating order with user details:", userDetails);
+      console.log(
+        "📦 Checkout: Creating order with user details:",
+        userDetails,
+      );
 
-      const order = await ordersService.create(user.id, orderItems, userDetails);
+      const order = await ordersService.create(
+        user.id,
+        orderItems,
+        userDetails,
+      );
 
       if (order) {
         clearCart();

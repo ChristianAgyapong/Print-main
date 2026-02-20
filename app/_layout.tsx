@@ -1,15 +1,16 @@
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
+    DarkTheme,
+    DefaultTheme,
+    ThemeProvider,
 } from "@react-navigation/native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
+import { AdminNotificationsProvider } from "@/contexts/AdminNotificationsContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -176,11 +177,13 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <AdminProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <RootLayoutNav />
-          </WishlistProvider>
-        </CartProvider>
+        <AdminNotificationsProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <RootLayoutNav />
+            </WishlistProvider>
+          </CartProvider>
+        </AdminNotificationsProvider>
       </AdminProvider>
     </AuthProvider>
   );

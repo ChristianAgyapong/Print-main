@@ -1,12 +1,15 @@
 # Order Customer Details Implementation Guide
 
 ## Overview
+
 The orders table has been enhanced to store customer details (name, email, phone) directly in each order record. This eliminates the need for additional API calls to fetch user information and improves admin panel performance.
 
 ## What Changed
 
 ### 1. Database Schema
+
 **New columns added to `orders` table:**
+
 - `user_name` (TEXT) - Customer's full name
 - `user_email` (TEXT) - Customer's email address
 - `user_phone` (TEXT) - Customer's phone number
@@ -14,7 +17,9 @@ The orders table has been enhanced to store customer details (name, email, phone
 ### 2. Code Changes
 
 #### lib/database-service.ts
+
 **Order Interface:**
+
 ```typescript
 export interface Order {
   id: string;
@@ -37,32 +42,38 @@ export interface Order {
 ```
 
 **ordersService.create():**
+
 - Now accepts optional `userDetails` parameter: `{ name?: string; email?: string; phone?: string }`
 - Stores customer details in order record
 - Logs: "📦 Creating order with user details"
 
 **adminService.getAllOrders():**
+
 - Reads user details directly from order columns
 - No longer calls `auth.admin.getUserById()`
 - Returns user object with name, email, and phone
 - Improved performance (no async user lookups)
 
 #### app/cart.tsx
+
 **handleCheckout():**
+
 - Fetches user profile via `profileService.get()`
 - Constructs userDetails object:
   ```typescript
   const userDetails = {
-    name: profile?.full_name || user.email?.split('@')[0] || 'Customer',
-    email: user.email || '',
-    phone: profile?.phone || null
+    name: profile?.full_name || user.email?.split("@")[0] || "Customer",
+    email: user.email || "",
+    phone: profile?.phone || null,
   };
   ```
 - Passes userDetails to `ordersService.create()`
 - Logs: "📦 Checkout: Creating order with user details"
 
 #### app/admin/orders.tsx
+
 **Order Display:**
+
 - Shows customer name (instead of just email)
 - Displays email on separate line
 - Shows phone number if available
@@ -71,6 +82,7 @@ export interface Order {
 ## Setup Instructions
 
 ### Step 1: Run Database Migration
+
 1. Open your Supabase project dashboard
 2. Navigate to **SQL Editor**
 3. Open the file `ORDERS_USER_DETAILS_MIGRATION.sql`
@@ -78,22 +90,26 @@ export interface Order {
 5. Click **Run**
 
 The migration will:
+
 - Add 3 new columns to orders table
 - Backfill existing orders with customer data from profiles
 - Create an index on user_email for faster queries
 - Display sample data to verify success
 
 ### Step 2: Verify Migration
+
 After running the migration, check:
+
 ```sql
-SELECT user_name, user_email, user_phone, total_amount 
-FROM orders 
+SELECT user_name, user_email, user_phone, total_amount
+FROM orders
 LIMIT 5;
 ```
 
 You should see customer details populated for existing orders.
 
 ### Step 3: Test Order Creation
+
 1. Open your app
 2. Add items to cart
 3. Complete checkout
@@ -103,20 +119,23 @@ You should see customer details populated for existing orders.
 ## Benefits
 
 ### For Admins:
+
 ✅ **See customer names** - No more "Unknown" or just email addresses  
 ✅ **Contact information** - Email and phone displayed in order details  
 ✅ **Faster loading** - No additional API calls to fetch user data  
-✅ **Better verification** - Easy to identify and contact customers  
+✅ **Better verification** - Easy to identify and contact customers
 
 ### For Developers:
+
 ✅ **Cleaner code** - No async user lookups in order display  
 ✅ **Better performance** - Eliminated auth.admin API dependency  
 ✅ **Richer data** - All customer info in one place  
-✅ **Improved debugging** - Logging shows when user details are captured  
+✅ **Improved debugging** - Logging shows when user details are captured
 
 ## Data Flow
 
 ### Order Creation:
+
 1. User clicks "Proceed to Checkout" in cart
 2. App fetches user profile (name, phone)
 3. Constructs userDetails object with name, email, phone
@@ -124,6 +143,7 @@ You should see customer details populated for existing orders.
 5. Supabase stores all fields in orders table
 
 ### Admin Orders View:
+
 1. Admin opens orders page
 2. Calls `adminService.getAllOrders()`
 3. Query fetches orders with:
@@ -135,24 +155,30 @@ You should see customer details populated for existing orders.
 ## Troubleshooting
 
 ### Issue: New orders still showing "Unknown Customer"
+
 **Cause:** User hasn't completed their profile  
-**Solution:** 
+**Solution:**
+
 - User details fallback to email username if full_name is empty
 - Encourage users to complete profile for better order records
 
 ### Issue: Phone number not showing
+
 **Cause:** User didn't provide phone in profile  
 **Solution:**
+
 - Phone is optional
 - Consider making phone required in profile edit form
 
 ### Issue: Existing orders show "N/A" for email
+
 **Cause:** Migration didn't backfill all orders  
 **Solution:**
 Run backfill query manually:
+
 ```sql
 UPDATE orders o
-SET 
+SET
   user_name = p.full_name,
   user_email = au.email,
   user_phone = p.phone
@@ -163,8 +189,10 @@ WHERE o.user_id = p.id
 ```
 
 ### Issue: Old code still using auth.admin.getUserById
+
 **Cause:** Code not updated yet  
 **Solution:**
+
 - Ensure you're using latest lib/database-service.ts
 - Check that adminService.getAllOrders() reads from order columns
 - Verify no `auth.admin.getUserById()` calls in orders fetching
@@ -174,6 +202,7 @@ WHERE o.user_id = p.id
 Watch for these logs during order creation and admin viewing:
 
 **During Checkout:**
+
 ```
 📦 Checkout: Creating order with user details: {
   name: "John Doe",
@@ -188,6 +217,7 @@ Watch for these logs during order creation and admin viewing:
 ```
 
 **In Admin Panel:**
+
 ```
 🔑 Admin check result: true
 📊 Admin: Fetching all orders...
@@ -198,6 +228,7 @@ Watch for these logs during order creation and admin viewing:
 ## Future Enhancements
 
 Consider adding:
+
 - **Search orders by customer name/email** - Filter orders in admin panel
 - **Click-to-contact** - Tap email to compose, tap phone to call
 - **Shipping address** - Store delivery address in order
