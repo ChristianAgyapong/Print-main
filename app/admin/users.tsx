@@ -211,13 +211,13 @@ export default function AdminUsersScreen() {
                 <Text style={styles.joinDate}>
                   {user.created_at
                     ? `Joined ${new Date(user.created_at).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        },
-                      )}`
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      },
+                    )}`
                     : "Join date unknown"}
                 </Text>
               </View>
@@ -251,8 +251,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
@@ -260,38 +260,37 @@ const styles = StyleSheet.create({
   headerBrand: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 8,
   },
   headerIconContainer: {
     shadowColor: "#EF4444",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
   },
   headerIconGradient: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
   },
   headerTextContainer: {
     flexDirection: "column",
-    gap: 2,
+    gap: 1,
   },
   headerBrandTitle: {
-    fontSize: 18,
-    fontWeight: "900",
+    fontSize: 15,
+    fontWeight: "600",
     color: "#1F2937",
-    letterSpacing: 0.5,
+    letterSpacing: 0.1,
   },
   headerBrandSubtitle: {
     fontSize: 10,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#9CA3AF",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
+    letterSpacing: 0.3,
   },
   searchContainer: {
     flexDirection: "row",

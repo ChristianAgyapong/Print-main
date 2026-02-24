@@ -3,65 +3,88 @@ import { useMessages } from "@/contexts/MessagesContext";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Message, messagesService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "Just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function initials(name?: string | null): string {
+  if (!name) return "PC";
+  const parts = name.trim().split(" ");
+  return parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : parts[0][0].toUpperCase();
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+type Filter = "all" | "inbox" | "sent";
 
 export default function MessagesScreen() {
   const colors = useThemeColors();
   const { user } = useAuth();
   const { refreshUnreadCount } = useMessages();
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(
-    null,
-  );
-  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<Filter>("all");
+  const [showCompose, setShowCompose] = useState(false);
   const [composeSubject, setComposeSubject] = useState("");
-  const [composeMessage, setComposeMessage] = useState("");
+  const [composeBody, setComposeBody] = useState("");
   const [sending, setSending] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<
-    "all" | "from_admin" | "sent"
-  >("all");
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (user) {
-      loadMessages();
-    }
+    if (user) loadMessages();
   }, [user]);
 
-  // Refresh when tab comes into focus
   useFocusEffect(
     useCallback(() => {
-      if (user) {
-        loadMessages();
-      }
+      if (user) loadMessages();
     }, [user]),
   );
 
   const loadMessages = async () => {
     if (!user) return;
-
     setLoading(true);
     const data = await messagesService.getUserMessages(user.id);
     setMessages(data);
     setLoading(false);
-    // Refresh unread count
     await refreshUnreadCount();
+    Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }).start();
   };
 
   const onRefresh = async () => {
@@ -70,872 +93,499 @@ export default function MessagesScreen() {
     setRefreshing(false);
   };
 
-  const handleMessagePress = async (message: Message) => {
-    // Mark as read if not already
-    if (!message.read) {
-      const success = await messagesService.markAsRead(message.id);
-      if (success) {
-        // Update local state
-        setMessages((prev) =>
-          prev.map((m) => (m.id === message.id ? { ...m, read: true } : m)),
-        );
-        // Refresh unread count in the badge
+  const handlePress = async (msg: Message) => {
+    if (!msg.read) {
+      const ok = await messagesService.markAsRead(msg.id);
+      if (ok) {
+        setMessages((prev) => prev.map((m) => m.id === msg.id ? { ...m, read: true } : m));
         await refreshUnreadCount();
       }
     }
-
-    // Toggle expansion
-    setExpandedMessageId(expandedMessageId === message.id ? null : message.id);
+    setExpandedId(expandedId === msg.id ? null : msg.id);
   };
 
-  const handleDeleteMessage = (messageId: string) => {
-    Alert.alert(
-      "Delete Message",
-      "Are you sure you want to delete this message?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            const success = await messagesService.deleteMessage(messageId);
-            if (success) {
-              setMessages((prev) => prev.filter((m) => m.id !== messageId));
-              Alert.alert("Success", "Message deleted");
-            } else {
-              Alert.alert("Error", "Failed to delete message");
-            }
-          },
+  const handleDelete = (id: string) =>
+    Alert.alert("Delete Message", "Remove this message permanently?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          if (await messagesService.deleteMessage(id)) {
+            setMessages((prev) => prev.filter((m) => m.id !== id));
+          } else {
+            Alert.alert("Error", "Could not delete the message.");
+          }
         },
-      ],
-    );
-  };
+      },
+    ]);
 
-  const handleSendToAdmin = async () => {
+  const handleSend = async () => {
     if (!user) return;
-
-    if (!composeSubject.trim()) {
-      Alert.alert("Error", "Please enter a subject");
-      return;
-    }
-
-    if (!composeMessage.trim()) {
-      Alert.alert("Error", "Please enter a message");
-      return;
-    }
+    if (!composeSubject.trim()) { Alert.alert("Required", "Please enter a subject."); return; }
+    if (!composeBody.trim()) { Alert.alert("Required", "Please enter a message."); return; }
 
     setSending(true);
-    const success = await messagesService.sendToAdmin(
-      user.id,
-      composeSubject.trim(),
-      composeMessage.trim(),
-    );
+    const ok = await messagesService.sendToAdmin(user.id, composeSubject.trim(), composeBody.trim());
     setSending(false);
 
-    if (success) {
-      Alert.alert("Success", "Your message has been sent to the admin", [
+    if (ok) {
+      Alert.alert("✅ Sent", "Your message has been sent to the support team.", [
         {
-          text: "OK",
-          onPress: () => {
-            setShowComposeModal(false);
+          text: "OK", onPress: () => {
+            setShowCompose(false);
             setComposeSubject("");
-            setComposeMessage("");
-            loadMessages(); // Refresh to show the sent message
-          },
+            setComposeBody("");
+            loadMessages();
+          }
         },
       ]);
     } else {
-      Alert.alert("Error", "Failed to send message. Please try again.");
+      Alert.alert("Error", "Failed to send. Please try again.");
     }
   };
 
-  const unreadCount = messages.filter((m) => !m.read && m.from_admin).length;
-  const sentCount = messages.filter((m) => !m.from_admin).length;
-  const fromAdminCount = messages.filter((m) => m.from_admin).length;
+  // ── Derived ────────────────────────────────────────────────────────────────
+  const unread = messages.filter((m) => !m.read && m.from_admin).length;
+  const inbox = messages.filter((m) => m.from_admin);
+  const sent = messages.filter((m) => !m.from_admin);
+  const filtered = activeFilter === "inbox" ? inbox
+    : activeFilter === "sent" ? sent
+      : messages;
 
-  // Filter messages based on active filter
-  const filteredMessages = messages.filter((message) => {
-    if (activeFilter === "from_admin") return message.from_admin;
-    if (activeFilter === "sent") return !message.from_admin;
-    return true; // "all"
-  });
-
-  const dynamicStyles = {
-    container: {
-      backgroundColor: colors.background,
-    },
-    loadingText: {
-      color: colors.textSecondary,
-    },
-    topBar: {
-      backgroundColor: colors.card,
-      borderBottomColor: colors.border,
-    },
-    statsContainer: {
-      backgroundColor: colors.backgroundSecondary,
-    },
-    statCard: {
-      backgroundColor: colors.card,
-      borderColor: colors.cardBorder,
-    },
-    statNumber: {
-      color: colors.text,
-    },
-    statLabel: {
-      color: colors.textSecondary,
-    },
-    filterTab: {
-      backgroundColor: colors.card,
-      borderColor: colors.borderLight,
-    },
-    filterTabText: {
-      color: colors.textSecondary,
-    },
-    messageCard: {
-      backgroundColor: colors.card,
-      borderColor: colors.cardBorder,
-    },
-    messageSubject: {
-      color: colors.text,
-    },
-    messageDate: {
-      color: colors.textSecondary,
-    },
-    messageText: {
-      color: colors.text,
-    },
-    emptyTitle: {
-      color: colors.text,
-    },
-    emptyText: {
-      color: colors.textSecondary,
-    },
-    modalContainer: {
-      backgroundColor: colors.background,
-    },
-    modalHeader: {
-      backgroundColor: colors.card,
-      borderBottomColor: colors.border,
-    },
-    modalTitle: {
-      color: colors.text,
-    },
-    inputLabel: {
-      color: colors.text,
-    },
-    input: {
-      backgroundColor: colors.backgroundSecondary,
-      borderColor: colors.border,
-      color: colors.text,
-    },
-    composeInfoText: {
-      color: colors.textSecondary,
-    },
-  };
-
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <View style={[styles.container, dynamicStyles.container]}>
-        <StatusBar style={colors.statusBarStyle} />
-        <View style={styles.loadingContainer}>
+      <SafeAreaView style={s.container}>
+        <StatusBar style="dark" />
+        <View style={s.loadingWrap}>
           <ActivityIndicator size="large" color="#FF006E" />
-          <Text style={[styles.loadingText, dynamicStyles.loadingText]}>
-            Loading messages...
-          </Text>
+          <Text style={s.loadingText}>Loading messages…</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={[styles.container, dynamicStyles.container]}>
-      <StatusBar style={colors.statusBarStyle} />
+    <SafeAreaView style={s.container} edges={["bottom"]}>
+      <StatusBar style="dark" />
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#FF006E"
-          />
-        }
-        showsVerticalScrollIndicator={true}
-      >
-        {/* Compose Button in Header Area */}
-        <View style={[styles.topBar, dynamicStyles.topBar]}>
-          {unreadCount > 0 && (
-            <View style={styles.unreadIndicator}>
-              <Text style={styles.unreadIndicatorText}>
-                {unreadCount} unread
-              </Text>
+      {/* ── Toolbar ──────────────────────────────────────────────────────── */}
+      <View style={s.toolbar}>
+        {/* Stats chips */}
+        <View style={s.toolbarStats}>
+          {unread > 0 && (
+            <View style={s.unreadChip}>
+              <View style={s.unreadDotSmall} />
+              <Text style={s.unreadChipText}>{unread} unread</Text>
             </View>
           )}
-          <TouchableOpacity
-            style={styles.composeButton}
-            onPress={() => setShowComposeModal(true)}
-          >
-            <Ionicons name="create" size={18} color="#FFFFFF" />
-            <Text style={styles.composeButtonText}>New Message</Text>
-          </TouchableOpacity>
+          <Text style={s.toolbarTotal}>{messages.length} messages</Text>
         </View>
 
-        {/* Statistics Section */}
-        {messages.length > 0 && (
-          <View style={[styles.statsContainer, dynamicStyles.statsContainer]}>
-            <View style={[styles.statCard, dynamicStyles.statCard]}>
-              <Ionicons name="mail-unread" size={16} color="#FF006E" />
-              <View style={styles.statInfo}>
-                <Text style={[styles.statNumber, dynamicStyles.statNumber]}>
-                  {unreadCount}
-                </Text>
-                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>
-                  Unread
-                </Text>
-              </View>
-            </View>
-            <View style={[styles.statCard, dynamicStyles.statCard]}>
-              <Ionicons name="arrow-down-circle" size={16} color="#8B5CF6" />
-              <View style={styles.statInfo}>
-                <Text style={[styles.statNumber, dynamicStyles.statNumber]}>
-                  {fromAdminCount}
-                </Text>
-                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>
-                  Received
-                </Text>
-              </View>
-            </View>
-            <View style={[styles.statCard, dynamicStyles.statCard]}>
-              <Ionicons name="arrow-up-circle" size={16} color="#10B981" />
-              <View style={styles.statInfo}>
-                <Text style={[styles.statNumber, dynamicStyles.statNumber]}>
-                  {sentCount}
-                </Text>
-                <Text style={[styles.statLabel, dynamicStyles.statLabel]}>
-                  Sent
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
+        {/* Compose FAB */}
+        <TouchableOpacity style={s.composeFab} onPress={() => setShowCompose(true)} activeOpacity={0.8}>
+          <Ionicons name="create-outline" size={17} color="#fff" />
+          <Text style={s.composeFabText}>New</Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Filter Tabs */}
-        <View style={styles.filterContainer}>
-          <TouchableOpacity
-            style={[
-              styles.filterTab,
-              dynamicStyles.filterTab,
-              activeFilter === "all" && styles.filterTabActive,
-            ]}
-            onPress={() => setActiveFilter("all")}
-          >
-            <Text
-              style={[
-                styles.filterTabText,
-                dynamicStyles.filterTabText,
-                activeFilter === "all" && styles.filterTabTextActive,
-              ]}
+      {/* ── Filter pills ──────────────────────────────────────────────────── */}
+      <View style={s.filterBar}>
+        {([["all", "All", messages.length], ["inbox", "Inbox", inbox.length], ["sent", "Sent", sent.length]] as [Filter, string, number][]).map(
+          ([key, label, count]) => (
+            <TouchableOpacity
+              key={key}
+              style={[s.pill, activeFilter === key && s.pillActive]}
+              onPress={() => setActiveFilter(key)}
+              activeOpacity={0.75}
             >
-              All {messages.length > 0 && `(${messages.length})`}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.filterTab,
-              dynamicStyles.filterTab,
-              activeFilter === "from_admin" && styles.filterTabActive,
-            ]}
-            onPress={() => setActiveFilter("from_admin")}
-          >
-            <Ionicons
-              name="arrow-down"
-              size={12}
-              color={activeFilter === "from_admin" ? "#FFFFFF" : "#6B7280"}
-              style={styles.filterTabIcon}
-            />
-            <Text
-              style={[
-                styles.filterTabText,
-                dynamicStyles.filterTabText,
-                activeFilter === "from_admin" && styles.filterTabTextActive,
-              ]}
-            >
-              Admin {fromAdminCount > 0 && `(${fromAdminCount})`}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.filterTab,
-              dynamicStyles.filterTab,
-              activeFilter === "sent" && styles.filterTabActive,
-            ]}
-            onPress={() => setActiveFilter("sent")}
-          >
-            <Ionicons
-              name="arrow-up"
-              size={12}
-              color={activeFilter === "sent" ? "#FFFFFF" : "#6B7280"}
-              style={styles.filterTabIcon}
-            />
-            <Text
-              style={[
-                styles.filterTabText,
-                dynamicStyles.filterTabText,
-                activeFilter === "sent" && styles.filterTabTextActive,
-              ]}
-            >
-              Sent {sentCount > 0 && `(${sentCount})`}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Messages List */}
-        <View style={styles.messagesContainer}>
-          {filteredMessages.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="mail-outline" size={56} color="#D1D5DB" />
-              <Text style={[styles.emptyTitle, dynamicStyles.emptyTitle]}>
-                {activeFilter === "all" && "No Messages"}
-                {activeFilter === "from_admin" && "No Messages from Admin"}
-                {activeFilter === "sent" && "No Sent Messages"}
+              <Text style={[s.pillText, activeFilter === key && s.pillTextActive]}>
+                {label}
               </Text>
-              <Text style={[styles.emptyText, dynamicStyles.emptyText]}>
-                {activeFilter === "all" &&
-                  "You don't have any messages yet. Check back later!"}
-                {activeFilter === "from_admin" &&
-                  "You haven't received any messages from the admin yet."}
-                {activeFilter === "sent" &&
-                  "You haven't sent any messages to the admin yet."}
-              </Text>
-              <TouchableOpacity
-                style={styles.emptyButton}
-                onPress={() => setShowComposeModal(true)}
-              >
-                <Text style={styles.emptyButtonText}>
-                  {activeFilter === "sent"
-                    ? "Send Your First Message"
-                    : "Send Message to Admin"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            filteredMessages.map((message) => (
-              <View
-                key={message.id}
-                style={[styles.messageCard, dynamicStyles.messageCard]}
-              >
-                <TouchableOpacity
-                  style={styles.messageHeader}
-                  onPress={() => handleMessagePress(message)}
-                >
-                  <View style={styles.messageHeaderLeft}>
-                    {!message.read && <View style={styles.unreadDot} />}
-                    <View style={styles.messageHeaderText}>
-                      <View style={styles.subjectRow}>
-                        <Text
-                          style={[
-                            styles.messageSubject,
-                            dynamicStyles.messageSubject,
-                            !message.read && styles.messageSubjectUnread,
-                          ]}
-                          numberOfLines={1}
-                        >
-                          {message.subject}
-                        </Text>
-                        <View
-                          style={[
-                            styles.directionBadge,
-                            message.from_admin
-                              ? styles.fromAdminBadge
-                              : styles.toAdminBadge,
-                          ]}
-                        >
-                          <Ionicons
-                            name={
-                              message.from_admin ? "arrow-down" : "arrow-up"
-                            }
-                            size={10}
-                            color="#FFFFFF"
-                          />
-                          <Text style={styles.directionBadgeText}>
-                            {message.from_admin ? "Admin" : "Sent"}
-                          </Text>
-                        </View>
-                      </View>
-                      <Text
-                        style={[styles.messageDate, dynamicStyles.messageDate]}
-                      >
-                        {message.created_at
-                          ? new Date(message.created_at).toLocaleDateString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              },
-                            )
-                          : "Date unknown"}
-                      </Text>
-                    </View>
-                  </View>
-                  <Ionicons
-                    name={
-                      expandedMessageId === message.id
-                        ? "chevron-up"
-                        : "chevron-down"
-                    }
-                    size={20}
-                    color="#9CA3AF"
-                  />
-                </TouchableOpacity>
-
-                {/* Expanded Message Content */}
-                {expandedMessageId === message.id && (
-                  <View style={styles.messageBody}>
-                    <View style={styles.messageContent}>
-                      <Text
-                        style={[styles.messageText, dynamicStyles.messageText]}
-                      >
-                        {message.message}
-                      </Text>
-                    </View>
-
-                    <View style={styles.messageActions}>
-                      <TouchableOpacity
-                        style={styles.deleteButton}
-                        onPress={() => handleDeleteMessage(message.id)}
-                      >
-                        <Ionicons
-                          name="trash-outline"
-                          size={16}
-                          color="#EF4444"
-                        />
-                        <Text style={styles.deleteButtonText}>Delete</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-              </View>
-            ))
-          )}
-        </View>
-      </ScrollView>
-
-      {/* Compose Message Modal */}
-      <Modal
-        visible={showComposeModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowComposeModal(false)}
-      >
-        <SafeAreaView
-          style={[styles.modalContainer, dynamicStyles.modalContainer]}
-        >
-          <View style={[styles.modalHeader, dynamicStyles.modalHeader]}>
-            <TouchableOpacity onPress={() => setShowComposeModal(false)}>
-              <Ionicons name="close" size={28} color={colors.text} />
-            </TouchableOpacity>
-            <Text style={[styles.modalTitle, dynamicStyles.modalTitle]}>
-              Message Admin
-            </Text>
-            <TouchableOpacity onPress={handleSendToAdmin} disabled={sending}>
-              {sending ? (
-                <ActivityIndicator size="small" color="#FF006E" />
-              ) : (
-                <Ionicons name="send" size={24} color="#FF006E" />
+              {count > 0 && (
+                <View style={[s.pillBadge, activeFilter === key && s.pillBadgeActive]}>
+                  <Text style={[s.pillBadgeText, activeFilter === key && s.pillBadgeTextActive]}>
+                    {count}
+                  </Text>
+                </View>
               )}
             </TouchableOpacity>
+          )
+        )}
+      </View>
+
+      {/* ── Message list ──────────────────────────────────────────────────── */}
+      <Animated.View style={[{ flex: 1 }, { opacity: fadeAnim }]}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FF006E" />
+          }
+        >
+          {filtered.length === 0 ? (
+            <EmptyState filter={activeFilter} onCompose={() => setShowCompose(true)} />
+          ) : (
+            <View style={s.list}>
+              {filtered.map((msg, idx) => {
+                const isOpen = expandedId === msg.id;
+                const isAdmin = msg.from_admin;
+                const isUnread = !msg.read && isAdmin;
+
+                return (
+                  <View key={msg.id}>
+                    {/* Divider (not before first) */}
+                    {idx > 0 && <View style={s.divider} />}
+
+                    <TouchableOpacity
+                      activeOpacity={0.88}
+                      onPress={() => handlePress(msg)}
+                      style={[s.row, isUnread && s.rowUnread]}
+                    >
+                      {/* Unread stripe */}
+                      {isUnread && <View style={s.unreadStripe} />}
+
+                      {/* Avatar */}
+                      <View style={[s.avatar, isAdmin ? s.avatarAdmin : s.avatarUser]}>
+                        {isAdmin
+                          ? <Ionicons name="shield-checkmark" size={18} color="#fff" />
+                          : <Text style={s.avatarText}>{initials(user?.email)}</Text>
+                        }
+                      </View>
+
+                      {/* Content */}
+                      <View style={s.rowBody}>
+                        <View style={s.rowTopLine}>
+                          <Text style={[s.rowSender, isUnread && s.rowSenderBold]} numberOfLines={1}>
+                            {isAdmin ? "PrintCraft Support" : "You → Support"}
+                          </Text>
+                          <Text style={[s.rowTime, isUnread && s.rowTimeBold]}>
+                            {msg.created_at ? relativeTime(msg.created_at) : ""}
+                          </Text>
+                        </View>
+
+                        <Text style={[s.rowSubject, isUnread && s.rowSubjectBold]} numberOfLines={1}>
+                          {msg.subject}
+                        </Text>
+
+                        <View style={s.rowBottomLine}>
+                          <Text style={s.rowPreview} numberOfLines={1}>
+                            {isOpen ? "" : msg.message}
+                          </Text>
+                          {/* Badge */}
+                          <View style={[s.badge, isAdmin ? s.badgeAdmin : s.badgeSent]}>
+                            <Ionicons
+                              name={isAdmin ? "arrow-down" : "arrow-up"}
+                              size={9}
+                              color={isAdmin ? "#8B5CF6" : "#10B981"}
+                            />
+                            <Text style={[s.badgeText, isAdmin ? s.badgeTextAdmin : s.badgeTextSent]}>
+                              {isAdmin ? "Inbox" : "Sent"}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+
+                      {/* Chevron */}
+                      <Ionicons
+                        name={isOpen ? "chevron-up" : "chevron-down"}
+                        size={16}
+                        color="#C4C4CF"
+                        style={{ marginLeft: 4 }}
+                      />
+                    </TouchableOpacity>
+
+                    {/* Expanded body */}
+                    {isOpen && (
+                      <View style={s.expandedWrap}>
+                        {/* Thread header */}
+                        <View style={s.threadHeader}>
+                          <Text style={s.threadHeaderLabel}>
+                            {isAdmin ? "From: PrintCraft Support" : "To: PrintCraft Support"}
+                          </Text>
+                          <Text style={s.threadHeaderDate}>
+                            {msg.created_at
+                              ? new Date(msg.created_at).toLocaleString("en-US", {
+                                weekday: "short", month: "short", day: "numeric",
+                                hour: "2-digit", minute: "2-digit",
+                              })
+                              : "—"}
+                          </Text>
+                        </View>
+
+                        <Text style={s.expandedBody}>{msg.message}</Text>
+
+                        {/* Actions */}
+                        <View style={s.expandedActions}>
+                          <TouchableOpacity
+                            style={s.replyBtn}
+                            onPress={() => {
+                              setComposeSubject(`Re: ${msg.subject}`);
+                              setShowCompose(true);
+                            }}
+                          >
+                            <Ionicons name="arrow-undo-outline" size={15} color="#FF006E" />
+                            <Text style={s.replyBtnText}>Reply</Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity style={s.deleteBtn} onPress={() => handleDelete(msg.id)}>
+                            <Ionicons name="trash-outline" size={15} color="#EF4444" />
+                            <Text style={s.deleteBtnText}>Delete</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+              <View style={{ height: 100 }} />
+            </View>
+          )}
+        </ScrollView>
+      </Animated.View>
+
+      {/* ── Compose Modal ─────────────────────────────────────────────────── */}
+      <Modal visible={showCompose} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowCompose(false)}>
+        <SafeAreaView style={s.composeContainer}>
+          <StatusBar style="dark" />
+
+          {/* Compose header */}
+          <View style={s.composeHeader}>
+            <TouchableOpacity style={s.composeHeaderBtn} onPress={() => setShowCompose(false)}>
+              <Ionicons name="close" size={20} color="#374151" />
+            </TouchableOpacity>
+            <Text style={s.composeTitle}>New Message</Text>
+            <TouchableOpacity
+              style={[s.sendBtn, (sending || !composeSubject.trim() || !composeBody.trim()) && s.sendBtnDisabled]}
+              onPress={handleSend}
+              disabled={sending || !composeSubject.trim() || !composeBody.trim()}
+            >
+              {sending
+                ? <ActivityIndicator size="small" color="#fff" />
+                : <><Ionicons name="send" size={14} color="#fff" /><Text style={s.sendBtnText}>Send</Text></>
+              }
+            </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.modalContent}>
-            <View style={styles.composeInfo}>
-              <Ionicons name="information-circle" size={20} color="#3B82F6" />
-              <Text
-                style={[styles.composeInfoText, dynamicStyles.composeInfoText]}
-              >
-                Send a message to the admin team. You'll receive a response
-                here.
-              </Text>
+          {/* To chip */}
+          <View style={s.toRow}>
+            <Text style={s.toLabel}>To</Text>
+            <View style={s.toChip}>
+              <LinearGradient colors={["#FF006E", "#D6005C"]} style={s.toChipIcon} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                <Ionicons name="shield-checkmark" size={12} color="#fff" />
+              </LinearGradient>
+              <Text style={s.toChipText}>PrintCraft Support</Text>
             </View>
+          </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>
-                Subject *
-              </Text>
-              <TextInput
-                style={[styles.input, dynamicStyles.input]}
-                placeholder="Enter subject"
-                placeholderTextColor={colors.textSecondary}
-                value={composeSubject}
-                onChangeText={setComposeSubject}
-                editable={!sending}
-              />
-            </View>
+          <View style={s.composeDividerLine} />
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, dynamicStyles.inputLabel]}>
-                Message *
-              </Text>
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+            <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
+
+              {/* Subject */}
+              <View style={s.composeFieldRow}>
+                <Text style={s.composeFieldLabel}>Subject</Text>
+                <TextInput
+                  style={s.composeSubjectInput}
+                  value={composeSubject}
+                  onChangeText={setComposeSubject}
+                  placeholder="What is this about?"
+                  placeholderTextColor="#C4C4CF"
+                  editable={!sending}
+                />
+              </View>
+
+              <View style={s.composeDividerLine} />
+
+              {/* Body */}
               <TextInput
-                style={[styles.input, styles.textArea, dynamicStyles.input]}
-                placeholder="Type your message here..."
-                placeholderTextColor={colors.textSecondary}
-                value={composeMessage}
-                onChangeText={setComposeMessage}
+                style={s.composeBodyInput}
+                value={composeBody}
+                onChangeText={setComposeBody}
+                placeholder={"Write your message here…\n\nOur team usually responds within 24 hours."}
+                placeholderTextColor="#C4C4CF"
                 multiline
-                numberOfLines={8}
                 textAlignVertical="top"
                 editable={!sending}
               />
-            </View>
-          </ScrollView>
+
+              {/* Character count */}
+              <Text style={s.charCount}>{composeBody.length} characters</Text>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9FAFB",
+// ─── Empty state ──────────────────────────────────────────────────────────────
+function EmptyState({ filter, onCompose }: { filter: Filter; onCompose: () => void }) {
+  const icons: Record<Filter, any> = { all: "mail-outline", inbox: "arrow-down-circle-outline", sent: "arrow-up-circle-outline" };
+  const titles: Record<Filter, string> = { all: "No messages yet", inbox: "Nothing in Inbox", sent: "Nothing sent yet" };
+  const bodies: Record<Filter, string> = {
+    all: "Your conversation with PrintCraft Support will appear here.",
+    inbox: "Messages from the support team will show up here.",
+    sent: "Messages you send to support will appear here.",
+  };
+
+  return (
+    <View style={es.wrap}>
+      <View style={es.iconWrap}>
+        <Ionicons name={icons[filter]} size={48} color="#D1D5DB" />
+      </View>
+      <Text style={es.title}>{titles[filter]}</Text>
+      <Text style={es.body}>{bodies[filter]}</Text>
+      <TouchableOpacity style={es.btn} onPress={onCompose} activeOpacity={0.8}>
+        <Ionicons name="create-outline" size={16} color="#fff" />
+        <Text style={es.btnText}>Send a Message</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+const es = StyleSheet.create({
+  wrap: { flex: 1, alignItems: "center", justifyContent: "center", padding: 40 },
+  iconWrap: { width: 88, height: 88, borderRadius: 44, backgroundColor: "#F3F4F6", justifyContent: "center", alignItems: "center", marginBottom: 20 },
+  title: { fontSize: 18, fontWeight: "700", color: "#1F2937", marginBottom: 8 },
+  body: { fontSize: 14, color: "#9CA3AF", textAlign: "center", lineHeight: 21 },
+  btn: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 28, backgroundColor: "#FF006E", paddingHorizontal: 22, paddingVertical: 12, borderRadius: 12, shadowColor: "#FF006E", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+  btnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+});
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+const s = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#F4F6FB" },
+  loadingWrap: { flex: 1, justifyContent: "center", alignItems: "center", gap: 16 },
+  loadingText: { fontSize: 15, color: "#9CA3AF" },
+
+  // Toolbar
+  toolbar: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    paddingHorizontal: 16, paddingVertical: 10,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1, borderBottomColor: "#EDEEF2",
   },
-  scrollView: {
-    flex: 1,
+  toolbarStats: { flexDirection: "row", alignItems: "center", gap: 10 },
+  toolbarTotal: { fontSize: 12, color: "#9CA3AF" },
+  unreadChip: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    backgroundColor: "#FFF1F7", paddingHorizontal: 10, paddingVertical: 4,
+    borderRadius: 20, borderWidth: 1, borderColor: "#FFB3D1",
   },
-  scrollContent: {
-    flexGrow: 1,
+  unreadDotSmall: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#FF006E" },
+  unreadChipText: { fontSize: 11, fontWeight: "700", color: "#FF006E" },
+  composeFab: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    backgroundColor: "#FF006E", paddingHorizontal: 14, paddingVertical: 8,
+    borderRadius: 20, shadowColor: "#FF006E", shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3, shadowRadius: 6, elevation: 4,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  composeFabText: { color: "#fff", fontWeight: "700", fontSize: 13 },
+
+  // Filter pills
+  filterBar: {
+    flexDirection: "row", gap: 8,
+    paddingHorizontal: 16, paddingVertical: 10,
+    backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#EDEEF2",
   },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#6B7280",
-  },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 12,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  unreadIndicator: {
-    backgroundColor: "#FFF1F7",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#FF006E",
-  },
-  unreadIndicatorText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#FF006E",
-  },
-  composeButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#FF006E",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    shadowColor: "#FF006E",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  composeButtonText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  messagesContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 100,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    marginTop: 16,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 8,
-    backgroundColor: "#FFFFFF",
-  },
-  statCard: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F9FAFB",
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    gap: 6,
-  },
-  statInfo: {
-    alignItems: "flex-start",
-  },
-  statNumber: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1F2937",
-    lineHeight: 18,
-  },
-  statLabel: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#6B7280",
-  },
-  filterContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 6,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    marginBottom: 0,
-  },
-  filterTab: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+  pill: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20,
     backgroundColor: "#F3F4F6",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
   },
-  filterTabActive: {
-    backgroundColor: "#FF006E",
-    borderColor: "#FF006E",
+  pillActive: { backgroundColor: "#FF006E" },
+  pillText: { fontSize: 13, fontWeight: "600", color: "#6B7280" },
+  pillTextActive: { color: "#fff" },
+  pillBadge: { backgroundColor: "#E5E7EB", borderRadius: 10, paddingHorizontal: 6, paddingVertical: 1 },
+  pillBadgeActive: { backgroundColor: "rgba(255,255,255,0.3)" },
+  pillBadgeText: { fontSize: 10, fontWeight: "700", color: "#6B7280" },
+  pillBadgeTextActive: { color: "#fff" },
+
+  // List
+  list: { backgroundColor: "#fff", marginTop: 12, marginHorizontal: 0 },
+  divider: { height: 1, backgroundColor: "#F3F4F6", marginLeft: 72 },
+
+  // Row
+  row: {
+    flexDirection: "row", alignItems: "center",
+    paddingVertical: 14, paddingRight: 14,
+    backgroundColor: "#fff", position: "relative",
   },
-  filterTabIcon: {
-    marginRight: 3,
+  rowUnread: { backgroundColor: "#FDFCFF" },
+  unreadStripe: { position: "absolute", left: 0, top: 0, bottom: 0, width: 3, backgroundColor: "#FF006E", borderRadius: 2 },
+
+  // Avatar
+  avatar: { width: 44, height: 44, borderRadius: 22, justifyContent: "center", alignItems: "center", marginLeft: 14, marginRight: 12 },
+  avatarAdmin: { backgroundColor: "#8B5CF6" },
+  avatarUser: { backgroundColor: "#FF006E" },
+  avatarText: { fontSize: 15, fontWeight: "700", color: "#fff" },
+
+  // Row text
+  rowBody: { flex: 1 },
+  rowTopLine: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 3 },
+  rowSender: { fontSize: 14, fontWeight: "500", color: "#374151", flex: 1, marginRight: 8 },
+  rowSenderBold: { fontWeight: "700", color: "#1F2937" },
+  rowTime: { fontSize: 11, color: "#9CA3AF" },
+  rowTimeBold: { color: "#FF006E", fontWeight: "600" },
+  rowSubject: { fontSize: 13, fontWeight: "500", color: "#6B7280", marginBottom: 4 },
+  rowSubjectBold: { fontWeight: "700", color: "#1F2937" },
+  rowBottomLine: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  rowPreview: { fontSize: 12, color: "#B0B0B8", flex: 1, marginRight: 8 },
+
+  // Badges
+  badge: { flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 10 },
+  badgeAdmin: { backgroundColor: "#EDE9FE" },
+  badgeSent: { backgroundColor: "#D1FAE5" },
+  badgeText: { fontSize: 10, fontWeight: "600" },
+  badgeTextAdmin: { color: "#8B5CF6" },
+  badgeTextSent: { color: "#059669" },
+
+  // Expanded
+  expandedWrap: {
+    marginLeft: 70, marginRight: 14, marginBottom: 14,
+    backgroundColor: "#F9FAFB", borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: "#EDEEF2",
   },
-  filterTabText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#6B7280",
+  threadHeader: { marginBottom: 10 },
+  threadHeaderLabel: { fontSize: 12, fontWeight: "600", color: "#6B7280" },
+  threadHeaderDate: { fontSize: 11, color: "#B0B0B8", marginTop: 2 },
+  expandedBody: { fontSize: 14, color: "#374151", lineHeight: 22 },
+  expandedActions: { flexDirection: "row", gap: 12, marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#EDEEF2" },
+  replyBtn: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, backgroundColor: "#FFF1F7", borderWidth: 1, borderColor: "#FFB3D1" },
+  replyBtnText: { fontSize: 13, fontWeight: "600", color: "#FF006E" },
+  deleteBtn: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, backgroundColor: "#FEF2F2", borderWidth: 1, borderColor: "#FECACA" },
+  deleteBtnText: { fontSize: 13, fontWeight: "600", color: "#EF4444" },
+
+  // Compose modal
+  composeContainer: { flex: 1, backgroundColor: "#fff" },
+  composeHeader: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: "#EDEEF2",
   },
-  filterTabTextActive: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-    paddingHorizontal: 20,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1F2937",
-    marginTop: 12,
-  },
-  emptyText: {
-    fontSize: 13,
-    color: "#6B7280",
-    marginTop: 6,
-    textAlign: "center",
-    paddingHorizontal: 20,
-  },
-  emptyButton: {
-    marginTop: 20,
-    backgroundColor: "#FF006E",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  emptyButtonText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  messageCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-    overflow: "hidden",
-  },
-  messageHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 12,
-  },
-  messageHeaderLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    gap: 8,
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#FF006E",
-  },
-  messageHeaderText: {
-    flex: 1,
-  },
-  messageSubject: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 3,
-    flex: 1,
-  },
-  messageSubjectUnread: {
-    fontWeight: "700",
-  },
-  messageDate: {
-    fontSize: 11,
-    color: "#9CA3AF",
-  },
-  messageBody: {
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    backgroundColor: "#F9FAFB",
-  },
-  messageContent: {
-    padding: 12,
-  },
-  messageText: {
-    fontSize: 14,
-    color: "#1F2937",
-    lineHeight: 20,
-  },
-  messageActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    paddingHorizontal: 12,
-    paddingBottom: 10,
-  },
-  deleteButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-  },
-  deleteButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#EF4444",
-  },
-  subjectRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 3,
-  },
-  directionBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-    gap: 3,
-  },
-  fromAdminBadge: {
-    backgroundColor: "#8B5CF6",
-  },
-  toAdminBadge: {
-    backgroundColor: "#10B981",
-  },
-  directionBadgeText: {
-    fontSize: 9,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "#F9FAFB",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1F2937",
-  },
-  modalContent: {
-    flex: 1,
-    padding: 20,
-  },
-  composeInfo: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "#EFF6FF",
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 20,
-    gap: 10,
-  },
-  composeInfoText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#1E40AF",
-    lineHeight: 18,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: "#1F2937",
-  },
-  textArea: {
-    minHeight: 150,
-    textAlignVertical: "top",
-  },
+  composeHeaderBtn: { width: 34, height: 34, borderRadius: 9, backgroundColor: "#F3F4F6", justifyContent: "center", alignItems: "center" },
+  composeTitle: { fontSize: 16, fontWeight: "600", color: "#1F2937" },
+  sendBtn: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "#FF006E", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
+  sendBtnDisabled: { opacity: 0.4 },
+  sendBtnText: { fontSize: 13, fontWeight: "700", color: "#fff" },
+
+  // To chip
+  toRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 12 },
+  toLabel: { fontSize: 13, fontWeight: "600", color: "#9CA3AF", width: 36 },
+  toChip: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#F3F4F6", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  toChipIcon: { width: 22, height: 22, borderRadius: 11, justifyContent: "center", alignItems: "center" },
+  toChipText: { fontSize: 13, fontWeight: "600", color: "#1F2937" },
+
+  composeDividerLine: { height: 1, backgroundColor: "#EDEEF2" },
+
+  // Subject row
+  composeFieldRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14 },
+  composeFieldLabel: { fontSize: 13, fontWeight: "600", color: "#9CA3AF", width: 60 },
+  composeSubjectInput: { flex: 1, fontSize: 15, color: "#1F2937" },
+
+  // Body
+  composeBodyInput: { padding: 16, fontSize: 15, color: "#1F2937", minHeight: 260, lineHeight: 24 },
+  charCount: { fontSize: 11, color: "#C4C4CF", textAlign: "right", paddingHorizontal: 16, paddingBottom: 16 },
 });

@@ -5,9 +5,12 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface AdminNotificationsContextType {
   newOrdersCount: number;
+  newMessagesCount: number;
   recentOrders: Order[];
   clearNotifications: () => void;
+  clearMessageNotifications: () => void;
   refreshOrders: () => Promise<void>;
+  refreshMessages: () => Promise<void>;
 }
 
 const AdminNotificationsContext = createContext<
@@ -20,69 +23,84 @@ export function AdminNotificationsProvider({
   children: React.ReactNode;
 }) {
   const [newOrdersCount, setNewOrdersCount] = useState(0);
+  const [newMessagesCount, setNewMessagesCount] = useState(0);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
-  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
 
   useEffect(() => {
-    // Subscribe to realtime order insertions
+    // 1. Listen for new orders
     const ordersChannel = supabase
       .channel("admin-orders")
       .on(
         "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "orders",
-        },
+        { event: "INSERT", schema: "public", table: "orders" },
         (payload) => {
-          console.log("🔔 New order received:", payload.new);
-
-          // Add to recent orders
-          const newOrder = payload.new as Order;
-          setRecentOrders((prev) => [newOrder, ...prev].slice(0, 10)); // Keep last 10
-
-          // Increment counter
+          setRecentOrders((prev) => [payload.new as Order, ...prev].slice(0, 10));
           setNewOrdersCount((prev) => prev + 1);
-
-          // Could show a toast notification here
-          console.log(
-            "📢 Admin notification: New order #" + newOrder.id.substring(0, 8),
-          );
         },
       )
       .subscribe();
 
-    setChannel(ordersChannel);
+    // 2. Listen for new messages FROM users
+    const messagesChannel = supabase
+      .channel("admin-messages")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload) => {
+          const msg = payload.new as any;
+          // Only notify if it's NOT from admin (i.e., from a user)
+          if (!msg.from_admin) {
+            console.log("📬 New user message received!");
+            setNewMessagesCount((prev) => prev + 1);
+          }
+        },
+      )
+      .subscribe();
 
-    // Cleanup on unmount
+    // Initial counts
+    refreshMessages();
+
     return () => {
-      if (ordersChannel) {
-        supabase.removeChannel(ordersChannel);
-      }
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(messagesChannel);
     };
   }, []);
 
   const clearNotifications = () => {
-    console.log("🔕 Clearing admin notifications");
     setNewOrdersCount(0);
     setRecentOrders([]);
   };
 
+  const clearMessageNotifications = () => {
+    setNewMessagesCount(0);
+  };
+
   const refreshOrders = async () => {
     try {
-      console.log("🔄 Refreshing recent orders...");
       const { data, error } = await supabase
         .from("orders")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(10);
-
       if (error) throw error;
-
       setRecentOrders(data || []);
-      console.log(`✅ Refreshed ${data?.length || 0} recent orders`);
     } catch (error) {
       console.error("❌ Error refreshing orders:", error);
+    }
+  };
+
+  const refreshMessages = async () => {
+    try {
+      const { count, error } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("from_admin", false)
+        .eq("read", false);
+
+      if (error) throw error;
+      setNewMessagesCount(count || 0);
+    } catch (error) {
+      console.error("❌ Error refreshing messages count:", error);
     }
   };
 
@@ -90,9 +108,12 @@ export function AdminNotificationsProvider({
     <AdminNotificationsContext.Provider
       value={{
         newOrdersCount,
+        newMessagesCount,
         recentOrders,
         clearNotifications,
+        clearMessageNotifications,
         refreshOrders,
+        refreshMessages,
       }}
     >
       {children}

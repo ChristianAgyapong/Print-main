@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, View } from "react-native";
+import { Animated, Dimensions, StyleSheet, View } from "react-native";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface SkeletonLoaderProps {
   width?: number | string;
@@ -7,6 +9,21 @@ interface SkeletonLoaderProps {
   borderRadius?: number;
   style?: any;
 }
+
+// Shared shimmer hook — one animation shared across all bones in a card
+const useShimmer = () => {
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(shimmerAnim, {
+        toValue: 1,
+        duration: 1200,
+        useNativeDriver: true,
+      }),
+    ).start();
+  }, []);
+  return shimmerAnim;
+};
 
 export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   width = "100%",
@@ -40,27 +57,86 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
 
   return (
     <Animated.View
-      style={[
-        styles.skeleton,
-        {
-          width,
-          height,
-          borderRadius,
-          opacity,
-        },
-        style,
-      ]}
+      style={[styles.skeleton, { width, height, borderRadius, opacity }, style]}
     />
   );
 };
 
+// A single shimmer "bone" that sweeps light left-to-right
+const ShimmerBone: React.FC<{
+  shimmer: Animated.Value;
+  width?: number | string;
+  height: number;
+  borderRadius?: number;
+  style?: any;
+}> = ({ shimmer, width = "100%", height, borderRadius = 8, style }) => {
+  const translateX = shimmer.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-SCREEN_WIDTH, SCREEN_WIDTH],
+  });
+
+  return (
+    <View
+      style={[
+        styles.bone,
+        { width: width as any, height, borderRadius },
+        style,
+      ]}
+    >
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          styles.shimmerOverlay,
+          { transform: [{ translateX }] },
+        ]}
+      />
+    </View>
+  );
+};
+
 export const ProductCardSkeleton = () => {
+  const shimmer = useShimmer();
   return (
     <View style={styles.productCard}>
-      <SkeletonLoader height={120} borderRadius={12} style={{ marginBottom: 12 }} />
-      <SkeletonLoader width="80%" height={16} style={{ marginBottom: 8 }} />
-      <SkeletonLoader width="60%" height={14} style={{ marginBottom: 8 }} />
-      <SkeletonLoader width="40%" height={18} />
+      {/* Image area */}
+      <ShimmerBone shimmer={shimmer} height={140} borderRadius={0} style={styles.productCardImage} />
+
+      {/* Info area */}
+      <View style={styles.productCardInfo}>
+        {/* Category label */}
+        <ShimmerBone
+          shimmer={shimmer}
+          width="45%"
+          height={10}
+          borderRadius={5}
+          style={{ marginBottom: 8 }}
+        />
+        {/* Title */}
+        <ShimmerBone
+          shimmer={shimmer}
+          width="90%"
+          height={14}
+          borderRadius={6}
+          style={{ marginBottom: 6 }}
+        />
+        <ShimmerBone
+          shimmer={shimmer}
+          width="70%"
+          height={14}
+          borderRadius={6}
+          style={{ marginBottom: 12 }}
+        />
+        {/* Footer: price + button */}
+        <View style={styles.productCardFooter}>
+          <ShimmerBone
+            shimmer={shimmer}
+            width={56}
+            height={18}
+            borderRadius={6}
+          />
+          <View style={styles.addButtonSkeleton} />
+        </View>
+      </View>
     </View>
   );
 };
@@ -93,7 +169,11 @@ export const ProfileSkeleton = () => {
       <View style={styles.statsContainer}>
         {[1, 2, 3].map((i) => (
           <View key={i} style={styles.statItem}>
-            <SkeletonLoader width={40} height={24} style={{ marginBottom: 4 }} />
+            <SkeletonLoader
+              width={40}
+              height={24}
+              style={{ marginBottom: 4 }}
+            />
             <SkeletonLoader width={60} height={14} />
           </View>
         ))}
@@ -106,16 +186,46 @@ const styles = StyleSheet.create({
   skeleton: {
     backgroundColor: "#E5E7EB",
   },
+  // Shimmer bone
+  bone: {
+    backgroundColor: "#EBEBEB",
+    overflow: "hidden",
+  },
+  shimmerOverlay: {
+    width: "60%",
+    backgroundColor: "rgba(255,255,255,0.65)",
+    transform: [{ skewX: "-20deg" }],
+  },
+  // Product card skeleton — mirrors the real 200 px card
   productCard: {
+    width: 200,
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
+    borderRadius: 14,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.06)",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
     elevation: 3,
+  },
+  productCardImage: {
+    width: "100%",
+  },
+  productCardInfo: {
+    padding: 12,
+  },
+  productCardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  addButtonSkeleton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#EBEBEB",
   },
   orderCard: {
     backgroundColor: "#fff",

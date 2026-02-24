@@ -43,6 +43,13 @@ export default function AdminLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="services"
+        options={{
+          title: "Services",
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

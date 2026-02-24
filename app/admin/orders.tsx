@@ -32,7 +32,6 @@ export default function AdminOrdersScreen() {
   const loadOrders = async () => {
     setLoading(true);
     const data = await adminService.getAllOrders();
-    console.log(`📊 Admin UI: Received ${data.length} orders from service`);
     setOrders(data);
     setLoading(false);
   };
@@ -44,52 +43,77 @@ export default function AdminOrdersScreen() {
   };
 
   const handleUpdateStatus = (orderId: string, currentStatus: string) => {
-    const statusOptions = ["pending", "delivered"];
-    const otherStatus =
-      statusOptions.find((s) => s !== currentStatus) || "delivered";
+    // Standard order flow
+    const flow = ["pending", "processing", "shipped", "delivered", "cancelled"];
 
-    Alert.alert("Update Order Status", `Change status to "${otherStatus}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Update",
-        onPress: async () => {
-          const success = await adminService.updateOrderStatus(
-            orderId,
-            otherStatus,
-          );
-          if (success) {
-            Alert.alert("Success", "Order status updated successfully");
-            await loadOrders();
-          } else {
-            Alert.alert("Error", "Failed to update order status");
+    Alert.alert(
+      "Update Status",
+      `Select new status for Order #${orderId.substring(0, 8)}`,
+      [
+        { text: "Cancel", style: "cancel" },
+        ...flow.map(status => ({
+          text: status.charAt(0).toUpperCase() + status.slice(1),
+          style: status === "cancelled" ? "destructive" as const : "default" as const,
+          onPress: async () => {
+            const success = await adminService.updateOrderStatus(orderId, status);
+            if (success) {
+              loadOrders();
+            } else {
+              Alert.alert("Error", "Failed to update status");
+            }
           }
-        },
-      },
-    ]);
+        }))
+      ]
+    );
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusConfig = (status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
-        return "#F59E0B";
+        return { color: "#F59E0B", icon: "time-outline", bg: "#FEF3C7" };
+      case "processing":
+        return { color: "#3B82F6", icon: "construct-outline", bg: "#DBEAFE" };
+      case "shipped":
+        return { color: "#8B5CF6", icon: "airplane-outline", bg: "#EDE9FE" };
       case "delivered":
-        return "#10B981";
+        return { color: "#10B981", icon: "checkmark-circle-outline", bg: "#D1FAE5" };
+      case "cancelled":
+        return { color: "#EF4444", icon: "close-circle-outline", bg: "#FEE2E2" };
       default:
-        return "#6B7280";
+        return { color: "#6B7280", icon: "help-circle-outline", bg: "#F3F4F6" };
     }
   };
 
-  const toggleOrderExpansion = (orderId: string) => {
-    setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
+  const getTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const past = new Date(dateString);
+    const diffMs = now.getTime() - past.getTime();
+    const diffMins = Math.round(diffMs / 60000);
+    const diffHrs = Math.round(diffMins / 60);
+    const diffDays = Math.round(diffHrs / 24);
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHrs < 24) return `${diffHrs}h ago`;
+    if (diffDays === 1) return "Yesterday";
+    return past.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  if (loading) {
+  const calculateStats = () => {
+    const total = orders.length;
+    const revenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+    const pending = orders.filter(o => o.status === "pending" || o.status === "processing").length;
+    return { total, revenue, pending };
+  };
+
+  const stats = calculateStats();
+
+  if (loading && !refreshing) {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar style="dark" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FF006E" />
-          <Text style={styles.loadingText}>Loading orders...</Text>
+          <Text style={styles.loadingText}>Loading dashboard...</Text>
         </View>
       </SafeAreaView>
     );
@@ -101,398 +125,294 @@ export default function AdminOrdersScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
         <View style={styles.headerBrand}>
           <View style={styles.headerIconContainer}>
             <LinearGradient
-              colors={["#EF4444", "#DC2626", "#B91C1C"]}
+              colors={["#FF006E", "#D6005C"]}
               style={styles.headerIconGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
             >
-              <Ionicons name="receipt-outline" size={18} color="#FFFFFF" />
+              <Ionicons name="receipt" size={16} color="#FFFFFF" />
             </LinearGradient>
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerBrandTitle}>Manage Orders</Text>
-            <Text style={styles.headerBrandSubtitle}>ALL ORDERS</Text>
+            <Text style={styles.headerBrandTitle}>Order Management</Text>
+            <Text style={styles.headerBrandSubtitle}>REVENUE & FULFILLMENT</Text>
           </View>
         </View>
-        <View style={{ width: 24 }} />
+        <TouchableOpacity onPress={onRefresh} style={styles.refreshBtn}>
+          <Ionicons name="refresh" size={20} color="#6B7280" />
+        </TouchableOpacity>
       </View>
 
-      {/* Stats */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{orders.length}</Text>
-          <Text style={styles.statLabel}>Total Orders</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>
-            {orders.filter((o) => o.status === "pending").length}
-          </Text>
-          <Text style={styles.statLabel}>Pending</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>
-            {orders.filter((o) => o.status === "delivered").length}
-          </Text>
-          <Text style={styles.statLabel}>Delivered</Text>
-        </View>
-      </View>
-
-      {/* Orders List */}
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
+        {/* Statistics Grid */}
+        <View style={styles.statsGrid}>
+          <LinearGradient
+            colors={["#FF006E", "#BD0052"]}
+            style={styles.mainStatCard}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <View style={styles.statIconCircle}>
+              <Ionicons name="wallet-outline" size={20} color="#FFF" />
+            </View>
+            <Text style={styles.mainStatLabel}>Total Revenue</Text>
+            <Text style={styles.mainStatValue}>€{stats.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</Text>
+            <View style={styles.statFooter}>
+              <Text style={styles.statFooterText}>From {stats.total} successful orders</Text>
+            </View>
+          </LinearGradient>
+
+          <View style={styles.statRow}>
+            <View style={styles.smallStatCard}>
+              <Text style={styles.smallStatValue}>{stats.pending}</Text>
+              <Text style={styles.smallStatLabel}>To Process</Text>
+              <View style={[styles.statBadge, { backgroundColor: '#FEF3C7' }]}>
+                <Text style={[styles.statBadgeText, { color: '#D97706' }]}>Action Required</Text>
+              </View>
+            </View>
+            <View style={styles.smallStatCard}>
+              <Text style={styles.smallStatValue}>{orders.filter(o => o.status === 'delivered').length}</Text>
+              <Text style={styles.smallStatLabel}>Completed</Text>
+              <View style={[styles.statBadge, { backgroundColor: '#D1FAE5' }]}>
+                <Text style={[styles.statBadgeText, { color: '#059669' }]}>Delivered</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent Orders</Text>
+          <Text style={styles.sectionSub}>{orders.length} items found</Text>
+        </View>
+
+        {/* Orders List */}
         {orders.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="receipt-outline" size={60} color="#9CA3AF" />
+            <Ionicons name="cube-outline" size={60} color="#D1D5DB" />
             <Text style={styles.emptyTitle}>No Orders Yet</Text>
-            <Text style={styles.emptyText}>
-              Orders will appear here when customers make purchases
-            </Text>
+            <Text style={styles.emptyText}>When customers purchase, they'll show up here.</Text>
           </View>
         ) : (
-          orders.map((order) => (
-            <View key={order.id} style={styles.orderCard}>
-              <TouchableOpacity
-                onPress={() => toggleOrderExpansion(order.id)}
-                style={styles.orderHeader}
-              >
-                <View style={styles.orderMainInfo}>
-                  <View style={styles.orderTitleRow}>
-                    <Text style={styles.orderNumber}>
-                      {order.id
-                        ? `Order #${order.id.substring(0, 8)}`
-                        : "Order"}
-                    </Text>
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        {
-                          backgroundColor: `${getStatusColor(order.status || "pending")}20`,
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.statusText,
-                          { color: getStatusColor(order.status || "pending") },
-                        ]}
-                      >
-                        {(order.status || "pending").toUpperCase()}
-                      </Text>
+          orders.map((order) => {
+            const config = getStatusConfig(order.status || "pending");
+            return (
+              <View key={order.id} style={styles.orderMasterCard}>
+                <TouchableOpacity
+                  onPress={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                  style={styles.orderMainArea}
+                >
+                  <View style={styles.orderLeftCol}>
+                    <View style={styles.customerAvatar}>
+                      <Text style={styles.avatarText}>{order.user?.name?.charAt(0) || "U"}</Text>
                     </View>
+                    <View style={styles.verticalLine} />
                   </View>
-                  <Text style={styles.orderCustomer}>
-                    {`Customer: ${order.user?.name || "Unknown Customer"}`}
-                  </Text>
-                  <Text style={styles.orderEmail}>
-                    {`Email: ${order.user?.email || "N/A"}`}
-                  </Text>
-                  {order.user?.phone ? (
-                    <Text style={styles.orderPhone}>
-                      {`Phone: ${order.user.phone}`}
-                    </Text>
-                  ) : null}
-                  <Text style={styles.orderDate}>
-                    {order.created_at
-                      ? new Date(order.created_at).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })
-                      : "Date N/A"}
-                  </Text>
-                  <Text style={styles.orderTotal}>
-                    {`€${(order.total_amount || 0).toFixed(2)}`}
-                  </Text>
-                </View>
-                <Ionicons
-                  name={
-                    expandedOrderId === order.id ? "chevron-up" : "chevron-down"
-                  }
-                  size={24}
-                  color="#9CA3AF"
-                />
-              </TouchableOpacity>
 
-              {/* Expanded Order Details */}
-              {expandedOrderId === order.id && (
-                <View style={styles.orderDetails}>
-                  <Text style={styles.detailsTitle}>Order Items:</Text>
-                  {order.items && order.items.length > 0 ? (
-                    order.items.map((item) => (
-                      <View key={item.id} style={styles.itemRow}>
-                        <Text style={styles.itemName}>
-                          {item.product?.title || "Product"}
-                        </Text>
-                        <Text style={styles.itemQty}>
-                          {`Qty: ${item.quantity || 0}`}
-                        </Text>
-                        <Text style={styles.itemPrice}>
-                          {`€${(item.price || 0).toFixed(2)}`}
+                  <View style={styles.orderRightCol}>
+                    <View style={styles.orderHeaderRow}>
+                      <Text style={styles.orderIdLabel}>#{order.id.substring(0, 8).toUpperCase()}</Text>
+                      <Text style={styles.relativeTime}>{getTimeAgo(order.created_at)}</Text>
+                    </View>
+
+                    <Text style={styles.customerName}>{order.user?.name || "Unknown Customer"}</Text>
+
+                    <View style={styles.statusPriceRow}>
+                      <View style={[styles.inlineStatusBadge, { backgroundColor: config.bg }]}>
+                        <Ionicons name={config.icon as any} size={12} color={config.color} />
+                        <Text style={[styles.inlineStatusText, { color: config.color }]}>
+                          {order.status?.toUpperCase() || "PENDING"}
                         </Text>
                       </View>
-                    ))
-                  ) : (
-                    <Text style={styles.emptyText}>No items found</Text>
-                  )}
+                      <Text style={styles.orderPrice}>€{order.total_amount?.toFixed(2)}</Text>
+                    </View>
 
-                  <TouchableOpacity
-                    style={styles.updateButton}
-                    onPress={() =>
-                      handleUpdateStatus(order.id, order.status || "pending")
-                    }
-                  >
-                    <Ionicons name="refresh" size={20} color="#FFFFFF" />
-                    <Text style={styles.updateButtonText}>Update Status</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          ))
+                    {expandedOrderId === order.id && (
+                      <View style={styles.detailsReveal}>
+                        <View style={styles.divider} />
+                        <Text style={styles.itemsLabel}>ORDER ITEMS</Text>
+                        {order.items?.map((item) => (
+                          <View key={item.id} style={styles.itemMiniRow}>
+                            <Text style={styles.itemTitle} numberOfLines={1}>{item.product?.title}</Text>
+                            <Text style={styles.itemQtyX}>x{item.quantity}</Text>
+                            <Text style={styles.itemPriceVal}>€{item.price?.toFixed(2)}</Text>
+                          </View>
+                        ))}
+
+                        <View style={styles.contactInfo}>
+                          <View style={styles.contactItem}>
+                            <Ionicons name="mail-outline" size={14} color="#6B7280" />
+                            <Text style={styles.contactText}>{order.user?.email || "N/A"}</Text>
+                          </View>
+                          {order.user?.phone && (
+                            <View style={styles.contactItem}>
+                              <Ionicons name="call-outline" size={14} color="#6B7280" />
+                              <Text style={styles.contactText}>{order.user.phone}</Text>
+                            </View>
+                          )}
+                        </View>
+
+                        <TouchableOpacity
+                          style={styles.actionBtn}
+                          onPress={() => handleUpdateStatus(order.id, order.status || "pending")}
+                        >
+                          <Text style={styles.actionBtnText}>Update Order Status</Text>
+                          <Ionicons name="chevron-forward" size={16} color="#FFF" />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              </View>
+            );
+          })
         )}
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 60 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F0F4F8",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 16,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: "#6B7280",
-    fontWeight: "500",
-  },
+  container: { flex: 1, backgroundColor: "#F8F9FB" },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { marginTop: 12, fontSize: 14, color: "#6B7280", fontWeight: '500' },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#F1F1F1",
   },
-  headerBrand: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  headerIconContainer: {
-    shadowColor: "#EF4444",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  headerIconGradient: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTextContainer: {
-    flexDirection: "column",
-    gap: 2,
-  },
-  headerBrandTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: "#1F2937",
-    letterSpacing: 0.5,
-  },
-  headerBrandSubtitle: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#9CA3AF",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-  },
-  statsContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#FF006E",
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-    fontWeight: "600",
-  },
-  content: {
-    flex: 1,
+  backButton: { padding: 4 },
+  headerBrand: { flexDirection: "row", alignItems: "center", gap: 10 },
+  headerIconContainer: { elevation: 2, shadowColor: "#FF006E", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.2, shadowRadius: 2 },
+  headerIconGradient: { width: 28, height: 28, borderRadius: 8, justifyContent: "center", alignItems: "center" },
+  headerTextContainer: { flexDirection: "column" },
+  headerBrandTitle: { fontSize: 16, fontWeight: "700", color: "#1F2937" },
+  headerBrandSubtitle: { fontSize: 10, fontWeight: "500", color: "#9CA3AF", letterSpacing: 0.5 },
+  refreshBtn: { padding: 8 },
+
+  content: { flex: 1 },
+  statsGrid: { padding: 20 },
+  mainStatCard: {
     padding: 20,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 60,
-    gap: 16,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1F2937",
-  },
-  emptyText: {
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
-    paddingHorizontal: 40,
-  },
-  orderCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    borderRadius: 24,
+    marginBottom: 16,
+    elevation: 4,
+    shadowColor: "#FF006E",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 2,
-    overflow: "hidden",
   },
-  orderHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
+  statIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12
   },
-  orderMainInfo: {
+  mainStatLabel: { color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '600', marginBottom: 4 },
+  mainStatValue: { color: '#FFF', fontSize: 32, fontWeight: '800' },
+  statFooter: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)' },
+  statFooterText: { color: 'rgba(255,255,255,0.7)', fontSize: 12 },
+
+  statRow: { flexDirection: 'row', gap: 12 },
+  smallStatCard: {
     flex: 1,
+    backgroundColor: '#FFF',
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#F1F1F1'
   },
-  orderTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 12,
+  smallStatValue: { fontSize: 24, fontWeight: '800', color: '#1F2937' },
+  smallStatLabel: { fontSize: 12, color: '#6B7280', marginTop: 2, marginBottom: 8 },
+  statBadge: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  statBadgeText: { fontSize: 10, fontWeight: '800' },
+
+  sectionHeader: { paddingHorizontal: 20, marginBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#1F2937' },
+  sectionSub: { fontSize: 12, color: '#9CA3AF' },
+
+  emptyContainer: { alignItems: 'center', paddingVertical: 60 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937', marginTop: 16 },
+  emptyText: { fontSize: 14, color: '#9CA3AF', marginTop: 8 },
+
+  orderMasterCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#F1F1F1',
+    overflow: 'hidden'
   },
-  orderNumber: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1F2937",
+  orderMainArea: { flexDirection: 'row', padding: 16 },
+  orderLeftCol: { alignItems: 'center', marginRight: 16 },
+  customerAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  statusBadge: {
+  avatarText: { fontSize: 18, fontWeight: '700', color: '#374151' },
+  verticalLine: { flex: 1, width: 2, backgroundColor: '#F3F4F6', marginTop: 8, borderRadius: 1 },
+
+  orderRightCol: { flex: 1 },
+  orderHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  orderIdLabel: { fontSize: 12, fontWeight: '800', color: '#FF006E', letterSpacing: 1 },
+  relativeTime: { fontSize: 12, color: '#9CA3AF' },
+  customerName: { fontSize: 16, fontWeight: '700', color: '#1F2937', marginBottom: 10 },
+
+  statusPriceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  inlineStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 5,
+    borderRadius: 10,
+    gap: 5
   },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  orderCustomer: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 4,
-  },
-  orderEmail: {
-    fontSize: 13,
-    color: "#9CA3AF",
-    marginBottom: 4,
-  },
-  orderPhone: {
-    fontSize: 13,
-    color: "#9CA3AF",
-    marginBottom: 4,
-  },
-  orderDate: {
-    fontSize: 13,
-    color: "#9CA3AF",
-    marginBottom: 6,
-  },
-  orderTotal: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#FF006E",
-  },
-  orderDetails: {
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    padding: 16,
-    backgroundColor: "#F9FAFB",
-  },
-  detailsTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#1F2937",
-    marginBottom: 12,
-  },
-  itemRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  itemName: {
-    flex: 1,
-    fontSize: 14,
-    color: "#1F2937",
-    fontWeight: "500",
-  },
-  itemQty: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginRight: 12,
-  },
-  itemPrice: {
-    fontSize: 14,
-    color: "#1F2937",
-    fontWeight: "600",
-  },
-  updateButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#3B82F6",
+  inlineStatusText: { fontSize: 10, fontWeight: '800' },
+  orderPrice: { fontSize: 18, fontWeight: '800', color: '#1F2937' },
+
+  detailsReveal: { marginTop: 16 },
+  divider: { height: 1, backgroundColor: '#F3F4F6', marginBottom: 16 },
+  itemsLabel: { fontSize: 10, fontWeight: '800', color: '#9CA3AF', letterSpacing: 1, marginBottom: 12 },
+  itemMiniRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, alignItems: 'center' },
+  itemTitle: { flex: 1, fontSize: 13, color: '#4B5563', fontWeight: '500' },
+  itemQtyX: { fontSize: 13, color: '#9CA3AF', marginHorizontal: 12 },
+  itemPriceVal: { fontSize: 13, color: '#1F2937', fontWeight: '600' },
+
+  contactInfo: { marginTop: 12, gap: 8 },
+  contactItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  contactText: { fontSize: 13, color: '#6B7280' },
+
+  actionBtn: {
+    backgroundColor: '#FF006E',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 14,
-    borderRadius: 12,
-    marginTop: 16,
-    gap: 8,
+    borderRadius: 14,
+    marginTop: 20,
+    gap: 10
   },
-  updateButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
+  actionBtnText: { color: '#FFF', fontSize: 14, fontWeight: '700' }
 });

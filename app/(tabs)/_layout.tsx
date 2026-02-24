@@ -45,9 +45,9 @@ export default function TabLayout() {
         ),
         headerTintColor: colors.text,
         headerTitleStyle: {
-          fontWeight: "700",
-          fontSize: 20,
-          letterSpacing: 0.5,
+          fontWeight: "500",
+          fontSize: 16,
+          letterSpacing: 0.2,
         },
         headerShadowVisible: true,
         tabBarButton: HapticTab,
@@ -56,20 +56,20 @@ export default function TabLayout() {
           bottom: 0,
           left: 0,
           right: 0,
-          height: 88,
+          height: 78,
           backgroundColor: darkMode
             ? "rgba(31, 41, 55, 0.95)"
             : "rgba(255, 255, 255, 0.95)",
-          borderTopLeftRadius: 32,
-          borderTopRightRadius: 32,
-          paddingBottom: 10,
+          borderTopLeftRadius: 26,
+          borderTopRightRadius: 26,
+          paddingBottom: 12,
           paddingTop: 12,
           paddingHorizontal: 8,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: darkMode ? 0.3 : 0.1,
-          shadowRadius: 16,
-          elevation: 20,
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: darkMode ? 0.2 : 0.07,
+          shadowRadius: 10,
+          elevation: 12,
           borderTopWidth: 1,
           borderLeftWidth: 1,
           borderRightWidth: 1,
@@ -82,20 +82,22 @@ export default function TabLayout() {
               tint={darkMode ? "dark" : "light"}
               style={[
                 StyleSheet.absoluteFill,
-                { borderTopLeftRadius: 32, borderTopRightRadius: 32 },
+                { borderTopLeftRadius: 24, borderTopRightRadius: 24 },
               ]}
             />
           ) : null,
         tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "700",
-          marginTop: 4,
-          marginBottom: 2,
-          letterSpacing: 0.3,
+          fontSize: 11,
+          fontWeight: "500",
+          marginTop: 3,
+          marginBottom: 0,
+          letterSpacing: 0.2,
         },
         tabBarItemStyle: {
-          paddingVertical: 8,
-          gap: 4,
+          paddingVertical: 0,
+          gap: 2,
+          justifyContent: "center",
+          alignItems: "center",
           backgroundColor: "transparent",
         },
       }}
@@ -151,7 +153,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
-              size={28}
+              size={24}
               color={focused ? "#FF006E" : "#9CA3AF"}
             />
           ),
@@ -184,7 +186,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "grid" : "grid-outline"}
-              size={28}
+              size={24}
               color={focused ? "#FF006E" : "#9CA3AF"}
             />
           ),
@@ -217,7 +219,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "document-text" : "document-text-outline"}
-              size={28}
+              size={24}
               color={focused ? "#FF006E" : "#9CA3AF"}
             />
           ),
@@ -251,7 +253,7 @@ export default function TabLayout() {
             <View style={{ position: "relative" }}>
               <Ionicons
                 name={focused ? "chatbubbles" : "chatbubbles-outline"}
-                size={28}
+                size={24}
                 color={focused ? "#FF006E" : "#9CA3AF"}
               />
               {unreadCount > 0 && (
@@ -314,7 +316,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "person" : "person-outline"}
-              size={28}
+              size={24}
               color={focused ? "#FF006E" : "#9CA3AF"}
             />
           ),
@@ -338,30 +340,26 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   logoGradient: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
   },
   titleTextContainer: {
     flexDirection: "column",
-    gap: 2,
+    gap: 1,
   },
   headerTitleText: {
-    fontSize: 20,
-    fontWeight: "900",
-    letterSpacing: 0.5,
-    textShadowColor: "rgba(255, 0, 110, 0.1)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.1,
   },
   headerSubtitle: {
     fontSize: 10,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#9CA3AF",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
+    letterSpacing: 0.3,
   },
   cartButton: {
     marginRight: 16,

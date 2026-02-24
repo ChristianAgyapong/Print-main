@@ -20,7 +20,7 @@ export default function AdminScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { isAdmin, isLoading } = useAdmin();
-  const { newOrdersCount, clearNotifications } = useAdminNotifications();
+  const { newOrdersCount, newMessagesCount, clearNotifications, clearMessageNotifications } = useAdminNotifications();
 
   useEffect(() => {
     // Refresh notifications when admin panel opens
@@ -88,9 +88,17 @@ export default function AdminScreen() {
     {
       icon: "chatbubble-ellipses",
       title: "Messages",
-      subtitle: "Send messages to users",
+      subtitle: "Chat with customers",
       color: "#FF006E",
       route: "/admin/messages",
+      badge: newMessagesCount,
+    },
+    {
+      icon: "construct",
+      title: "Services",
+      subtitle: "Edit service descriptions & pricing",
+      color: "#8B5CF6",
+      route: "/admin/services",
     },
   ];
 
@@ -146,6 +154,9 @@ export default function AdminScreen() {
               onPress={() => {
                 if (item.route === "/admin/orders" && newOrdersCount > 0) {
                   clearNotifications();
+                }
+                if (item.route === "/admin/messages" && newMessagesCount > 0) {
+                  clearMessageNotifications();
                 }
                 router.push(item.route as any);
               }}
@@ -262,20 +273,19 @@ const styles = StyleSheet.create({
   },
   headerTextContainer: {
     flexDirection: "column",
-    gap: 2,
+    gap: 1,
   },
   headerBrandTitle: {
-    fontSize: 18,
-    fontWeight: "900",
+    fontSize: 15,
+    fontWeight: "600",
     color: "#1F2937",
-    letterSpacing: 0.5,
+    letterSpacing: 0.1,
   },
   headerBrandSubtitle: {
     fontSize: 10,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#9CA3AF",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
+    letterSpacing: 0.3,
   },
   content: {
     flex: 1,

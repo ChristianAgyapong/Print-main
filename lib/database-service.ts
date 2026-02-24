@@ -788,6 +788,7 @@ export const adminMessagesService = {
         ...newMessage,
         from_admin: true,
         admin_sender_email: user?.email || null,
+        read: false,
       };
 
       const { error } = await supabase
@@ -800,6 +801,69 @@ export const adminMessagesService = {
     } catch (error) {
       console.error("❌ Error sending message:", error);
       return false;
+    }
+  },
+
+  // Broadcast a message to ALL registered users at once
+  async sendToAllUsers(
+    subject: string,
+    message: string,
+  ): Promise<{ sent: number; failed: number }> {
+    try {
+      console.log("📢 Admin broadcasting message to all users...");
+
+      // Get current admin user email
+      const {
+        data: { user: adminUser },
+      } = await supabase.auth.getUser();
+
+      // Get all profile IDs
+      const { data: profiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("id");
+
+      if (profileError) throw profileError;
+      if (!profiles || profiles.length === 0) return { sent: 0, failed: 0 };
+
+      // Create broadcast messages
+      const broadcastMessages = profiles.map((profile: any) => ({
+        user_id: profile.id,
+        subject,
+        message,
+        from_admin: true,
+        read: false,
+        admin_sender_email: adminUser?.email || null,
+      }));
+
+      // Insert in chunks if necessary (Supabase handles batch insert)
+      const { error: insertError } = await supabase
+        .from("messages")
+        .insert(broadcastMessages);
+
+      if (insertError) throw insertError;
+
+      console.log(`✅ Broadcast sent to ${profiles.length} users successfully`);
+      return { sent: profiles.length, failed: 0 };
+    } catch (error) {
+      console.error("❌ Error broadcasting message:", error);
+      return { sent: 0, failed: 1 };
+    }
+  },
+
+  // Get count of unread messages sent by users to admin
+  async getAdminUnreadCount(): Promise<number> {
+    try {
+      const { count, error } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("from_admin", false)
+        .eq("read", false);
+
+      if (error) throw error;
+      return count || 0;
+    } catch (error) {
+      console.error("❌ Error getting admin unread count:", error);
+      return 0;
     }
   },
 

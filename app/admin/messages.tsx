@@ -8,7 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -29,12 +29,13 @@ type UserWithEmail = Profile & { email: string };
 
 export default function AdminMessagesScreen() {
   const router = useRouter();
-  const [showInbox, setShowInbox] = useState(false);
+  const [showInbox, setShowInbox] = useState(true);
   const [users, setUsers] = useState<UserWithEmail[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithEmail | null>(null);
+  const [isBroadcast, setIsBroadcast] = useState(false);
   const [showComposeModal, setShowComposeModal] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -43,6 +44,7 @@ export default function AdminMessagesScreen() {
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(
     null,
   );
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -50,25 +52,29 @@ export default function AdminMessagesScreen() {
 
   const loadData = async () => {
     setLoading(true);
-    if (showInbox) {
-      await loadMessages();
-    } else {
-      await loadUsers();
-    }
+    await Promise.all([
+      loadMessages(),
+      loadUsers(),
+      refreshUnreadCount()
+    ]);
     setLoading(false);
+  };
+
+  const refreshUnreadCount = async () => {
+    const count = await adminMessagesService.getAdminUnreadCount();
+    setUnreadCount(count);
   };
 
   const loadMessages = async () => {
     const data = await adminMessagesService.getAllMessages();
-    console.log(`📬 Admin: Loaded ${data.length} messages`);
-    // Filter to show messages FROM users (to admin)
-    const userMessages = data.filter((msg) => !msg.from_admin);
-    setMessages(userMessages);
+    // For admin inbox, usually show messages from users to admin
+    // But we'll show all and filter for relevant ones
+    const incomingMessages = data.filter((msg) => !msg.from_admin);
+    setMessages(incomingMessages);
   };
 
   const loadUsers = async () => {
     const data = await adminService.getAllUsers();
-    console.log(`📬 Admin Messages: Loaded ${data.length} users`);
     setUsers(data);
   };
 
@@ -80,70 +86,97 @@ export default function AdminMessagesScreen() {
 
   const handleSelectUser = (user: UserWithEmail) => {
     setSelectedUser(user);
+    setIsBroadcast(false);
+    setShowComposeModal(true);
+  };
+
+  const handleBroadcastInitiate = () => {
+    setSelectedUser(null);
+    setIsBroadcast(true);
     setShowComposeModal(true);
   };
 
   const handleSendMessage = async () => {
-    if (!selectedUser || !subject.trim() || !message.trim()) {
+    if ((!selectedUser && !isBroadcast) || !subject.trim() || !message.trim()) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     setSending(true);
-    const success = await adminMessagesService.sendMessage({
-      user_id: selectedUser.id,
-      subject: subject.trim(),
-      message: message.trim(),
-    });
+
+    let success = false;
+    if (isBroadcast) {
+      const result = await adminMessagesService.sendToAllUsers(subject.trim(), message.trim());
+      success = result.sent > 0;
+      if (success) {
+        Alert.alert("Success", `Broadcast sent to ${result.sent} users.`);
+      }
+    } else if (selectedUser) {
+      success = await adminMessagesService.sendMessage({
+        user_id: selectedUser.id,
+        subject: subject.trim(),
+        message: message.trim(),
+      });
+      if (success) {
+        Alert.alert("Success", `Message sent to ${selectedUser.full_name || selectedUser.email}.`);
+      }
+    }
 
     setSending(false);
 
     if (success) {
-      Alert.alert(
-        "Success",
-        `Message sent to ${selectedUser.full_name || selectedUser.email || "user"}`,
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              setShowComposeModal(false);
-              setSelectedUser(null);
-              setSubject("");
-              setMessage("");
-            },
-          },
-        ],
-      );
+      setShowComposeModal(false);
+      setSelectedUser(null);
+      setIsBroadcast(false);
+      setSubject("");
+      setMessage("");
+      loadData();
     } else {
       Alert.alert("Error", "Failed to send message. Please try again.");
     }
   };
 
+  const markAsRead = async (messageId: string) => {
+    await adminMessagesService.markAsRead(messageId);
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, read: true } : m));
+    refreshUnreadCount();
+  };
+
+  const handleDeleteMessage = (messageId: string) => {
+    Alert.alert("Delete Message", "Are you sure? This is permanent for the admin view.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const ok = await adminMessagesService.deleteMessage(messageId);
+          if (ok) {
+            setMessages(prev => prev.filter(m => m.id !== messageId));
+            refreshUnreadCount();
+          }
+        }
+      }
+    ]);
+  };
+
   const filteredUsers = users.filter(
-    (user) =>
-      (user.email &&
-        user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (user.full_name &&
-        user.full_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (user.company &&
-        user.company.toLowerCase().includes(searchQuery.toLowerCase())),
+    (u) =>
+      u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.company?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="dark" />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FF006E" />
-          <Text style={styles.loadingText}>
-            {showInbox ? "Loading messages..." : "Loading users..."}
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const unreadCount = messages.filter((m) => !m.read).length;
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Ionicons name={showInbox ? "mail-outline" : "people-outline"} size={64} color="#D1D5DB" />
+      <Text style={styles.emptyTitle}>{showInbox ? "No Incoming Messages" : "No Users Found"}</Text>
+      <Text style={styles.emptyText}>
+        {showInbox
+          ? "When users message you, they will appear here."
+          : "Try searching for a different user name or email."}
+      </Text>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -151,261 +184,184 @@ export default function AdminMessagesScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
         <View style={styles.headerBrand}>
           <View style={styles.headerIconContainer}>
             <LinearGradient
-              colors={["#EF4444", "#DC2626", "#B91C1C"]}
+              colors={["#FF006E", "#D6005C"]}
               style={styles.headerIconGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
             >
-              <Ionicons name="mail-outline" size={18} color="#FFFFFF" />
+              <Ionicons name="chatbubbles" size={16} color="#FFFFFF" />
             </LinearGradient>
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerBrandTitle}>Messages</Text>
+            <Text style={styles.headerBrandTitle}>Admin Messages</Text>
             <Text style={styles.headerBrandSubtitle}>
-              {showInbox ? "INBOX VIEW" : "COMPOSE"}
+              {showInbox ? "CUSTOMER INBOX" : "SEND MESSAGE"}
             </Text>
           </View>
         </View>
         <TouchableOpacity
-          onPress={() => {
-            setShowInbox(!showInbox);
-            setSearchQuery("");
-          }}
-          style={styles.toggleButton}
+          style={[styles.headerActionBtn, showInbox && styles.activeTab]}
+          onPress={() => setShowInbox(!showInbox)}
         >
-          {showInbox ? (
-            <>
-              <Ionicons name="send" size={20} color="#FF006E" />
-              <Text style={styles.toggleButtonText}>Send</Text>
-            </>
-          ) : (
-            <>
-              <Ionicons name="mail" size={20} color="#FF006E" />
-              <Text style={styles.toggleButtonText}>Inbox</Text>
-              {unreadCount > 0 && (
-                <View style={styles.headerBadge}>
-                  <Text style={styles.headerBadgeText}>
-                    {String(unreadCount)}
-                  </Text>
-                </View>
-              )}
-            </>
-          )}
+          <View style={styles.iconWithBadge}>
+            <Ionicons name={showInbox ? "create-outline" : "mail-outline"} size={22} color={showInbox ? "#FF006E" : "#1F2937"} />
+            {showInbox && unreadCount > 0 && (
+              <View style={styles.badgeSmall}><Text style={styles.badgeTextSmall}>{unreadCount}</Text></View>
+            )}
+          </View>
         </TouchableOpacity>
       </View>
 
-      {/* Content based on view */}
-      {showInbox ? (
-        // Inbox View
-        <>
-          <View style={styles.infoBanner}>
-            <Ionicons name="information-circle" size={20} color="#3B82F6" />
-            <Text style={styles.infoText}>
-              Messages received from users will appear here.
-            </Text>
-          </View>
+      {/* Tabs */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tab, showInbox && styles.activeTabItem]}
+          onPress={() => setShowInbox(true)}
+        >
+          <Text style={[styles.tabText, showInbox && styles.activeTabText]}>Inbox</Text>
+          {unreadCount > 0 && (
+            <View style={styles.tabBadge}><Text style={styles.tabBadgeText}>{unreadCount}</Text></View>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, !showInbox && styles.activeTabItem]}
+          onPress={() => setShowInbox(false)}
+        >
+          <Text style={[styles.tabText, !showInbox && styles.activeTabText]}>Compose</Text>
+        </TouchableOpacity>
+      </View>
 
-          <ScrollView
-            style={styles.content}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-          >
-            {messages.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="mail-open-outline" size={64} color="#D1D5DB" />
-                <Text style={styles.emptyTitle}>No Messages</Text>
-                <Text style={styles.emptyText}>
-                  You haven't received any messages from users yet
-                </Text>
-              </View>
-            ) : (
-              messages.map((msg) => (
+      {loading && !refreshing ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF006E" />
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.content}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          {showInbox ? (
+            // INBOX VIEW
+            <View style={styles.messageList}>
+              {messages.length === 0 ? renderEmptyState() : messages.map((msg) => (
                 <TouchableOpacity
                   key={msg.id}
-                  style={[
-                    styles.messageCard,
-                    !msg.read && styles.unreadMessage,
-                  ]}
+                  style={[styles.messageCard, !msg.read && styles.unreadCard]}
                   onPress={() => {
-                    setExpandedMessageId(
-                      expandedMessageId === msg.id ? null : msg.id,
-                    );
-                    if (!msg.read) {
-                      adminMessagesService.markAsRead(msg.id);
-                      loadMessages();
-                    }
+                    setExpandedMessageId(expandedMessageId === msg.id ? null : msg.id);
+                    if (!msg.read) markAsRead(msg.id);
                   }}
                 >
                   <View style={styles.messageHeader}>
-                    <View style={styles.messageUserInfo}>
-                      <View style={styles.userAvatar}>
-                        <Text style={styles.userAvatarText}>
-                          {(msg.user?.full_name &&
-                            msg.user.full_name.charAt(0).toUpperCase()) ||
-                            (msg.user?.email &&
-                              msg.user.email.charAt(0).toUpperCase()) ||
-                            "U"}
-                        </Text>
-                      </View>
-                      <View style={styles.messageUserDetails}>
-                        <Text style={styles.messageUserName}>
+                    <View style={styles.userAvatar}>
+                      <Text style={styles.avatarText}>
+                        {msg.user?.full_name?.charAt(0) || msg.user?.email?.charAt(0) || "U"}
+                      </Text>
+                    </View>
+                    <View style={styles.messageMainInfo}>
+                      <View style={styles.nameRow}>
+                        <Text style={[styles.userName, !msg.read && styles.boldText]}>
                           {msg.user?.full_name || "Unknown User"}
                         </Text>
-                        <Text style={styles.messageUserEmail}>
-                          {msg.user?.email || "No email"}
+                        <Text style={styles.messageDate}>
+                          {new Date(msg.created_at).toLocaleDateString()}
                         </Text>
                       </View>
+                      <Text style={[styles.msgSubject, !msg.read && styles.boldText]} numberOfLines={1}>
+                        {msg.subject}
+                      </Text>
                     </View>
                     {!msg.read && <View style={styles.unreadDot} />}
                   </View>
 
-                  <Text style={styles.messageSubject}>{msg.subject}</Text>
-
-                  {expandedMessageId === msg.id ? (
-                    <Text style={styles.messageBody}>{msg.message}</Text>
-                  ) : (
-                    <Text style={styles.messagePreview} numberOfLines={2}>
-                      {msg.message}
-                    </Text>
+                  {expandedMessageId === msg.id && (
+                    <View style={styles.expandedContent}>
+                      <Text style={styles.fullMessage}>{msg.message}</Text>
+                      <View style={styles.actionRow}>
+                        <TouchableOpacity
+                          style={styles.replyBtn}
+                          onPress={() => {
+                            const u = users.find(user => user.id === msg.user_id);
+                            if (u) {
+                              setSelectedUser(u);
+                              setSubject(`Re: ${msg.subject}`);
+                              setShowComposeModal(true);
+                            }
+                          }}
+                        >
+                          <Ionicons name="arrow-undo" size={16} color="#FF006E" />
+                          <Text style={styles.replyBtnText}>Reply</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.deleteBtn}
+                          onPress={() => handleDeleteMessage(msg.id)}
+                        >
+                          <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   )}
-
-                  <View style={styles.messageFooter}>
-                    <Text style={styles.messageDate}>
-                      {new Date(msg.created_at).toLocaleString()}
-                    </Text>
-                    <TouchableOpacity
-                      style={styles.replyButton}
-                      onPress={() => {
-                        if (msg.user && msg.user.id) {
-                          // Find the full user profile from users list
-                          const fullUser = users.find(
-                            (u) => u.id === msg.user!.id,
-                          );
-                          if (fullUser) {
-                            setSelectedUser(fullUser);
-                            setSubject(`Re: ${msg.subject}`);
-                            setShowInbox(false);
-                            setShowComposeModal(true);
-                          }
-                        }
-                      }}
-                    >
-                      <Ionicons name="arrow-undo" size={16} color="#FF006E" />
-                      <Text style={styles.replyButtonText}>Reply</Text>
-                    </TouchableOpacity>
-                  </View>
                 </TouchableOpacity>
-              ))
-            )}
-          </ScrollView>
-        </>
-      ) : (
-        // Compose View
-        <>
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <Ionicons
-              name="search"
-              size={20}
-              color="#9CA3AF"
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search users by name, email, or company..."
-              placeholderTextColor="#9CA3AF"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+              ))}
+            </View>
+          ) : (
+            // COMPOSE / USER LIST VIEW
+            <View style={styles.userSection}>
+              <TouchableOpacity
+                style={styles.broadcastBtn}
+                onPress={handleBroadcastInitiate}
+              >
+                <LinearGradient
+                  colors={["#FF006E", "#BD0052"]}
+                  style={styles.broadcastGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Ionicons name="megaphone-outline" size={24} color="#FFF" />
+                  <View style={styles.broadcastTextRow}>
+                    <Text style={styles.broadcastTitle}>Broadcast to Everyone</Text>
+                    <Text style={styles.broadcastSub}>Send a message to all registered users</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#FFF" />
+                </LinearGradient>
               </TouchableOpacity>
-            )}
-          </View>
 
-          {/* Info Banner */}
-          <View style={styles.infoBanner}>
-            <Ionicons name="information-circle" size={20} color="#3B82F6" />
-            <Text style={styles.infoText}>
-              Select a user to send them a message. They'll receive it in their
-              Messages section.
-            </Text>
-          </View>
-
-          {/* Users List */}
-          <ScrollView
-            style={styles.content}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-          >
-            {filteredUsers.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="people-outline" size={64} color="#D1D5DB" />
-                <Text style={styles.emptyTitle}>No Users Found</Text>
-                <Text style={styles.emptyText}>
-                  {searchQuery
-                    ? "Try a different search term"
-                    : "No registered users yet"}
-                </Text>
+              <View style={styles.searchBox}>
+                <Ionicons name="search" size={20} color="#9CA3AF" />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
               </View>
-            ) : (
-              filteredUsers.map((user) => (
+
+              {filteredUsers.length === 0 ? renderEmptyState() : filteredUsers.map((user) => (
                 <TouchableOpacity
                   key={user.id}
-                  style={styles.userCard}
+                  style={styles.userRow}
                   onPress={() => handleSelectUser(user)}
                 >
-                  <View style={styles.userAvatar}>
-                    <Text style={styles.userAvatarText}>
-                      {(user.full_name &&
-                        user.full_name.charAt(0).toUpperCase()) ||
-                        (user.email && user.email.charAt(0).toUpperCase()) ||
-                        "U"}
-                    </Text>
+                  <View style={[styles.userCircle, { backgroundColor: '#F3F4F6' }]}>
+                    <Text style={styles.userInitial}>{user.full_name?.charAt(0) || "U"}</Text>
                   </View>
-
-                  <View style={styles.userInfo}>
-                    <Text style={styles.userName}>
-                      {user.full_name || "No Name"}
-                    </Text>
-                    <Text style={styles.userEmail}>
-                      {user.email || "No Email"}
-                    </Text>
-                    {user.company ? (
-                      <Text
-                        style={styles.userCompany}
-                      >{`🏢 ${user.company}`}</Text>
-                    ) : null}
-                    {user.phone ? (
-                      <Text style={styles.userPhone}>{`📱 ${user.phone}`}</Text>
-                    ) : null}
+                  <View style={styles.userInfoCol}>
+                    <Text style={styles.userNameText}>{user.full_name || "No Name"}</Text>
+                    <Text style={styles.userEmailText}>{user.email}</Text>
                   </View>
-
-                  <Ionicons
-                    name="chatbubble-ellipses"
-                    size={24}
-                    color="#FF006E"
-                  />
+                  <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
                 </TouchableOpacity>
-              ))
-            )}
-          </ScrollView>
-        </>
+              ))}
+            </View>
+          )}
+        </ScrollView>
       )}
 
-      {/* Compose Message Modal */}
+      {/* Compose Modal */}
       <Modal
         visible={showComposeModal}
         animationType="slide"
@@ -414,68 +370,47 @@ export default function AdminMessagesScreen() {
       >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.modalContainer}
+          style={styles.modalOverlay}
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Send Message</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowComposeModal(false);
-                  setSelectedUser(null);
-                  setSubject("");
-                  setMessage("");
-                }}
-              >
-                <Ionicons name="close" size={28} color="#6B7280" />
+              <View>
+                <Text style={styles.modalTitle}>{isBroadcast ? "Broadcast Message" : "Direct Message"}</Text>
+                <Text style={styles.modalSubtitle}>
+                  {isBroadcast ? "To: All Registered Users" : `To: ${selectedUser?.full_name || selectedUser?.email}`}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowComposeModal(false)}>
+                <Ionicons name="close-circle" size={32} color="#D1D5DB" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
-              {/* Recipient Info */}
-              <View style={styles.recipientCard}>
-                <Text style={styles.recipientLabel}>To:</Text>
-                <Text style={styles.recipientName}>
-                  {selectedUser?.full_name || "Unknown"}
-                </Text>
-                <Text style={styles.recipientEmail}>
-                  {selectedUser?.email || "No Email"}
-                </Text>
-              </View>
-
-              {/* Subject Input */}
+            <ScrollView style={styles.modalForm}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Subject *</Text>
+                <Text style={styles.label}>Subject</Text>
                 <TextInput
-                  style={styles.input}
-                  placeholder="Enter message subject"
-                  placeholderTextColor="#9CA3AF"
+                  style={styles.modalInput}
+                  placeholder="What is this about?"
                   value={subject}
                   onChangeText={setSubject}
                 />
               </View>
 
-              {/* Message Input */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Message *</Text>
+                <Text style={styles.label}>Message Body</Text>
                 <TextInput
-                  style={[styles.input, styles.messageInput]}
-                  placeholder="Type your message here..."
-                  placeholderTextColor="#9CA3AF"
+                  style={[styles.modalInput, styles.textArea]}
+                  placeholder="Compose your message here..."
                   value={message}
                   onChangeText={setMessage}
                   multiline
-                  numberOfLines={8}
+                  numberOfLines={10}
                   textAlignVertical="top"
                 />
               </View>
 
-              {/* Send Button */}
               <TouchableOpacity
-                style={[
-                  styles.sendButton,
-                  sending && styles.sendButtonDisabled,
-                ]}
+                style={[styles.sendBtn, sending && styles.btnDisabled]}
                 onPress={handleSendMessage}
                 disabled={sending}
               >
@@ -483,8 +418,8 @@ export default function AdminMessagesScreen() {
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
                   <>
-                    <Ionicons name="send" size={20} color="#FFFFFF" />
-                    <Text style={styles.sendButtonText}>Send Message</Text>
+                    <Text style={styles.sendBtnText}>Send Message</Text>
+                    <Ionicons name="paper-plane" size={18} color="#FFFFFF" />
                   </>
                 )}
               </TouchableOpacity>
@@ -497,386 +432,224 @@ export default function AdminMessagesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9FAFB",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#6B7280",
-  },
+  container: { flex: 1, backgroundColor: "#F9FAFB" },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
   },
-  backButton: {
-    padding: 4,
-  },
-  headerBrand: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
+  backButton: { padding: 4 },
+  headerBrand: { flexDirection: "row", alignItems: "center", gap: 8 },
   headerIconContainer: {
-    shadowColor: "#EF4444",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  headerIconGradient: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTextContainer: {
-    flexDirection: "column",
-    gap: 2,
-  },
-  headerBrandTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: "#1F2937",
-    letterSpacing: 0.5,
-  },
-  headerBrandSubtitle: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#9CA3AF",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-  },
-  toggleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: "#FFF1F7",
-    borderRadius: 8,
-  },
-  toggleButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#FF006E",
-  },
-  headerBadge: {
-    backgroundColor: "#FF006E",
-    borderRadius: 8,
-    minWidth: 16,
-    height: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-    marginLeft: 4,
-  },
-  headerBadgeText: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "700",
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 20,
-    marginTop: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: "#1F2937",
-  },
-  infoBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#EFF6FF",
-    marginHorizontal: 20,
-    marginTop: 12,
-    padding: 12,
-    borderRadius: 12,
-    gap: 8,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#1E40AF",
-    lineHeight: 18,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    marginTop: 16,
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1F2937",
-    marginTop: 16,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginTop: 8,
-  },
-  userCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowColor: "#FF006E",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
     elevation: 2,
   },
-  userAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#FF006E",
+  headerIconGradient: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
   },
-  userAvatarText: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#FFFFFF",
+  headerTextContainer: { flexDirection: "column", gap: 1 },
+  headerBrandTitle: { fontSize: 16, fontWeight: "600", color: "#1F2937" },
+  headerBrandSubtitle: { fontSize: 10, fontWeight: "400", color: "#9CA3AF" },
+  headerActionBtn: { padding: 8, borderRadius: 10 },
+  activeTab: { backgroundColor: "#FFF1F7" },
+  iconWithBadge: { position: 'relative' },
+  badgeSmall: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: '#FF006E',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FFF'
   },
-  userInfo: {
-    flex: 1,
+  badgeTextSmall: { fontSize: 9, fontWeight: '800', color: '#FFF' },
+
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB'
   },
-  userName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 4,
+  tab: {
+    paddingVertical: 12,
+    marginRight: 24,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+    flexDirection: 'row',
+    alignItems: 'center'
   },
-  userEmail: {
-    fontSize: 13,
-    color: "#6B7280",
-    marginBottom: 2,
+  activeTabItem: { borderBottomColor: '#FF006E' },
+  tabText: { fontSize: 14, fontWeight: '600', color: '#6B7280' },
+  activeTabText: { color: '#FF006E' },
+  tabBadge: {
+    backgroundColor: '#FF006E',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginLeft: 6
   },
-  userCompany: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    marginTop: 2,
+  tabBadgeText: { fontSize: 10, fontWeight: '700', color: '#FFF' },
+
+  content: { flex: 1 },
+  messageList: { padding: 16 },
+  messageCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  userPhone: {
-    fontSize: 12,
-    color: "#9CA3AF",
+  unreadCard: {
+    backgroundColor: '#FFFBFD',
+    borderColor: '#FF006E33',
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  messageHeader: { flexDirection: 'row', alignItems: 'center' },
+  userAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12
   },
+  avatarText: { fontSize: 16, fontWeight: '700', color: '#1F2937' },
+  messageMainInfo: { flex: 1 },
+  nameRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
+  userName: { fontSize: 14, fontWeight: '500', color: '#1F2937' },
+  messageDate: { fontSize: 11, color: '#9CA3AF' },
+  msgSubject: { fontSize: 13, color: '#4B5563' },
+  boldText: { fontWeight: '700', color: '#000' },
+  unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#FF006E', marginLeft: 8 },
+
+  expandedContent: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#F3F4F6' },
+  fullMessage: { fontSize: 14, color: '#374151', lineHeight: 20, marginBottom: 16 },
+  actionRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  replyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF1F7',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6
+  },
+  replyBtnText: { fontSize: 13, fontWeight: '600', color: '#FF006E' },
+  deleteBtn: { padding: 8 },
+
+  userSection: { padding: 16 },
+  broadcastBtn: { marginBottom: 20 },
+  broadcastGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
+    gap: 16
+  },
+  broadcastTextRow: { flex: 1 },
+  broadcastTitle: { fontSize: 16, fontWeight: '700', color: '#FFF' },
+  broadcastSub: { fontSize: 12, color: '#FFE1ED' },
+
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 16,
+    gap: 10
+  },
+  searchInput: { flex: 1, fontSize: 14, color: '#1F2937' },
+  userRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    gap: 12
+  },
+  userCircle: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
+  userInitial: { fontSize: 18, fontWeight: '700', color: '#374151' },
+  userInfoCol: { flex: 1 },
+  userNameText: { fontSize: 15, fontWeight: '600', color: '#1F2937' },
+  userEmailText: { fontSize: 12, color: '#6B7280' },
+
+  emptyState: { padding: 40, alignItems: 'center' },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937', marginTop: 16 },
+  emptyText: { fontSize: 14, color: '#9CA3AF', textAlign: 'center', marginTop: 8 },
+
+  modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: "90%",
-    paddingBottom: Platform.OS === "ios" ? 34 : 20,
+    maxHeight: '90%'
   },
   modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: '#F3F4F6'
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1F2937",
-  },
-  modalBody: {
-    paddingHorizontal: 20,
-  },
-  recipientCard: {
-    backgroundColor: "#F9FAFB",
-    padding: 16,
-    borderRadius: 12,
-    marginTop: 16,
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1F2937' },
+  modalSubtitle: { fontSize: 12, fontWeight: '500', color: '#6B7280', marginTop: 2 },
+  modalForm: { padding: 20 },
+  inputGroup: { marginBottom: 20 },
+  label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 8 },
+  modalInput: {
+    backgroundColor: '#F9FAFB',
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  recipientLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#6B7280",
-    marginBottom: 4,
-  },
-  recipientName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 2,
-  },
-  recipientEmail: {
-    fontSize: 13,
-    color: "#6B7280",
-  },
-  inputGroup: {
-    marginTop: 20,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: '#E5E7EB',
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    padding: 14,
     fontSize: 15,
-    color: "#1F2937",
+    color: '#1F2937'
   },
-  messageInput: {
-    minHeight: 150,
-    paddingTop: 12,
-  },
-  sendButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FF006E",
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginTop: 24,
-    marginBottom: 20,
-    gap: 8,
-  },
-  sendButtonDisabled: {
-    opacity: 0.6,
-  },
-  sendButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  messageCard: {
-    backgroundColor: "#FFFFFF",
+  textArea: { minHeight: 150 },
+  sendBtn: {
+    backgroundColor: '#FF006E',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 16,
-    marginHorizontal: 20,
-    marginTop: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderRadius: 16,
+    gap: 10,
+    marginTop: 10,
+    marginBottom: 30
   },
-  unreadMessage: {
-    borderLeftWidth: 4,
-    borderLeftColor: "#FF006E",
-  },
-  messageHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
-  messageUserInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  messageUserDetails: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  messageUserName: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1F2937",
-  },
-  messageUserEmail: {
-    fontSize: 13,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  unreadDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#FF006E",
-  },
-  messageSubject: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 8,
-  },
-  messagePreview: {
-    fontSize: 14,
-    color: "#6B7280",
-    lineHeight: 20,
-  },
-  messageBody: {
-    fontSize: 14,
-    color: "#374151",
-    lineHeight: 20,
-  },
-  messageFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-  },
-  messageDate: {
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  replyButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: "#FFF1F7",
-    borderRadius: 8,
-  },
-  replyButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#FF006E",
-  },
+  btnDisabled: { opacity: 0.6 },
+  sendBtnText: { color: '#FFF', fontSize: 16, fontWeight: '700' }
 });
