@@ -1,17 +1,18 @@
 import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -80,7 +81,26 @@ export default function ChangePasswordScreen() {
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#1F2937" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Change Password</Text>
+          <View style={styles.headerBrand}>
+            <View style={styles.headerIconContainer}>
+              <LinearGradient
+                colors={["#8B5CF6", "#7C3AED", "#6D28D9"]}
+                style={styles.headerIconGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={18}
+                  color="#FFFFFF"
+                />
+              </LinearGradient>
+            </View>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.headerBrandTitle}>Change Password</Text>
+              <Text style={styles.headerBrandSubtitle}>ACCOUNT SECURITY</Text>
+            </View>
+          </View>
           <View style={{ width: 40 }} />
         </View>
 
@@ -223,10 +243,41 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+  headerBrand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerIconContainer: {
+    shadowColor: "#8B5CF6",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  headerIconGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTextContainer: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  headerBrandTitle: {
+    fontSize: 18,
+    fontWeight: "900",
     color: "#1F2937",
+    letterSpacing: 0.5,
+  },
+  headerBrandSubtitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   infoCard: {
     flexDirection: "row",

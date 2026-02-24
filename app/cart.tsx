@@ -1,20 +1,22 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { ordersService, profileService } from "@/lib/database-service";
+import { generateTransactionRef } from "@/lib/paystack";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { usePaystack } from "react-native-paystack-webview";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CartScreen() {
@@ -28,6 +30,7 @@ export default function CartScreen() {
     itemCount,
   } = useCart();
   const { user } = useAuth();
+  const { popup } = usePaystack();
   const [loading, setLoading] = useState(false);
 
   const handleBack = () => {
@@ -58,56 +61,146 @@ export default function CartScreen() {
     setLoading(true);
 
     try {
-      // Fetch user profile for order details
+      // Fetch user profile for payment details
       const profile = await profileService.get(user.id);
 
-      const orderItems = items.map((item) => ({
-        product_id: item.product.id,
-        quantity: item.quantity,
-        price: item.product.price,
-      }));
+      // Calculate total amount (including tax and shipping)
+      const shippingFee = totalAmount >= 100 ? 0 : 10;
+      const tax = totalAmount * 0.21;
+      const finalAmount = totalAmount + shippingFee + tax;
 
-      // Create order with user details
-      const userDetails = {
-        name:
-          profile?.full_name ||
-          user.user_metadata?.full_name ||
-          user.email?.split("@")[0] ||
-          "Customer",
-        email: user.email || "no-email@provided.com",
-        phone: profile?.phone || null,
-      };
+      // Prepare customer info
+      const customerEmail = user.email || "no-email@provided.com";
+      const customerName =
+        profile?.full_name ||
+        user.user_metadata?.full_name ||
+        user.email?.split("@")[0] ||
+        "Customer";
 
-      console.log(
-        "📦 Checkout: Creating order with user details:",
-        userDetails,
-      );
+      // Generate transaction reference
+      const reference = generateTransactionRef();
 
-      const order = await ordersService.create(
-        user.id,
-        orderItems,
-        userDetails,
-      );
+      console.log("📱 Initiating Mobile Money payment:", {
+        email: customerEmail,
+        amount: finalAmount,
+        reference: reference,
+        networks: "MTN, Telecel, AirtelTigo",
+      });
 
-      if (order) {
-        clearCart();
-        Alert.alert(
-          "Order Placed!",
-          `Your order #${order.id.slice(0, 8)} has been placed successfully.`,
-          [
+      // Call Paystack popup checkout
+      // Only Mobile Money (MoMo) is enabled: MTN, Telecel, AirtelTigo
+      popup.checkout({
+        email: customerEmail,
+        amount: finalAmount, // Amount in Cedis (not pesewas)
+        reference: reference,
+        metadata: {
+          custom_fields: [
             {
-              text: "View Orders",
-              onPress: () => router.push("/(tabs)/orders"),
+              display_name: "Customer Name",
+              variable_name: "customer_name",
+              value: customerName,
+            },
+            {
+              display_name: "Cart Items",
+              variable_name: "cart_items",
+              value: `${items.length} item(s)`,
+            },
+            {
+              display_name: "User ID",
+              variable_name: "user_id",
+              value: user.id,
             },
           ],
-        );
-      } else {
-        Alert.alert("Error", "Failed to place order. Please try again.");
-      }
+        },
+        onSuccess: async (response: any) => {
+          console.log("✅ Payment successful:", response);
+          setLoading(true);
+
+          try {
+            if (!user) return;
+
+            // Fetch user profile for order details
+            const profile = await profileService.get(user.id);
+
+            const orderItems = items.map((item) => ({
+              product_id: item.product.id,
+              quantity: item.quantity,
+              price: item.product.price,
+            }));
+
+            // Create order with user details and payment info
+            const userDetails = {
+              name:
+                profile?.full_name ||
+                user.user_metadata?.full_name ||
+                user.email?.split("@")[0] ||
+                "Customer",
+              email: user.email || "no-email@provided.com",
+              phone: profile?.phone || "",
+            };
+
+            console.log(
+              "📦 Creating order after payment success:",
+              userDetails,
+            );
+
+            const order = await ordersService.create(
+              user.id,
+              orderItems,
+              userDetails,
+            );
+
+            if (order) {
+              clearCart();
+              Alert.alert(
+                "Order Placed Successfully! 🎉",
+                `Your payment was successful and order #${order.id.slice(0, 8)} has been placed.\n\nTransaction Ref: ${reference}`,
+                [
+                  {
+                    text: "View Orders",
+                    onPress: () => router.push("/(tabs)/orders"),
+                  },
+                ],
+              );
+            } else {
+              Alert.alert(
+                "Warning",
+                "Payment was successful but order creation failed. Please contact support with your transaction reference.",
+              );
+            }
+          } catch (error) {
+            console.error("Order creation error after payment:", error);
+            Alert.alert(
+              "Warning",
+              "Payment was successful but order creation failed. Please contact support.",
+            );
+          } finally {
+            setLoading(false);
+          }
+        },
+        onCancel: () => {
+          console.log("❌ Payment cancelled");
+          Alert.alert(
+            "Payment Cancelled",
+            "You cancelled the payment. Your cart items are still saved.",
+          );
+          setLoading(false);
+        },
+        onError: (error: any) => {
+          console.error("❌ Payment error:", error);
+          Alert.alert(
+            "Payment Error",
+            "An error occurred during payment. Please try again.",
+          );
+          setLoading(false);
+        },
+      });
+
+      // Set loading to false after calling popup.checkout()
+      setLoading(false);
     } catch (error) {
-      console.error("Checkout error:", error);
-      Alert.alert("Error", "Something went wrong. Please try again.");
-    } finally {
+      console.error("Checkout preparation error:", error);
+      Alert.alert("Error", "Failed to prepare checkout. Please try again.");
       setLoading(false);
     }
   };
@@ -141,7 +234,22 @@ export default function CartScreen() {
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#1F2937" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Shopping Cart</Text>
+          <View style={styles.headerBrand}>
+            <View style={styles.headerIconContainer}>
+              <LinearGradient
+                colors={["#FF006E", "#D6005C", "#AD004A"]}
+                style={styles.headerIconGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="cart-outline" size={18} color="#FFFFFF" />
+              </LinearGradient>
+            </View>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.headerBrandTitle}>Shopping Cart</Text>
+              <Text style={styles.headerBrandSubtitle}>YOUR ITEMS</Text>
+            </View>
+          </View>
           <TouchableOpacity onPress={clearCart}>
             <Text style={styles.clearText}>Clear</Text>
           </TouchableOpacity>
@@ -174,7 +282,7 @@ export default function CartScreen() {
                 <Text style={styles.itemName}>{item.product.title}</Text>
                 <Text style={styles.itemCategory}>{item.product.category}</Text>
                 <Text style={styles.itemPrice}>
-                  �{item.product.price.toFixed(2)}
+                  ₵{item.product.price.toFixed(2)}
                 </Text>
               </View>
               <View style={styles.itemActions}>
@@ -213,25 +321,25 @@ export default function CartScreen() {
           <Text style={styles.summaryTitle}>Order Summary</Text>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>�{totalAmount.toFixed(2)}</Text>
+            <Text style={styles.summaryValue}>₵{totalAmount.toFixed(2)}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Shipping</Text>
             <Text style={styles.summaryValue}>
-              {totalAmount >= 100 ? "FREE" : "�10.00"}
+              {totalAmount >= 100 ? "FREE" : "₵10.00"}
             </Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Tax (21%)</Text>
             <Text style={styles.summaryValue}>
-              �{(totalAmount * 0.21).toFixed(2)}
+              ₵{(totalAmount * 0.21).toFixed(2)}
             </Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.summaryRow}>
             <Text style={styles.totalLabel}>Total</Text>
             <Text style={styles.totalValue}>
-              �
+              ₵
               {(
                 totalAmount +
                 (totalAmount >= 100 ? 0 : 10) +
@@ -263,9 +371,9 @@ export default function CartScreen() {
             style={styles.checkoutButton}
           >
             <Text style={styles.checkoutButtonText}>
-              {loading ? "Processing..." : "Proceed to Checkout"}
+              {loading ? "Processing..." : "Pay with Mobile Money"}
             </Text>
-            <Ionicons name="arrow-forward-circle" size={24} color="#fff" />
+            <Ionicons name="phone-portrait" size={24} color="#fff" />
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -330,12 +438,41 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+  headerBrand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerIconContainer: {
+    shadowColor: "#FF006E",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  headerIconGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTextContainer: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  headerBrandTitle: {
+    fontSize: 18,
+    fontWeight: "900",
     color: "#1F2937",
-    flex: 1,
-    textAlign: "center",
+    letterSpacing: 0.5,
+  },
+  headerBrandSubtitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   clearText: {
     fontSize: 16,

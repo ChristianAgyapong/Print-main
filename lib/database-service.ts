@@ -626,6 +626,7 @@ export interface Message {
   read: boolean;
   from_admin: boolean;
   admin_sender_email?: string | null;
+  deleted_by_user: boolean;
   created_at: string;
   updated_at: string;
   user?: {
@@ -657,6 +658,7 @@ export const messagesService = {
         .from("messages")
         .select("*")
         .eq("user_id", userId)
+        .eq("deleted_by_user", false) // Only show messages not deleted by user
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -676,7 +678,8 @@ export const messagesService = {
         .from("messages")
         .select("*", { count: "exact", head: true })
         .eq("user_id", userId)
-        .eq("read", false);
+        .eq("read", false)
+        .eq("deleted_by_user", false); // Don't count deleted messages
 
       if (error) throw error;
       return count || 0;
@@ -721,16 +724,18 @@ export const messagesService = {
     }
   },
 
-  // Delete message
+  // Delete message (for users - soft delete)
   async deleteMessage(messageId: string): Promise<boolean> {
     try {
+      // Mark message as deleted by user instead of actually deleting it
+      // This allows admin to still see the message
       const { error } = await supabase
         .from("messages")
-        .delete()
+        .update({ deleted_by_user: true })
         .eq("id", messageId);
 
       if (error) throw error;
-      console.log("🗑️ Message deleted:", messageId);
+      console.log("🗑️ Message marked as deleted by user:", messageId);
       return true;
     } catch (error) {
       console.error("❌ Error deleting message:", error);

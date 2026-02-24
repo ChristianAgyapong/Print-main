@@ -5,6 +5,7 @@ import {
   Profile,
 } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
@@ -156,9 +157,24 @@ export default function AdminMessagesScreen() {
         >
           <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {showInbox ? "Inbox" : "Send Message"}
-        </Text>
+        <View style={styles.headerBrand}>
+          <View style={styles.headerIconContainer}>
+            <LinearGradient
+              colors={["#EF4444", "#DC2626", "#B91C1C"]}
+              style={styles.headerIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="mail-outline" size={18} color="#FFFFFF" />
+            </LinearGradient>
+          </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerBrandTitle}>Messages</Text>
+            <Text style={styles.headerBrandSubtitle}>
+              {showInbox ? "INBOX VIEW" : "COMPOSE"}
+            </Text>
+          </View>
+        </View>
         <TouchableOpacity
           onPress={() => {
             setShowInbox(!showInbox);
@@ -508,13 +524,41 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 4,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1F2937",
+  headerBrand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
-  placeholder: {
+  headerIconContainer: {
+    shadowColor: "#EF4444",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  headerIconGradient: {
     width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTextContainer: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  headerBrandTitle: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#1F2937",
+    letterSpacing: 0.5,
+  },
+  headerBrandSubtitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   toggleButton: {
     flexDirection: "row",

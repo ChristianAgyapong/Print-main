@@ -1,19 +1,20 @@
 import { adminService, Profile } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -85,7 +86,22 @@ export default function AdminUsersScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Manage Users</Text>
+        <View style={styles.headerBrand}>
+          <View style={styles.headerIconContainer}>
+            <LinearGradient
+              colors={["#EF4444", "#DC2626", "#B91C1C"]}
+              style={styles.headerIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="people-outline" size={18} color="#FFFFFF" />
+            </LinearGradient>
+          </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerBrandTitle}>Manage Users</Text>
+            <Text style={styles.headerBrandSubtitle}>ALL USERS</Text>
+          </View>
+        </View>
         <View style={{ width: 24 }} />
       </View>
 
@@ -241,10 +257,41 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+  headerBrand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerIconContainer: {
+    shadowColor: "#EF4444",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  headerIconGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTextContainer: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  headerBrandTitle: {
+    fontSize: 18,
+    fontWeight: "900",
     color: "#1F2937",
+    letterSpacing: 0.5,
+  },
+  headerBrandSubtitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   searchContainer: {
     flexDirection: "row",

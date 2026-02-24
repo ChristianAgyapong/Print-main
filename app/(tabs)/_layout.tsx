@@ -1,13 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
 import { Tabs, useRouter } from "expo-router";
 import React from "react";
 import {
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
@@ -97,33 +98,56 @@ export default function TabLayout() {
           gap: 4,
           backgroundColor: "transparent",
         },
-        headerRight: () => (
-          <TouchableOpacity
-            style={styles.cartButton}
-            onPress={() => router.push("/cart")}
-          >
-            <View
-              style={[
-                styles.cartIconContainer,
-                { backgroundColor: colors.card, borderColor: "#FF006E" },
-              ]}
-            >
-              <Ionicons name="cart" size={22} color="#FF006E" />
-              {itemCount > 0 && (
-                <View style={[styles.cartBadge, { borderColor: colors.card }]}>
-                  <Text style={styles.cartBadgeText}>{itemCount}</Text>
-                </View>
-              )}
-            </View>
-          </TouchableOpacity>
-        ),
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          headerTitle: "PrintCraft",
+          headerTitle: () => (
+            <View style={styles.headerTitleContainer}>
+              <View style={styles.logoContainer}>
+                <LinearGradient
+                  colors={["#FF006E", "#D6005C", "#AD004A"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.logoGradient}
+                >
+                  <Ionicons name="color-palette" size={16} color="#FFFFFF" />
+                </LinearGradient>
+              </View>
+              <View style={styles.titleTextContainer}>
+                <Text style={[styles.headerTitleText, { color: colors.text }]}>
+                  PrintCraft
+                </Text>
+                <Text style={styles.headerSubtitle}>
+                  Quality Print Services
+                </Text>
+              </View>
+            </View>
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              style={styles.cartButton}
+              onPress={() => router.push("/cart")}
+            >
+              <View
+                style={[
+                  styles.cartIconContainer,
+                  { backgroundColor: colors.card, borderColor: "#FF006E" },
+                ]}
+              >
+                <Ionicons name="cart" size={22} color="#FF006E" />
+                {itemCount > 0 && (
+                  <View
+                    style={[styles.cartBadge, { borderColor: colors.card }]}
+                  >
+                    <Text style={styles.cartBadgeText}>{itemCount}</Text>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
+          ),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
@@ -137,7 +161,26 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: "Services",
-          headerTitle: "Our Services",
+          headerTitle: () => (
+            <View style={styles.headerTitleContainer}>
+              <View style={styles.logoContainer}>
+                <LinearGradient
+                  colors={["#3B82F6", "#2563EB", "#1D4ED8"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.logoGradient}
+                >
+                  <Ionicons name="grid" size={16} color="#FFFFFF" />
+                </LinearGradient>
+              </View>
+              <View style={styles.titleTextContainer}>
+                <Text style={[styles.headerTitleText, { color: colors.text }]}>
+                  Our Services
+                </Text>
+                <Text style={styles.headerSubtitle}>Browse Print Options</Text>
+              </View>
+            </View>
+          ),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "grid" : "grid-outline"}
@@ -151,7 +194,26 @@ export default function TabLayout() {
         name="orders"
         options={{
           title: "Orders",
-          headerTitle: "My Orders",
+          headerTitle: () => (
+            <View style={styles.headerTitleContainer}>
+              <View style={styles.logoContainer}>
+                <LinearGradient
+                  colors={["#10B981", "#059669", "#047857"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.logoGradient}
+                >
+                  <Ionicons name="document-text" size={16} color="#FFFFFF" />
+                </LinearGradient>
+              </View>
+              <View style={styles.titleTextContainer}>
+                <Text style={[styles.headerTitleText, { color: colors.text }]}>
+                  My Orders
+                </Text>
+                <Text style={styles.headerSubtitle}>Track Your Orders</Text>
+              </View>
+            </View>
+          ),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "document-text" : "document-text-outline"}
@@ -165,7 +227,26 @@ export default function TabLayout() {
         name="messages"
         options={{
           title: "Inbox",
-          headerTitle: "Inbox",
+          headerTitle: () => (
+            <View style={styles.headerTitleContainer}>
+              <View style={styles.logoContainer}>
+                <LinearGradient
+                  colors={["#F59E0B", "#D97706", "#B45309"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.logoGradient}
+                >
+                  <Ionicons name="chatbubbles" size={16} color="#FFFFFF" />
+                </LinearGradient>
+              </View>
+              <View style={styles.titleTextContainer}>
+                <Text style={[styles.headerTitleText, { color: colors.text }]}>
+                  Messages
+                </Text>
+                <Text style={styles.headerSubtitle}>Stay Connected</Text>
+              </View>
+            </View>
+          ),
           tabBarIcon: ({ color, focused }) => (
             <View style={{ position: "relative" }}>
               <Ionicons
@@ -210,7 +291,26 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Account",
-          headerTitle: "Account",
+          headerTitle: () => (
+            <View style={styles.headerTitleContainer}>
+              <View style={styles.logoContainer}>
+                <LinearGradient
+                  colors={["#8B5CF6", "#7C3AED", "#6D28D9"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.logoGradient}
+                >
+                  <Ionicons name="person" size={16} color="#FFFFFF" />
+                </LinearGradient>
+              </View>
+              <View style={styles.titleTextContainer}>
+                <Text style={[styles.headerTitleText, { color: colors.text }]}>
+                  My Account
+                </Text>
+                <Text style={styles.headerSubtitle}>Manage Your Profile</Text>
+              </View>
+            </View>
+          ),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "person" : "person-outline"}
@@ -225,42 +325,81 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
+  headerTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  logoContainer: {
+    shadowColor: "#FF006E",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  logoGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  titleTextContainer: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  headerTitleText: {
+    fontSize: 20,
+    fontWeight: "900",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(255, 0, 110, 0.1)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  headerSubtitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
   cartButton: {
-    marginRight: 12,
+    marginRight: 16,
+    marginTop: 2,
   },
   cartIconContainer: {
     position: "relative",
-    padding: 12,
-    borderRadius: 16,
+    padding: 10,
+    borderRadius: 14,
     borderWidth: 2,
     shadowColor: "#FF006E",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   cartBadge: {
     position: "absolute",
-    top: -8,
-    right: -8,
+    top: -6,
+    right: -6,
     backgroundColor: "#FF006E",
-    borderRadius: 14,
-    minWidth: 24,
-    height: 24,
+    borderRadius: 12,
+    minWidth: 22,
+    height: 22,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 7,
-    borderWidth: 3,
+    paddingHorizontal: 6,
+    borderWidth: 2,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 5,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   cartBadgeText: {
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "900",
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
   },
 });

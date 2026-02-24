@@ -5,9 +5,9 @@ import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import {
-    Product,
-    productsService,
-    profileService,
+  Product,
+  productsService,
+  profileService,
 } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -16,15 +16,15 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Image,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -54,7 +54,7 @@ export default function HomeScreen() {
     {
       icon: "pricetag",
       title: "First Order Discount",
-      subtitle: "Get 20% off your first order over €100",
+      subtitle: "Get 20% off your first order over ₵100",
       colors: ["#FF006E", "#D6005C"] as const,
     },
     {
@@ -66,7 +66,7 @@ export default function HomeScreen() {
     {
       icon: "gift",
       title: "Free Shipping",
-      subtitle: "Free delivery on orders over €75",
+      subtitle: "Free delivery on orders over ₵75",
       colors: ["#059669", "#047857"] as const,
     },
     {
@@ -146,7 +146,7 @@ export default function HomeScreen() {
         profile.bio || profile.company || profile.job_title;
 
       // Profile is complete if they have basic info and either address or additional info
-      const isComplete = hasBasicInfo && (hasAddress || hasAdditionalInfo);
+      const isComplete = !!(hasBasicInfo && (hasAddress || hasAdditionalInfo));
       setProfileComplete(isComplete);
     } catch (error) {
       console.error("Error checking profile completion:", error);
@@ -178,15 +178,20 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  const getProductGradient = (category: string | null): string[] => {
-    const gradients: { [key: string]: string[] } = {
-      Stationery: ["#1E40AF", "#1E3A8A"],
-      "Large Format": ["#059669", "#047857"],
-      Commercial: ["#8B5CF6", "#7C3AED"],
-      Digital: ["#DB2777", "#BE185D"],
-      Packaging: ["#F59E0B", "#D97706"],
-    };
-    return gradients[category || "Commercial"] || ["#3B82F6", "#2563EB"];
+  const getProductGradient = (
+    category: string | null,
+  ): readonly [string, string, ...string[]] => {
+    const gradients: { [key: string]: readonly [string, string, ...string[]] } =
+      {
+        Stationery: ["#1E40AF", "#1E3A8A"] as const,
+        "Large Format": ["#059669", "#047857"] as const,
+        Commercial: ["#8B5CF6", "#7C3AED"] as const,
+        Digital: ["#DB2777", "#BE185D"] as const,
+        Packaging: ["#F59E0B", "#D97706"] as const,
+      };
+    return (
+      gradients[category || "Commercial"] || (["#3B82F6", "#2563EB"] as const)
+    );
   };
 
   const getProductIcon = (category: string | null): string => {
@@ -269,16 +274,6 @@ export default function HomeScreen() {
             style={styles.heroGradient}
           >
             <View style={styles.heroContent}>
-              <View style={styles.heroHeader}>
-                <View>
-                  <Text style={styles.heroTitle}>PrintCraft Shop</Text>
-                  <Text style={styles.heroSubtitle}>
-                    Professional printing services for business, marketing,
-                    branding, and more
-                  </Text>
-                </View>
-              </View>
-
               {/* Profile Completion Banner */}
               {user && !profileComplete && (
                 <TouchableOpacity
@@ -503,7 +498,7 @@ export default function HomeScreen() {
                               dynamicStyles.productPrice,
                             ]}
                           >
-                            €{product.price.toFixed(2)}
+                            ₵{product.price.toFixed(2)}
                           </Text>
                           <TouchableOpacity
                             style={styles.addButton}

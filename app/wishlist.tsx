@@ -5,12 +5,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function WishlistScreen() {
@@ -54,7 +54,22 @@ export default function WishlistScreen() {
         >
           <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Wishlist</Text>
+        <View style={styles.headerBrand}>
+          <View style={styles.headerIconContainer}>
+            <LinearGradient
+              colors={["#EC4899", "#DB2777", "#BE185D"]}
+              style={styles.headerIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="heart-outline" size={18} color="#FFFFFF" />
+            </LinearGradient>
+          </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerBrandTitle}>My Wishlist</Text>
+            <Text style={styles.headerBrandSubtitle}>SAVED ITEMS</Text>
+          </View>
+        </View>
         {wishlist.length > 0 && (
           <TouchableOpacity onPress={clearWishlist}>
             <Text style={styles.clearText}>Clear All</Text>
@@ -193,10 +208,41 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+  headerBrand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerIconContainer: {
+    shadowColor: "#EC4899",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  headerIconGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTextContainer: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  headerBrandTitle: {
+    fontSize: 18,
+    fontWeight: "900",
     color: "#1F2937",
+    letterSpacing: 0.5,
+  },
+  headerBrandSubtitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   clearText: {
     fontSize: 14,

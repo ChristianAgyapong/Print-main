@@ -10,14 +10,14 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    Dimensions,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -158,16 +158,6 @@ export default function OrdersScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Header */}
-        <View style={[styles.header, dynamicStyles.header]}>
-          <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>
-            My Orders
-          </Text>
-          <Text style={[styles.headerSubtitle, dynamicStyles.headerSubtitle]}>
-            Track and manage your orders
-          </Text>
-        </View>
-
         {/* Orders Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>

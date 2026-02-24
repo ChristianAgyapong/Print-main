@@ -3,6 +3,7 @@ import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Profile, profileService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
@@ -141,9 +142,24 @@ export default function ViewProfileScreen() {
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>
-          Personal Information
-        </Text>
+        <View style={styles.headerBrand}>
+          <View style={styles.headerIconContainer}>
+            <LinearGradient
+              colors={["#8B5CF6", "#7C3AED", "#6D28D9"]}
+              style={styles.headerIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="person-outline" size={18} color="#FFFFFF" />
+            </LinearGradient>
+          </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={[styles.headerBrandTitle, dynamicStyles.headerTitle]}>
+              Personal Information
+            </Text>
+            <Text style={styles.headerBrandSubtitle}>YOUR PROFILE</Text>
+          </View>
+        </View>
         <TouchableOpacity
           onPress={() => router.push("/edit-profile")}
           style={styles.editButton}
@@ -447,10 +463,41 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-end",
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+  headerBrand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerIconContainer: {
+    shadowColor: "#8B5CF6",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  headerIconGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTextContainer: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  headerBrandTitle: {
+    fontSize: 18,
+    fontWeight: "900",
     color: "#1F2937",
+    letterSpacing: 0.5,
+  },
+  headerBrandSubtitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   loadingContainer: {
     flex: 1,

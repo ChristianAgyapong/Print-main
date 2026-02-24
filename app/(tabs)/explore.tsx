@@ -2,12 +2,12 @@ import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import {
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -145,16 +145,6 @@ export default function ServicesScreen() {
         style={[styles.container, dynamicStyles.container]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={[styles.header, dynamicStyles.header]}>
-          <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>
-            Our Services
-          </Text>
-          <Text style={[styles.headerSubtitle, dynamicStyles.headerSubtitle]}>
-            Professional printing solutions for every need
-          </Text>
-        </View>
-
         {/* Services Grid */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>

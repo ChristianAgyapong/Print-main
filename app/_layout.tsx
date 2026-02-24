@@ -1,7 +1,7 @@
 import {
-    DarkTheme,
-    DefaultTheme,
-    ThemeProvider,
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
 } from "@react-navigation/native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -14,11 +14,13 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { MessagesProvider } from "@/contexts/MessagesContext";
 import {
-    PreferencesProvider,
-    usePreferences,
+  PreferencesProvider,
+  usePreferences,
 } from "@/contexts/PreferencesContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { PAYSTACK_PUBLIC_KEY } from "@/lib/paystack";
+import { PaystackProvider } from "react-native-paystack-webview";
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
@@ -78,6 +80,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="index"
           options={{
+            title: "PrintCraft",
             headerShown: false,
             gestureEnabled: false,
           }}
@@ -85,6 +88,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="auth"
           options={{
+            title: "Sign In",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -93,6 +97,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="(tabs)"
           options={{
+            title: "Home",
             headerShown: false,
             gestureEnabled: false,
           }}
@@ -100,6 +105,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="product/[id]"
           options={{
+            title: "Product Details",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -108,6 +114,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="cart"
           options={{
+            title: "Shopping Cart",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -116,6 +123,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="edit-profile"
           options={{
+            title: "Edit Profile",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -124,6 +132,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="view-profile"
           options={{
+            title: "Profile",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -132,6 +141,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="addresses"
           options={{
+            title: "Delivery Addresses",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -140,6 +150,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="saved-designs"
           options={{
+            title: "Saved Designs",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -148,6 +159,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="wishlist"
           options={{
+            title: "My Wishlist",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -156,6 +168,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="change-password"
           options={{
+            title: "Change Password",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -164,6 +177,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="admin"
           options={{
+            title: "Admin Panel",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -172,6 +186,25 @@ function RootLayoutNav() {
         <Stack.Screen
           name="help-center"
           options={{
+            title: "Help Center",
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="messages"
+          options={{
+            title: "Messages",
+            headerShown: false,
+            gestureEnabled: true,
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="category"
+          options={{
+            title: "Category",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -180,6 +213,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="terms-privacy"
           options={{
+            title: "Terms & Privacy",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -188,6 +222,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="payment-methods"
           options={{
+            title: "Payment Methods",
             headerShown: false,
             gestureEnabled: true,
             animation: "slide_from_right",
@@ -210,17 +245,23 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <PreferencesProvider>
-        <AdminProvider>
-          <AdminNotificationsProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <MessagesProvider>
-                  <RootLayoutNav />
-                </MessagesProvider>
-              </WishlistProvider>
-            </CartProvider>
-          </AdminNotificationsProvider>
-        </AdminProvider>
+        <PaystackProvider
+          publicKey={PAYSTACK_PUBLIC_KEY}
+          currency="GHS"
+          defaultChannels={["mobile_money"]}
+        >
+          <AdminProvider>
+            <AdminNotificationsProvider>
+              <CartProvider>
+                <WishlistProvider>
+                  <MessagesProvider>
+                    <RootLayoutNav />
+                  </MessagesProvider>
+                </WishlistProvider>
+              </CartProvider>
+            </AdminNotificationsProvider>
+          </AdminProvider>
+        </PaystackProvider>
       </PreferencesProvider>
     </AuthProvider>
   );

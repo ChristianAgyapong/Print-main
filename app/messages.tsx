@@ -1,20 +1,21 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Message, messagesService } from "@/lib/database-service";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -174,18 +175,33 @@ export default function MessagesScreen() {
         >
           <Ionicons name="arrow-back" size={24} color="#1F2937" />
         </TouchableOpacity>
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Messages</Text>
-          {unreadCount > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadBadgeText}>
-                {unreadCount.toString()}
-              </Text>
+        <View style={styles.headerBrand}>
+          <View style={styles.headerIconContainer}>
+            <LinearGradient
+              colors={["#F59E0B", "#D97706", "#B45309"]}
+              style={styles.headerIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="chatbubbles-outline" size={18} color="#FFFFFF" />
+            </LinearGradient>
+          </View>
+          <View style={styles.headerTextContainer}>
+            <View style={styles.headerTitleRow}>
+              <Text style={styles.headerBrandTitle}>Messages</Text>
+              {unreadCount > 0 && (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadBadgeText}>
+                    {unreadCount.toString()}
+                  </Text>
+                </View>
+              )}
             </View>
-          )}
+            <Text style={styles.headerBrandSubtitle}>STAY CONNECTED</Text>
+          </View>
         </View>
         <TouchableOpacity onPress={() => setShowComposeModal(true)}>
-          <Ionicons name="create-outline" size={24} color="#FF006E" />
+          <Ionicons name="create-outline" size={24} color="#F59E0B" />
         </TouchableOpacity>
       </View>
 
@@ -392,15 +408,46 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 4,
   },
-  headerTitleContainer: {
+  headerBrand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerIconContainer: {
+    shadowColor: "#F59E0B",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  headerIconGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTextContainer: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  headerTitleRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+  headerBrandTitle: {
+    fontSize: 18,
+    fontWeight: "900",
     color: "#1F2937",
+    letterSpacing: 0.5,
+  },
+  headerBrandSubtitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   unreadBadge: {
     backgroundColor: "#FF006E",
