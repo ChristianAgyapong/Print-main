@@ -1,46 +1,341 @@
 import { useThemeColors } from "@/hooks/use-theme-colors";
-import { PrintService, servicesDataService } from "@/lib/services-data";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Dimensions,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 
 const { width } = Dimensions.get("window");
 
+// Service data
+const serviceData: { [key: string]: any } = {
+  "1": {
+    id: "1",
+    title: "Business Printing",
+    icon: "briefcase",
+    description: "Professional business cards, letterheads, and more",
+    color: "#3B82F6",
+    items: ["Business Cards", "Letterheads", "Envelopes", "Folders"],
+    longDescription:
+      "Elevate your business presence with our professional printing services. From business cards that make a lasting impression to elegant letterheads that convey credibility, we deliver top-quality materials that represent your brand perfectly.",
+    features: [
+      {
+        title: "Premium Paper Stock",
+        description:
+          "Choose from various premium paper options including matte, glossy, and textured finishes",
+        icon: "layers",
+      },
+      {
+        title: "Custom Designs",
+        description: "Work with our designers or upload your own design",
+        icon: "brush",
+      },
+      {
+        title: "Fast Production",
+        description: "Most orders ready in 2-3 business days",
+        icon: "flash",
+      },
+      {
+        title: "Bulk Discounts",
+        description: "Save more with larger quantity orders",
+        icon: "pricetag",
+      },
+    ],
+    pricing: [
+      { quantity: "100 cards", price: "₵45.00" },
+      { quantity: "500 cards", price: "₵180.00" },
+      { quantity: "1000 cards", price: "₵320.00" },
+    ],
+    faqs: [
+      {
+        question: "What file format should I use?",
+        answer: "We accept PDF, AI, EPS, and high-resolution PNG/JPG files.",
+      },
+      {
+        question: "Can I see a proof before printing?",
+        answer:
+          "Yes! We provide digital proofs for all orders before production.",
+      },
+      {
+        question: "What's the turnaround time?",
+        answer:
+          "Standard turnaround is 2-3 business days. Rush options available.",
+      },
+    ],
+  },
+  "2": {
+    id: "2",
+    title: "Marketing Materials",
+    icon: "megaphone",
+    description: "Eye-catching promotional materials for your brand",
+    color: "#8B5CF6",
+    items: ["Flyers", "Brochures", "Catalogs", "Postcards"],
+    longDescription:
+      "Make your marketing campaigns stand out with vibrant, professional print materials. Whether you need flyers for an event, brochures to showcase your products, or catalogs to display your full range, we've got you covered.",
+    features: [
+      {
+        title: "Vibrant Colors",
+        description: "Full-color printing with accurate color matching",
+        icon: "color-palette",
+      },
+      {
+        title: "Multiple Formats",
+        description: "Various sizes and folding options available",
+        icon: "resize",
+      },
+      {
+        title: "High-Quality Images",
+        description: "Crisp, clear printing for photos and graphics",
+        icon: "image",
+      },
+      {
+        title: "Distribution Ready",
+        description: "Professional finishing for immediate use",
+        icon: "checkmark-done",
+      },
+    ],
+    pricing: [
+      { quantity: "250 flyers", price: "₵85.00" },
+      { quantity: "500 flyers", price: "₵150.00" },
+      { quantity: "1000 flyers", price: "₵265.00" },
+    ],
+    faqs: [
+      {
+        question: "What paper weight do you use?",
+        answer: "We offer 100lb, 130lb glossy, and 14pt cardstock options.",
+      },
+      {
+        question: "Can you help with design?",
+        answer:
+          "Yes! Our design team can create custom designs for your materials.",
+      },
+      {
+        question: "Do you offer mailing services?",
+        answer: "Yes, we provide direct mail services for bulk orders.",
+      },
+    ],
+  },
+  "3": {
+    id: "3",
+    title: "Large Format",
+    icon: "resize",
+    description: "Banners, posters, and signage in any size",
+    color: "#EC4899",
+    items: ["Banners", "Posters", "Wall Graphics", "Vehicle Wraps"],
+    longDescription:
+      "Go big with our large format printing services. Perfect for trade shows, retail displays, outdoor advertising, and special events. We print on various materials to suit indoor and outdoor applications.",
+    features: [
+      {
+        title: "Weather Resistant",
+        description: "Durable materials for outdoor use",
+        icon: "shield-checkmark",
+      },
+      {
+        title: "Custom Sizes",
+        description: "Any size up to 10ft wide",
+        icon: "expand",
+      },
+      {
+        title: "Multiple Materials",
+        description: "Vinyl, fabric, mesh, and rigid substrates",
+        icon: "apps",
+      },
+      {
+        title: "Installation Available",
+        description: "Professional installation services offered",
+        icon: "construct",
+      },
+    ],
+    pricing: [
+      { quantity: "2x4 ft banner", price: "₵120.00" },
+      { quantity: "3x6 ft banner", price: "₵240.00" },
+      { quantity: "4x8 ft banner", price: "₵350.00" },
+    ],
+    faqs: [
+      {
+        question: "Are these suitable for outdoor use?",
+        answer: "Yes! We use UV-resistant inks and weatherproof materials.",
+      },
+      {
+        question: "Can you add grommets or pole pockets?",
+        answer:
+          "Yes, we offer various finishing options for easy installation.",
+      },
+      {
+        question: "How long do outdoor prints last?",
+        answer: "With proper care, outdoor prints can last 3-5 years.",
+      },
+    ],
+  },
+  "4": {
+    id: "4",
+    title: "Custom Apparel",
+    icon: "shirt",
+    description: "T-shirts, hoodies, and more with your design",
+    color: "#10B981",
+    items: ["T-Shirts", "Hoodies", "Caps", "Tote Bags"],
+    longDescription:
+      "Create custom branded apparel for your team, event, or business. Choose from premium quality garments and multiple printing methods including screen printing, direct-to-garment, and embroidery.",
+    features: [
+      {
+        title: "Quality Garments",
+        description: "Premium brands like Gildan, Hanes, and Bella+Canvas",
+        icon: "star",
+      },
+      {
+        title: "Multiple Print Methods",
+        description: "Screen print, DTG, vinyl, and embroidery",
+        icon: "print",
+      },
+      {
+        title: "No Minimums",
+        description: "Order as few or as many as you need",
+        icon: "infinite",
+      },
+      {
+        title: "Color Options",
+        description: "Wide range of garment and print colors",
+        icon: "color-filter",
+      },
+    ],
+    pricing: [
+      { quantity: "12 t-shirts", price: "₵180.00" },
+      { quantity: "24 t-shirts", price: "₵320.00" },
+      { quantity: "50 t-shirts", price: "₵600.00" },
+    ],
+    faqs: [
+      {
+        question: "What's the difference between DTG and screen printing?",
+        answer:
+          "DTG is better for detailed designs and small orders. Screen printing is ideal for simple designs and bulk orders.",
+      },
+      {
+        question: "Can I mix sizes in one order?",
+        answer: "Yes! You can order multiple sizes at the same price tier.",
+      },
+      {
+        question: "How should I care for printed apparel?",
+        answer:
+          "Wash inside-out in cold water, tumble dry low. Avoid bleach and ironing directly on prints.",
+      },
+    ],
+  },
+  "5": {
+    id: "5",
+    title: "Photo Services",
+    icon: "camera",
+    description: "Professional photo printing and framing",
+    color: "#F59E0B",
+    items: ["Photo Prints", "Canvas Prints", "Photo Books", "Framing"],
+    longDescription:
+      "Preserve your precious memories with professional photo printing services. From standard prints to custom canvas art and beautifully designed photo books, we bring your photos to life with stunning clarity and color.",
+    features: [
+      {
+        title: "Professional Quality",
+        description: "Lab-quality prints with accurate color reproduction",
+        icon: "images",
+      },
+      {
+        title: "Multiple Surfaces",
+        description: "Print on paper, canvas, metal, and acrylic",
+        icon: "file-tray-full",
+      },
+      {
+        title: "Custom Framing",
+        description: "Professional framing options available",
+        icon: "square-outline",
+      },
+      {
+        title: "Photo Books",
+        description: "Create custom albums and photo books",
+        icon: "book",
+      },
+    ],
+    pricing: [
+      { quantity: "4x6 prints (25)", price: "₵45.00" },
+      { quantity: "16x20 canvas", price: "₵180.00" },
+      { quantity: "20-page photo book", price: "₵250.00" },
+    ],
+    faqs: [
+      {
+        question: "What resolution should my photos be?",
+        answer: "For best results, use 300 DPI at the desired print size.",
+      },
+      {
+        question: "Can you print from my phone?",
+        answer: "Yes! Upload photos directly from your phone through our app.",
+      },
+      {
+        question: "Do you offer color correction?",
+        answer: "Yes, we provide basic color correction for all photo prints.",
+      },
+    ],
+  },
+  "6": {
+    id: "6",
+    title: "Packaging",
+    icon: "cube",
+    description: "Custom boxes, labels, and packaging solutions",
+    color: "#06B6D4",
+    items: ["Boxes", "Labels", "Stickers", "Bags"],
+    longDescription:
+      "Stand out on the shelf with custom packaging solutions. From product boxes to shipping labels, stickers to branded bags, we help you create packaging that protects your product and promotes your brand.",
+    features: [
+      {
+        title: "Custom Die-Cutting",
+        description: "Unique shapes and sizes for boxes and labels",
+        icon: "cut",
+      },
+      {
+        title: "Various Materials",
+        description: "Cardboard, kraft, vinyl, and premium papers",
+        icon: "folder-open",
+      },
+      {
+        title: "Finishing Options",
+        description: "Gloss, matte, spot UV, foil, and embossing",
+        icon: "sparkles",
+      },
+      {
+        title: "Bulk Pricing",
+        description: "Competitive pricing for large quantities",
+        icon: "cash",
+      },
+    ],
+    pricing: [
+      { quantity: "100 labels", price: "₵35.00" },
+      { quantity: "250 stickers", price: "₵90.00" },
+      { quantity: "100 custom boxes", price: "₵450.00" },
+    ],
+    faqs: [
+      {
+        question: "What's the minimum order quantity?",
+        answer: "Minimums vary by product. Labels start at 25, boxes at 50.",
+      },
+      {
+        question: "Can you create structural designs?",
+        answer: "Yes! Our team can design custom box structures.",
+      },
+      {
+        question: "Are your materials recyclable?",
+        answer: "Yes, we offer eco-friendly and recyclable packaging options.",
+      },
+    ],
+  },
+};
 
 export default function ServiceDetailScreen() {
   const colors = useThemeColors();
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const [service, setService] = useState<PrintService | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const data = await servicesDataService.getById(id as string);
-      setService(data);
-      setLoading(false);
-    })();
-  }, [id]);
-
-  if (loading) {
-    return (
-      <View style={styles.errorContainer}>
-        <ActivityIndicator size="large" color="#FF006E" />
-      </View>
-    );
-  }
+  const service = serviceData[id as string];
 
   if (!service) {
     return (
@@ -217,7 +512,10 @@ export default function ServiceDetailScreen() {
                   style={{ marginRight: 12 }}
                 />
                 <Text
-                  style={[styles.pricingQuantity, dynamicStyles.pricingQuantity]}
+                  style={[
+                    styles.pricingQuantity,
+                    dynamicStyles.pricingQuantity,
+                  ]}
                 >
                   {price.quantity}
                 </Text>
@@ -240,11 +538,7 @@ export default function ServiceDetailScreen() {
           {service.faqs.map((faq: any, index: number) => (
             <View key={index} style={[styles.faqCard, dynamicStyles.faqCard]}>
               <View style={styles.faqHeader}>
-                <Ionicons
-                  name="help-circle"
-                  size={20}
-                  color={service.color}
-                />
+                <Ionicons name="help-circle" size={20} color={service.color} />
                 <Text style={[styles.faqQuestion, dynamicStyles.faqQuestion]}>
                   {faq.question}
                 </Text>
@@ -266,14 +560,13 @@ export default function ServiceDetailScreen() {
             <Text style={styles.ctaButtonText}>Browse Products</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[
-              styles.ctaButtonOutline,
-              { borderColor: service.color },
-            ]}
+            style={[styles.ctaButtonOutline, { borderColor: service.color }]}
             onPress={() => router.push("/help-center")}
           >
             <Ionicons name="chatbubble" size={20} color={service.color} />
-            <Text style={[styles.ctaButtonOutlineText, { color: service.color }]}>
+            <Text
+              style={[styles.ctaButtonOutlineText, { color: service.color }]}
+            >
               Get a Quote
             </Text>
           </TouchableOpacity>

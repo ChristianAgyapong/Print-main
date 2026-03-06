@@ -1,18 +1,14 @@
 import { useThemeColors } from "@/hooks/use-theme-colors";
-import { PrintService, servicesDataService } from "@/lib/services-data";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -20,25 +16,57 @@ const { width } = Dimensions.get("window");
 export default function ServicesScreen() {
   const colors = useThemeColors();
   const router = useRouter();
-  const [services, setServices] = useState<PrintService[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Reload on every focus so admin edits are reflected immediately
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      (async () => {
-        const data = await servicesDataService.getAll();
-        if (active) {
-          setServices(data);
-          setLoading(false);
-        }
-      })();
-      return () => {
-        active = false;
-      };
-    }, [])
-  );
+  const services = [
+    {
+      id: "1",
+      title: "Business Printing",
+      icon: "briefcase",
+      description: "Professional business cards, letterheads, and more",
+      color: "#3B82F6",
+      items: ["Business Cards", "Letterheads", "Envelopes", "Folders"],
+    },
+    {
+      id: "2",
+      title: "Marketing Materials",
+      icon: "megaphone",
+      description: "Eye-catching promotional materials for your brand",
+      color: "#8B5CF6",
+      items: ["Flyers", "Brochures", "Catalogs", "Postcards"],
+    },
+    {
+      id: "3",
+      title: "Large Format",
+      icon: "resize",
+      description: "Banners, posters, and signage in any size",
+      color: "#EC4899",
+      items: ["Banners", "Posters", "Wall Graphics", "Vehicle Wraps"],
+    },
+    {
+      id: "4",
+      title: "Custom Apparel",
+      icon: "shirt",
+      description: "T-shirts, hoodies, and more with your design",
+      color: "#10B981",
+      items: ["T-Shirts", "Hoodies", "Caps", "Tote Bags"],
+    },
+    {
+      id: "5",
+      title: "Photo Services",
+      icon: "camera",
+      description: "Professional photo printing and framing",
+      color: "#F59E0B",
+      items: ["Photo Prints", "Canvas Prints", "Photo Books", "Framing"],
+    },
+    {
+      id: "6",
+      title: "Packaging",
+      icon: "cube",
+      description: "Custom boxes, labels, and packaging solutions",
+      color: "#06B6D4",
+      items: ["Boxes", "Labels", "Stickers", "Bags"],
+    },
+  ];
 
   const features = [
     {
@@ -64,32 +92,52 @@ export default function ServicesScreen() {
   ];
 
   const dynamicStyles = {
-    container: { backgroundColor: colors.background },
+    container: {
+      backgroundColor: colors.background,
+    },
     header: {
       backgroundColor: colors.backgroundSecondary,
       borderBottomColor: colors.border,
     },
-    headerTitle: { color: colors.text },
-    headerSubtitle: { color: colors.textSecondary },
-    sectionTitle: { color: colors.text },
+    headerTitle: {
+      color: colors.text,
+    },
+    headerSubtitle: {
+      color: colors.textSecondary,
+    },
+    sectionTitle: {
+      color: colors.text,
+    },
     serviceCard: {
       backgroundColor: colors.card,
       borderColor: colors.cardBorder,
     },
-    serviceTitle: { color: colors.text },
-    serviceDescription: { color: colors.textSecondary },
+    serviceTitle: {
+      color: colors.text,
+    },
+    serviceDescription: {
+      color: colors.textSecondary,
+    },
     featureCard: {
       backgroundColor: colors.card,
       borderColor: colors.cardBorder,
     },
-    featureTitle: { color: colors.text },
-    featureDescription: { color: colors.textSecondary },
+    featureTitle: {
+      color: colors.text,
+    },
+    featureDescription: {
+      color: colors.textSecondary,
+    },
     ctaCard: {
       backgroundColor: colors.card,
       borderColor: colors.cardBorder,
     },
-    ctaTitle: { color: colors.text },
-    ctaDescription: { color: colors.textSecondary },
+    ctaTitle: {
+      color: colors.text,
+    },
+    ctaDescription: {
+      color: colors.textSecondary,
+    },
   };
 
   return (
@@ -104,61 +152,48 @@ export default function ServicesScreen() {
           <Text style={[styles.sectionTitle, dynamicStyles.sectionTitle]}>
             What We Offer
           </Text>
-
-          {loading ? (
-            <ActivityIndicator
-              size="large"
-              color="#FF006E"
-              style={{ marginTop: 40 }}
-            />
-          ) : (
-            services.map((service) => (
-              <TouchableOpacity
-                key={service.id}
-                style={[styles.serviceCard, dynamicStyles.serviceCard]}
-                activeOpacity={0.7}
-                onPress={() =>
-                  router.push(`/service/${service.id}` as any)
-                }
+          {services.map((service) => (
+            <TouchableOpacity
+              key={service.id}
+              style={[styles.serviceCard, dynamicStyles.serviceCard]}
+              activeOpacity={0.7}
+              onPress={() => router.push(`/service/${service.id}` as any)}
+            >
+              <View
+                style={[
+                  styles.serviceIconContainer,
+                  { backgroundColor: service.color + "20" },
+                ]}
               >
-                <View
+                <Ionicons
+                  name={service.icon as any}
+                  size={32}
+                  color={service.color}
+                />
+              </View>
+              <View style={styles.serviceContent}>
+                <Text style={[styles.serviceTitle, dynamicStyles.serviceTitle]}>
+                  {service.title}
+                </Text>
+                <Text
                   style={[
-                    styles.serviceIconContainer,
-                    { backgroundColor: service.color + "20" },
+                    styles.serviceDescription,
+                    dynamicStyles.serviceDescription,
                   ]}
                 >
-                  <Ionicons
-                    name={service.icon as any}
-                    size={32}
-                    color={service.color}
-                  />
+                  {service.description}
+                </Text>
+                <View style={styles.serviceItems}>
+                  {service.items.map((item, index) => (
+                    <View key={index} style={styles.serviceItemTag}>
+                      <Text style={styles.serviceItemText}>{item}</Text>
+                    </View>
+                  ))}
                 </View>
-                <View style={styles.serviceContent}>
-                  <Text
-                    style={[styles.serviceTitle, dynamicStyles.serviceTitle]}
-                  >
-                    {service.title}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.serviceDescription,
-                      dynamicStyles.serviceDescription,
-                    ]}
-                  >
-                    {service.description}
-                  </Text>
-                  <View style={styles.serviceItems}>
-                    {service.items.map((item, index) => (
-                      <View key={index} style={styles.serviceItemTag}>
-                        <Text style={styles.serviceItemText}>{item}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-                <Ionicons name="chevron-forward" size={24} color="#B8B8D1" />
-              </TouchableOpacity>
-            ))
-          )}
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#B8B8D1" />
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Features Section */}
@@ -179,9 +214,7 @@ export default function ServicesScreen() {
                     color="#FF006E"
                   />
                 </View>
-                <Text
-                  style={[styles.featureTitle, dynamicStyles.featureTitle]}
-                >
+                <Text style={[styles.featureTitle, dynamicStyles.featureTitle]}>
                   {feature.title}
                 </Text>
                 <Text
@@ -204,9 +237,7 @@ export default function ServicesScreen() {
             <Text style={[styles.ctaTitle, dynamicStyles.ctaTitle]}>
               Need Help Choosing?
             </Text>
-            <Text
-              style={[styles.ctaDescription, dynamicStyles.ctaDescription]}
-            >
+            <Text style={[styles.ctaDescription, dynamicStyles.ctaDescription]}>
               Our print experts are here to help you find the perfect solution
             </Text>
             <TouchableOpacity style={styles.ctaButton}>
@@ -223,7 +254,10 @@ export default function ServicesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F0F4F8" },
+  container: {
+    flex: 1,
+    backgroundColor: "#F0F4F8",
+  },
   header: {
     padding: 20,
     backgroundColor: "#FFFFFF",
@@ -241,8 +275,14 @@ const styles = StyleSheet.create({
     color: "#1F2937",
     marginBottom: 4,
   },
-  headerSubtitle: { fontSize: 16, color: "#6B7280" },
-  section: { marginTop: 20, paddingHorizontal: 20 },
+  headerSubtitle: {
+    fontSize: 16,
+    color: "#6B7280",
+  },
+  section: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700",
@@ -272,7 +312,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 16,
   },
-  serviceContent: { flex: 1 },
+  serviceContent: {
+    flex: 1,
+  },
   serviceTitle: {
     fontSize: 18,
     fontWeight: "700",
@@ -285,14 +327,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     lineHeight: 20,
   },
-  serviceItems: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  serviceItems: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+  },
   serviceItemTag: {
     backgroundColor: "rgba(255, 0, 110, 0.08)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
-  serviceItemText: { fontSize: 11, color: "#FF006E", fontWeight: "600" },
+  serviceItemText: {
+    fontSize: 11,
+    color: "#FF006E",
+    fontWeight: "600",
+  },
   featuresGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -335,7 +385,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 18,
   },
-  ctaSection: { paddingHorizontal: 20, marginTop: 20 },
+  ctaSection: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
   ctaCard: {
     backgroundColor: "rgba(255, 0, 110, 0.06)",
     borderRadius: 20,
@@ -368,5 +421,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 8,
   },
-  ctaButtonText: { fontSize: 16, fontWeight: "700", color: "#fff" },
+  ctaButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+  },
 });
