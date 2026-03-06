@@ -52,7 +52,7 @@ export default function AdminProductsScreen() {
   const loadProducts = async () => {
     setLoading(true);
     const data = await productsService.getAll();
-    console.log(`📊 Admin UI: Received ${data.length} products from service`);
+    console.log(` Admin UI: Received ${data.length} products from service`);
     setProducts(data);
     setLoading(false);
   };
