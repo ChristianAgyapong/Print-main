@@ -104,7 +104,7 @@ export default function ProfileScreen() {
             await signOut();
             // Auth guard in _layout.tsx will redirect to landing page
           } catch (error) {
-            console.error("Error during logout:", error);
+            console.error("Errors during logout:", error);
             setLoggingOut(false);
             Alert.alert("Error", "Failed to logout. Please try again.");
           }
