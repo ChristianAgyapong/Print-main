@@ -134,7 +134,7 @@ export default function ProfileScreen() {
 
     Alert.alert(
       "Rate PrintCraft",
-      "Would you like to rate our app? Your feedback helps us improve!",
+      "Would you like to rate our app? Your feedbacks helps us improve!",
       [
         { text: "Not Now", style: "cancel" },
         {
