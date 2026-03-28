@@ -147,7 +147,7 @@ export default function ProfileScreen() {
 
   const profileSections = [
     {
-      title: "Account",
+      title: "Accounts",
       items: [
         {
           icon: "person-outline",
