@@ -138,7 +138,7 @@ export default function ProfileScreen() {
       [
         { text: "Not Now", style: "cancel" },
         {
-          text: "Rate App",
+          text: "Rate Apps",
           onPress: () => Linking.openURL(storeUrl),
         },
       ],
