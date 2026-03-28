@@ -313,7 +313,7 @@ export default function OrdersScreen() {
                                       dynamicStyles.totalLabel,
                                     ]}
                                   >
-                                    per item
+                                    per items
                                   </Text>
                                 </View>
                               </View>
